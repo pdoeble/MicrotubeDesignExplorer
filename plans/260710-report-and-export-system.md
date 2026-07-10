@@ -26,12 +26,14 @@ and provenance.
 ## Tasks
 
 - [x] ReportPayload builder in the Python core (single source).
-- [ ] Standalone HTML report generator.
-- [ ] Client-side PDF (print-safe, grayscale-readable).
+- [x] Standalone HTML report generator.
+- [x] Client-side PDF path through browser print/PDF using print-safe report HTML.
 - [x] Canonical JSON sidecar payload with versions, hashes, summaries, warnings,
       and array manifests.
-- [ ] Browser JSON sidecar download.
-- [ ] Determinism test: same request + version ⇒ same report content.
+- [x] Browser JSON sidecar download.
+- [ ] Embed report figures from registered Plotly specs/SVG exports.
+- [ ] Determinism policy/test: same request + version + immutable result
+      provenance => same report content.
 
 ## Risks
 
@@ -44,6 +46,10 @@ and provenance.
 
 - 2026-07-10 ReportPayload basis: `uv run pytest` (54 passed),
   `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`.
+- 2026-07-10 Browser report export slice: `pnpm test -- report-export`,
+  `pnpm test` (38 passed), `pnpm typecheck`, `pnpm lint` (generated-contract
+  warnings only), `pnpm format:check`, `pnpm build`,
+  `python scripts/check_prohibited_files.py`, `git diff --check`.
 
 ## Status log
 
@@ -51,6 +57,7 @@ and provenance.
 |---|---|
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-10 | M7 started: Python `microtubes_core.exports.report` builds canonical report payloads and JSON sidecars from one request/result pair with deterministic array manifests. |
+| 2026-07-10 | Browser export adapter added: JSON sidecar download, standalone HTML report, and browser print/PDF path all use the current worker `SimulationResult`; embedded report figures remain open. |
 
 ## Final commits
 

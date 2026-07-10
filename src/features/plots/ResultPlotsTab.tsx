@@ -2,6 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSimulationStore } from "../../state/simulationStore";
 import { SimulationWorkerClient, type SimulationProgressHandler } from "../simulation/client";
 import type { SimulationWorkerResult } from "../../workers/protocol";
+import {
+  buildBrowserReportPayload,
+  buildStandaloneHtmlReport,
+  canonicalReportJson,
+  downloadTextFile,
+  openPrintableReport,
+  reportFilename,
+} from "../export/reportExport";
 import { PlotFigure } from "./PlotFigure";
 import {
   plotById,
@@ -37,6 +45,7 @@ export function ResultPlotsTab() {
   const request = useSimulationStore((state) => state.request);
   const [result, setResult] = useState<SimulationWorkerResult | null>(null);
   const [status, setStatus] = useState("No result computed in this session.");
+  const [reportStatus, setReportStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState<PlotId>("overall-coefficient-map");
@@ -84,6 +93,7 @@ export function ResultPlotsTab() {
       await client.initialize();
       const next = await client.compute(request);
       setResult(next);
+      setReportStatus(null);
       setStatus(`Computed ${next.arrays.length} numeric fields.`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -91,6 +101,33 @@ export function ResultPlotsTab() {
     } finally {
       unsubscribe();
       setRunning(false);
+    }
+  };
+
+  const exportReport = async (format: "json" | "html" | "pdf") => {
+    if (!result) return;
+    setReportStatus(null);
+    try {
+      const payload = await buildBrowserReportPayload(request, result);
+      if (format === "json") {
+        downloadTextFile(
+          reportFilename(payload, "json"),
+          canonicalReportJson(payload),
+          "application/json;charset=utf-8",
+        );
+        setReportStatus("Exported JSON sidecar.");
+      } else {
+        const html = buildStandaloneHtmlReport(payload);
+        if (format === "html") {
+          downloadTextFile(reportFilename(payload, "html"), html, "text/html;charset=utf-8");
+          setReportStatus("Exported standalone HTML report.");
+        } else {
+          openPrintableReport(html);
+          setReportStatus("Opened print/PDF report.");
+        }
+      }
+    } catch (caught) {
+      setReportStatus(caught instanceof Error ? caught.message : String(caught));
     }
   };
 
@@ -114,6 +151,44 @@ export function ResultPlotsTab() {
       {result ? (
         <>
           <KpiSummary result={result} />
+          <section className="full-width-panel" aria-labelledby="report-export-heading">
+            <div className="report-export-row">
+              <div>
+                <h3 id="report-export-heading">Report exports</h3>
+                <p className="section-kicker">
+                  Reports use the current immutable `SimulationResult` and request hash.
+                </p>
+              </div>
+              <div className="report-export-actions" aria-label="Report export controls">
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("json")}
+                  type="button"
+                >
+                  JSON
+                </button>
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("html")}
+                  type="button"
+                >
+                  HTML
+                </button>
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("pdf")}
+                  type="button"
+                >
+                  Print / PDF
+                </button>
+              </div>
+            </div>
+            {reportStatus ? (
+              <p className="plot-figure__status" role="status">
+                {reportStatus}
+              </p>
+            ) : null}
+          </section>
           <fieldset className="link-controls">
             <legend>Plot selection</legend>
             <label className="text-field" htmlFor="plot-id">

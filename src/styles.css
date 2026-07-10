@@ -278,6 +278,20 @@ code {
   flex-wrap: wrap;
 }
 
+.report-export-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.report-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .table-scroll {
   overflow-x: auto;
 }
@@ -349,6 +363,7 @@ code {
 @media (max-width: 760px) {
   .cooler-grid,
   .plot-tandem-grid,
+  .report-export-row,
   .section-heading-row {
     grid-template-columns: 1fr;
     display: grid;

@@ -435,10 +435,10 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 ### Major tasks
 
 - [ ] Export individual figures as PNG with selectable resolution.
-- [ ] Export individual figures as SVG.
-- [ ] Generate standalone HTML report.
-- [ ] Generate client-side PDF report.
-- [ ] Generate machine-readable JSON sidecar.
+- [x] Export individual figures as SVG.
+- [x] Generate standalone HTML report.
+- [x] Generate client-side PDF report.
+- [x] Generate machine-readable JSON sidecar.
 - [ ] Include both coolers' inputs, materials, fluids, assumptions, warnings,
       summaries, screens, figures, versions, timestamp, and provenance.
 - [ ] Generate reports from one immutable `SimulationResult`.
@@ -669,3 +669,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 screen-boundary slice completed: per-screen failure masks are exported from Python and rendered as SVG-compatible contour lines for minimum-wall, burst, flow, pressure-drop, cost, and capillary screens. | Codex |
 | 2026-07-10 | M6 completed: plot registry, grouped selection, tandem scales, delta/ratio variants, exported-value-only Plotly specs, screen/benchmark overlays, hover status, tabular summaries, PNG/SVG figure export, plot catalog coverage, and browser worker parity are verified. M7 is ready. | Codex |
 | 2026-07-10 | M7 started: Python ReportPayload and canonical JSON sidecar basis added with request/result provenance, summaries, warnings, and SHA-256 array manifests. | Codex |
+| 2026-07-10 | M7 browser export slice completed: current `SimulationResult` can be exported as canonical JSON sidecar, standalone HTML report, and print/PDF report path; report figure embedding and PNG resolution selection remain open. | Codex |
