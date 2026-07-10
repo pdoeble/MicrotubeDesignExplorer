@@ -14,7 +14,7 @@
 - Resolve conflicts explicitly; never silently choose one source.
 - Record each resolved conflict in `/wiki/decisions/`.
 ## 3. Fixed architecture
-- Deployment target: static GitHub Pages only; no production backend, database, server session, or secret.
+- Deployment target: static GitHub Pages only; no production backend, database, server session, or secret. Make sure that all istallaitions are avialable and compatible on Github Pages
 - Frontend: React, TypeScript, and Vite.
 - Scientific core: pure Python package under `python/microtubes_core/`.
 - Browser execution: Pyodide inside a dedicated Web Worker.
