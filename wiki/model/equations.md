@@ -147,6 +147,32 @@ All-screen feasibility ports MATLAB `maskDesignBoundaryKAMap`:
 - cost index strictly below threshold;
 - capillary rise below threshold.
 
+## Comparison and boundaries
+
+Implemented in `sweeps.comparison`, porting MATLAB
+`nearestFeasibleAlReference`, `compositeFeasibleDiameterBoundary`, and
+`evaluateDesignScreenAtQueries`.
+
+Native-grid queries use bilinear interpolation in linear coordinates on the
+log-spaced design grid:
+
+- `x_vec = d_o` axis;
+- `t_vec = t` axis;
+- outside-grid queries return NaN;
+- any NaN interpolation corner returns NaN.
+
+Same-geometry ratio is `k_right / k_left`, with cells below the larger
+material minimum-wall threshold masked.
+
+Tech-adjusted comparison uses the left cooler as the reference set. For each
+feasible right-cooler cell, candidate left-cooler points are scanned at equal
+wall ratio and equal-or-larger diameter. The first candidate passing all
+screens supplies `k_left,ref`, `kA_left,ref`, and `d_left,ref`.
+
+Composite feasible boundaries sample 600 wall-ratio values from `0.05 %` to
+the plot limit `40 %`, and scan `4 * 600` log-spaced diameter candidates over
+the sweep diameter range.
+
 ## Capillary rise
 
 Implemented in `models.capillary.capillary_rise`, ported from MATLAB lines

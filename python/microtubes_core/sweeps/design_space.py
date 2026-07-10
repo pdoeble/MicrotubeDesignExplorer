@@ -105,6 +105,7 @@ class CoolerSweepResult:
     mask_below_min_wall: BoolArray
     mask_all_screens_feasible: BoolArray
     screen_inputs: ScreenInputs
+    screen_thresholds: ScreenThresholdsSI
 
 
 def build_design_grid(sweep: SweepSettings) -> DesignGrid:
@@ -331,11 +332,12 @@ def evaluate_cooler_sweep(
         cost_index=masked_cost,
         capillary_rise=capillary,
     )
+    screen_thresholds = _screen_thresholds(cooler.boundary_conditions.screens)
     feasible = all_screen_feasible_mask(
         design_grid.outer_diameter,
         design_grid.wall_ratio_pct,
         screen_inputs,
-        _screen_thresholds(cooler.boundary_conditions.screens),
+        screen_thresholds,
     )
 
     return CoolerSweepResult(
@@ -367,6 +369,7 @@ def evaluate_cooler_sweep(
         mask_below_min_wall=mask_below_min_wall,
         mask_all_screens_feasible=feasible,
         screen_inputs=screen_inputs,
+        screen_thresholds=screen_thresholds,
     )
 
 
