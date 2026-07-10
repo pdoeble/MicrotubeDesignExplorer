@@ -1,0 +1,180 @@
+%%%%%%%%%%%%%%%%%%%% main.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local Resistance-Based Design-Space Analysis of Polyamide Microtubes
+% for Compact Heat Exchangers.
+% Springer svmult contributed-volume manuscript (LNME, 155 mm x 235 mm).
+%
+% Build: pdflatex -> bibtex -> pdflatex x2  (or: latexmk -pdf main.tex)
+%
+% Section files (sections/):
+%   00  Nomenclature
+%   01  Introduction
+%   02  Methods
+%   03  Results
+%   04  Case Study
+%   05  Discussion
+%   06  Conclusions
+%   07  Acknowledgement
+%   08  Appendix figures
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[graybox]{svmult}
+\pdfminorversion=7        % match MATLAB/Ghostscript vector plot exports
+\pdfobjcompresslevel=0    % keep object streams uncompressed for parser compatibility
+
+% Springer book format: 155 mm × 235 mm (LNME series).
+% svmult.cls sets textwidth=117mm and textheight=191mm for this trim size
+% but leaves the paper size unset. geometry is used here to set the PDF
+% output page size and position the text block correctly; it overrides
+% svmult's margin settings but preserves the text-area dimensions.
+% Layout: inner=outer=19 mm, top-to-header=13 mm, bottom≈23 mm.
+\usepackage[
+  paperwidth  = 155mm,
+  paperheight = 235mm,
+  textwidth   = 117mm,
+  textheight  = 191mm,
+  headheight  = 12pt,
+  headsep     = 12pt,
+  top         = 13mm,
+  inner       = 19mm,
+  includehead
+]{geometry}
+
+% PDF text encoding / copy-paste support for accented names in pdflatex.
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\IfFileExists{glyphtounicode.tex}{%
+  \input{glyphtounicode}%
+  \pdfgentounicode=1%
+}{}
+
+% Springer-style Times/Helvetica/Courier font setup.
+\usepackage{mathptmx}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{type1cm}
+
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage[bottom]{footmisc}
+\usepackage{textcmds}
+\usepackage{amssymb,amsbsy,amsmath}
+\usepackage[square,numbers,sort&compress]{natbib}
+\usepackage{url}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{needspace}
+\usepackage{placeins}
+\usepackage{tabularx}
+
+\captionsetup{labelsep=space}
+
+\newcommand{\DoeblerPrint}{D\"obler}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\ETD}{\ensuremath{\mathrm{ETD}}}
+\def\Cdot{\pmb{\cdot}}
+
+% All figures are local to figures/ (self-contained submission package).
+\graphicspath{{figures/}}
+
+\makeindex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+% Starred title follows the contributed-volume author style without chapter prefix.
+\title*{Local Resistance-Based Design-Space Analysis\\
+of Polyamide Microtubes\\
+for Compact Heat Exchangers}
+\titlerunning{Polyamide Microtube HX: Local Resistance Design-Space Analysis}
+
+\author{
+Philip \DoeblerPrint\inst{1} \and
+Michael Henzler\inst{1} \and
+Michael Auerbach\inst{1} \and
+Andr\'e Casal Kulzer\inst{2}
+}
+\authorrunning{P. \DoeblerPrint{} et al.}
+
+\institute{%
+  \inst{1}Esslingen University of Applied Sciences,
+  Kanalstra{\ss}e 33,
+  73728 Esslingen am Neckar, Germany\\
+  \email{philip.doebler@hs-esslingen.de}
+  \at
+  \inst{2}Institute of Automotive Engineering Stuttgart (IFS),
+  University of Stuttgart,
+  Pfaffenwaldring 12,
+  70569 Stuttgart, Germany
+}
+
+\maketitle
+
+\abstract{%
+In automotive or aerospace contexts, air--liquid hollow-fiber heat exchangers (HFHX)
+offer a high-area tube-bundle architecture for compact mobile cooling systems,
+but metallic microtube bundles remain costly and manufacturing-intensive.
+Polymer fibers may reduce tube-supply cost and mass, yet their low wall
+conductivity, pressure integrity, and manufacturing tolerances must be evaluated
+together rather than through surface-area arguments alone. In the sub-millimeter
+range, the standard conductivity objection to polyamide (PA) loses quantitative
+force: when outer convective resistance dominates, the PA wall contributes only
+about $2$--$6\,\%$ of total thermal resistance at the material-specific minimum
+wall ($t_{\mathrm{min},\mathrm{PA}}=0.025\,\mathrm{mm}$).
+This paper tests whether that local compensation survives package and
+manufacturing constraints.
+A resistance-based design-space sweep over $(d_{\mathrm{o}},t)$ uses VDI Heat
+Atlas G1/G7 correlations anchored to an aluminum benchmark and converts the
+local heat-transfer coefficient to package-scaled conductance
+$k_{\mathrm{o}}A_{\mathrm{o}}$.
+Six constraints are applied to both materials: minimum wall thickness, coolant
+throughput, straight-tube friction pressure drop, derated burst pressure,
+capillary rise in the potting zone, and a preliminary tube-supply-cost cutoff.
+The resulting design-boundary map shows that, under the normal extrusion
+tolerance, a conditional sub-millimeter PA prototype target remains near
+$d_{\mathrm{o}}\approx 0.35$--$0.65\,\mathrm{mm}$ at wall thicknesses
+moderately above the process minimum.
+The corresponding aluminum minimum-wall option is feasible only from
+$d_{\mathrm{o}}\approx 0.63$--$0.65\,\mathrm{mm}$ because the example
+tube-supply-cost cutoff excludes smaller aluminum diameters under the assumed
+benchmark pitch.
+The PA interval is therefore a model-derived prototype target that still
+requires tests of wall tolerances, potting geometry, and bundle durability.
+\keywords{hollow-fiber heat exchangers, polyamide microtubes,
+tube-bank heat transfer, VDI Heat Atlas, design-space constraints,
+potting capillarity}%
+}
+
+\clearpage
+\input{sections/00_nomenclature}
+\clearpage
+\input{sections/01_introduction}
+\clearpage
+\input{sections/02_methods}
+\input{sections/03_results}
+\clearpage
+\input{sections/04_case_study}
+\input{sections/05_discussion}
+\input{sections/06_conclusions}
+
+\begin{acknowledgement}
+\input{sections/07_acknowledgement}
+\end{acknowledgement}
+\clearpage
+\appendix
+\input{sections/08_appendix_figures}
+\bibliographystyle{spmpsci}
+\bibliography{references}
+
+\end{document}

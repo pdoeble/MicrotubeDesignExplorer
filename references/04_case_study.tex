@@ -1,0 +1,148 @@
+\section{Case study: baseline prototype-target scenario}
+\label{sec:case-study}
+
+The preceding model results describe the individual thermal, hydraulic,
+pressure-integrity, and potting-process relationships within their stated
+limits. This case study combines them with the tube-supply-cost criterion using
+one internally consistent set of example values. The values in
+Table~\ref{tab:design_boundary_assumptions} define this example; they are not
+design allowables or universal feasibility limits.
+
+\subsection{Example design-boundary map}
+\label{sec:case-design-boundary}
+
+Figure~\ref{fig:design_boundary} combines the preceding thermal, hydraulic,
+mechanical, process, and tube-supply-cost constraints in one example design-space
+view. The baseline values and thresholds are summarized in
+Table~\ref{tab:design_boundary_assumptions}.
+
+\begin{table}[htbp]
+\caption{Baseline thresholds used for the design-boundary map.}
+\label{tab:design_boundary_assumptions}
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabular*}{\textwidth}{@{}ll@{\extracolsep{\fill}}ccc@{}}
+\toprule
+Boundary & Scope & Symbol & Limit & Unit \\
+\midrule
+Min. wall thickness & Al, drawn tube
+  & $t$ & $\ge 0.070$ & $\mathrm{mm}$ \\
+Min. wall thickness & PA, precision route
+  & $t$ & $\ge 0.025$ & $\mathrm{mm}$ \\
+Coolant throughput & fixed velocity model
+  & $\dot{V}_{\mathrm{c}}$ & $\ge 10$ & $\mathrm{L\,min^{-1}}$ \\
+Pressure drop & fixed friction model
+  & $\Delta p_{\mathrm{i},\mathrm{fric}}$ & $\le 0.5$ & $\mathrm{bar}$ \\
+Tube-supply cost & cost index
+  & $C_{\mathrm{tube}}/C_{\mathrm{fin}}$ & $<5$ & -- \\
+Burst pressure & normal extrusion
+  & $p_{\mathrm{b},\mathrm{tol}}$ & $\ge 6$ & $\mathrm{bar}$ \\
+Capillary rise & potting, $G=10$
+  & $h_{\mathrm{cap}}$ & $\le 2$ & $\mathrm{mm}$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\FloatBarrier
+
+Under this example value set, cost, pressure-integrity, potting, and
+coolant-side constraints remove large parts of the thermally attractive design
+space. The remaining PA region defines a prototype target window for this value
+set; turning it into a design rule would require data over production
+tolerances, potting quality, and pressure cycling.
+Under the example normal-route tolerance, the PA minimum-wall line itself
+fails the $6\,\mathrm{bar}$ burst criterion:
+$t_{\mathrm{min},\mathrm{PA}}=0.025\,\mathrm{mm}$ leaves a minimum local wall of
+$t_{\mathrm{loc},\mathrm{min}}=5\,\mu\mathrm{m}$.
+The PA region accepted by the combined constraints requires walls moderately
+above the example process minimum,
+$t \gtrsim \Delta t + 0.03\,d_{\mathrm{o}}$, about
+$0.030$--$0.040\,\mathrm{mm}$ at sub-millimeter diameters.
+Its lower diameter edge in this scenario is not set by the capillary limit.
+Under the example $G=10$ benchmark-pitch convention and the
+$h_{\mathrm{cap}}\le2\,\mathrm{mm}$ limit, the updated PA/process capillary
+limit reaches its threshold near $d_{\mathrm{o}}\approx 0.27\,\mathrm{mm}$,
+below the tube-supply-cost cutoff near $d_{\mathrm{o}}\approx 0.35\,\mathrm{mm}$
+and the straight-tube friction limit near $d_{\mathrm{o}}\approx
+0.31\,\mathrm{mm}$.
+For aluminum, the case-study minimum-wall boundary starts at
+$d_{\mathrm{o}}\approx 0.63$--$0.65\,\mathrm{mm}$ because the example
+tube-supply-cost cutoff excludes smaller aluminum diameters.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{20_design_boundary_lines_alu_pa}
+\caption{Design-boundary map for Al and PA tubes.
+  Color encodes $k_{\mathrm{o}}A_{\mathrm{o}}$ for constraint-admitted points;
+  boundary colors follow the legend and hatching marks excluded sides. Blue
+  cross: validated aluminum benchmark. The $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:design_boundary}
+\end{figure}
+
+\FloatBarrier
+\subsection{Feasible PA-to-aluminum conductance comparison}
+\label{sec:case-delta}
+
+The comparison in Fig.~\ref{fig:tech_adj} uses the combined feasibility masks
+from Table~\ref{tab:design_boundary_assumptions}. For
+$m\in\{\mathrm{Al},\mathrm{PA}\}$, the mask
+$\mathcal{F}_m(d_{\mathrm{o}},\tau)\in\{0,1\}$ is set to 1 when the design
+point satisfies all applicable thresholds in
+Table~\ref{tab:design_boundary_assumptions}, and to 0 otherwise.
+For each feasible PA point, the aluminum comparator is the nearest feasible
+aluminum geometry at the same wall-thickness ratio $\tau$ and at an equal or
+larger outer diameter. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{22_tech_adjusted_kA_change}
+\caption{Case-study relative conductance difference
+  $\Delta (k_{\mathrm{o}}A_{\mathrm{o}})^{\,\mathrm{feas}}$.
+  Color marks PA points passing all example constraints.
+  Each PA point is compared with the nearest constraint-admitted aluminum diameter at
+  the same $\tau$; uncolored areas are excluded or have no admitted aluminum
+  comparator. Solid black curves are isolines of
+  $\Delta (k_{\mathrm{o}}A_{\mathrm{o}})^{\,\mathrm{feas}}$.
+  Dashed dark-blue and dotted dark-green curves mark the Al and PA combined-constraint
+  lower-diameter boundaries, respectively. Blue cross: validated aluminum
+  benchmark geometry. The $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:tech_adj}
+\end{figure}
+
+The feasible PA-to-aluminum comparison is defined by
+Eq.~\eqref{eq:feasible_pa_al_comparison},
+\be
+  \begin{aligned}
+  d_{\mathrm{o},\mathrm{Al}}^{*}(d_{\mathrm{o}},\tau)
+  &=
+  \min\left\{
+    \tilde d_{\mathrm{o}}\ge d_{\mathrm{o}}\; \middle|\;
+    \mathcal{F}_{\mathrm{Al}}(\tilde d_{\mathrm{o}},\tau)=1
+  \right\},\\
+  \Delta (k_{\mathrm{o}}A_{\mathrm{o}})^{\,\mathrm{feas}}
+  &=
+  \frac{
+    (k_{\mathrm{o}}A_{\mathrm{o}})_{\mathrm{PA}}(d_{\mathrm{o}},\tau)
+  }{
+    (k_{\mathrm{o}}A_{\mathrm{o}})_{\mathrm{Al}}
+    (d_{\mathrm{o},\mathrm{Al}}^{*},\tau)
+  }
+  - 1,
+  \qquad
+  \mathcal{F}_{\mathrm{PA}}(d_{\mathrm{o}},\tau)=1 .
+  \end{aligned}
+  \label{eq:feasible_pa_al_comparison}
+\ee
+
+In this map a positive value marks a PA point that exceeds the nearest
+constraint-admitted aluminum option at the same wall-thickness ratio, whereas a
+negative value marks a point where aluminum remains superior. The relevant PA
+target is the conditional sub-millimeter interval identified in
+Sect.~\ref{sec:case-design-boundary}, where no constraint-admitted aluminum
+comparator exists at a smaller diameter. The comparison isolates
+geometry-dependent conductance; burst/leak tests and bundle heat-rate and
+pressure-drop tests would have to show prototype qualification and system
+performance.
+
+\FloatBarrier

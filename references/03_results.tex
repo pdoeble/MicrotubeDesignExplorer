@@ -1,0 +1,186 @@
+\section{Results}
+\label{sec:results}
+
+All results are derived from the analytical sweep of Section~\ref{sec:methods}
+at fixed operating conditions ($u_{\mathrm{air},\infty} = 5\,\mathrm{m\,s^{-1}}$,
+$v_{\mathrm{i}} = 0.5\,\mathrm{m\,s^{-1}}$). Their combination under one set of
+constraint values is treated separately as a case study in
+Section~\ref{sec:case-study}.
+
+\subsection{Bundle-scale conductance map}
+\label{sec:results-ko}
+
+Figure~\ref{fig:ko} shows the package-scaled conductance
+$k_{\mathrm{o}}A_{\mathrm{o}}$ over the $(d_{\mathrm{o}},\,\tau)$ plane for
+aluminum and PA, with the respective minimum-wall constraints.
+Both maps share a common color scale, so the absolute conductance gap is
+directly visible.
+Smaller outer diameters both raise $k_{\mathrm{o}}$ and increase the available
+outer surface area at fixed package size; the resistance distribution behind
+this trend is quantified in the next subsection.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{20_bundle_kA_alu_pa_portrait}
+\caption{Package-scaled heat-transfer conductance
+  $k_{\mathrm{o}}A_{\mathrm{o}}$ for aluminum and PA over the
+  $(d_{\mathrm{o}},\tau)$ design space. Line and symbol conventions as defined
+  in Sect.~\ref{sec:plot-conventions}; the $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:ko}
+\end{figure}
+
+\pagebreak
+
+\subsection{Thermal resistance distribution}
+\label{sec:results-shares}
+
+Figure~\ref{fig:shares} maps the three fractional resistances $\phi_{\mathrm{i}}$, $\phi_{\mathrm{w}}$, and $\phi_{\mathrm{o}}$
+for aluminum and PA tubes over the $(d_{\mathrm{o}},\,\tau)$ design space.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{12_shares_alu_pa_portrait.pdf}
+\caption{Fractional thermal resistance shares $\phi_{\mathrm{i}}$,
+  $\phi_{\mathrm{w}}$, and $\phi_{\mathrm{o}}$ for Al and PA tubes. Line and
+  symbol conventions as defined in Sect.~\ref{sec:plot-conventions}.}
+\label{fig:shares}
+\end{figure}
+
+\pagebreak
+The fractional resistance shares are defined as
+\[
+  \phi_j = \frac{R_j}{R_{\mathrm{tot}}}, \qquad j \in \{\mathrm{i},\,\mathrm{w},\,\mathrm{o}\},
+\]
+with the total resistance $R_{\mathrm{tot}} = R_{\mathrm{i}} + R_{\mathrm{w}} + R_{\mathrm{o}}$ and
+$\phi_{\mathrm{i}} + \phi_{\mathrm{w}} + \phi_{\mathrm{o}} = 1$ by construction.
+
+The outer convective resistance $\phi_{\mathrm{o}}$ constitutes the dominant fraction across
+the small-diameter minimum-wall region.
+Even for PA, where $\lambda_{\mathrm{w}} = 0.25\,\mathrm{W\,m^{-1}\,K^{-1}}$ represents an
+880-fold reduction relative to aluminum, the wall resistance share $\phi_{\mathrm{w}}$
+is $2.1$--$5.5\,\%$ along the PA minimum-wall line for
+$d_{\mathrm{o}}=0.3$--$2.0\,\mathrm{mm}$.
+When the outer convective resistance dominates, reducing wall conductivity by two orders
+of magnitude attenuates $k_{\mathrm{o}}$ in proportion to $\phi_{\mathrm{w}}$ -- the penalty shrinks
+with the wall-resistance share.
+The corresponding outer share is $\phi_{\mathrm{o}}=83.8$--$85.4\,\%$ in this range.
+At larger wall-thickness ratios, $\phi_{\mathrm{w}}$ grows and the geometry becomes less
+attractive for compact cooling applications.
+
+The inner convective share $\phi_{\mathrm{i}}$ is secondary but still relevant under the
+conservative EGL5050 VDI G1 assumption; along the same line it
+is $\phi_{\mathrm{i}}=9.6$--$13.2\,\%$, while the outer-side resistance remains
+the largest term.
+
+
+
+\FloatBarrier
+\subsection{Coolant flow limits}
+\label{sec:coolant-flow-limits}
+
+Two coolant-side hydraulic limits are applied to the fixed-$v_{\mathrm{i}}$
+sweep.
+In Fig.~\ref{fig:coolant_throughput}, the geometrically similar pitch
+assumption in Eq.~\eqref{eq:coolant_throughput} is shown. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=80mm]{19_coolant_throughput_lmin}
+\caption{Coolant throughput diagnostic at fixed tube-side velocity. Line and
+  symbol conventions as defined in Sect.~\ref{sec:plot-conventions}; the
+  $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:coolant_throughput}
+\end{figure}
+
+It makes the total flow depend
+on the open-area ratio $(d_{\mathrm{i}}/d_{\mathrm{o}})^2$ under this
+scaling, rather than on $d_{\mathrm{o}}$ alone.
+At the fixed tube-side velocity used here, the increasing tube count at smaller
+diameter is offset by the smaller flow area per tube; the associated wall-shear
+effect is evaluated in the separate pressure-loss check below.
+
+\Needspace{15\baselineskip}
+\FloatBarrier
+\subsection{Coolant pressure-loss limits}
+\label{sec:coolant-pressure-loss-limits}
+
+The pressure-loss map in Fig.~\ref{fig:dp_i_fric} follows the laminar
+Hagen--Poiseuille scaling in Eq.~\eqref{eq:dp_i_laminar} over the PA
+minimum-wall range.
+Along the PA minimum-wall line, the affected region is confined to the smallest diameters:
+for $d_{\mathrm{o}}\gtrsim 0.31\,\mathrm{mm}$ the straight-tube friction
+pressure stays below $0.5\,\mathrm{bar}$.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=80mm]{18_tube_side_friction_pressure_drop}
+\caption{Straight-tube coolant pressure loss at fixed tube-side velocity. Line
+  and symbol conventions as defined in Sect.~\ref{sec:plot-conventions}; the
+  $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:dp_i_fric}
+\end{figure}
+
+\FloatBarrier
+\subsection{Tolerance-adjusted pressure-integrity check}
+\label{sec:results-burst}
+
+Figure~\ref{fig:burst} shows the tolerance-adjusted Lam\'e burst-pressure maps
+for aluminum and PA over the $(d_{\mathrm{o}},\,\tau)$ plane.
+Because $\sigma_{\mathrm{lim},\mathrm{Al}} / \sigma_{\mathrm{lim},\mathrm{PA}} = 20$, the PA isolines
+are shifted strongly toward thicker walls compared with aluminum at the same
+internal pressure.
+In the thermally attractive small-diameter range, however, parts of the PA
+window remain above typical automotive cooling-circuit operating pressures.
+This is only a diagnostic observation; the integrated design-boundary map uses
+the stricter criterion
+$p_{\mathrm{b},\mathrm{tol}}\ge 6\,\mathrm{bar}$.
+The comparison between rows shows the sensitivity to absolute tolerance:
+at the PA minimum wall, the normal route leaves
+$t_{\mathrm{loc},\mathrm{min}}=5\,\mu\mathrm{m}$, whereas the high-precision route leaves
+$20\,\mu\mathrm{m}$.
+At fixed $t_{\mathrm{min}}$ and $\Delta t$, smaller $d_{\mathrm{o}}$ increases
+$(t_{\mathrm{min}}-\Delta t)/d_{\mathrm{o}}$ and raises the Lam\'e geometry factor.
+The check shifts attention from isolated tube-wall burst to
+bundle-level mechanisms outside this idealized calculation.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{15_burst_tolerance_alu_pa_portrait}
+\caption{Tolerance-adjusted Lam\'e burst pressure
+  $p_{\mathrm{b},\mathrm{tol}}$ for aluminum and PA tubes.
+  Columns compare materials; rows compare
+  $\Delta t=0.020\,\mathrm{mm}$ and $\Delta t=0.005\,\mathrm{mm}$. Line and
+  symbol conventions as defined in Sect.~\ref{sec:plot-conventions}; the
+  $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:burst}
+\end{figure}
+
+\FloatBarrier
+\subsection{Capillary-rise process constraint}
+\label{sec:results-capillary-rise}
+
+Figure~\ref{fig:capillary_rise} maps the predicted resin rise for aluminum and
+PA columns under effective acceleration factors $G=1$, 5, and 10.
+At $G=1$, sub-millimeter clear gaps generate process-relevant resin rise;
+because Eq.~\eqref{eq:capillary_rise} scales as $1/G$, increasing
+acceleration to $G=5$--$10$ reduces the predicted rise by the same factor.
+For the benchmark pitch ratio $S_{\mathrm{L}}/\!d_{\mathrm{o}}=2.00$, the
+$h_{\mathrm{cap}}=2\,\mathrm{mm}$ line at $G=10$ is near
+$d_{\mathrm{o}}\approx 0.31\,\mathrm{mm}$ for the aluminum estimate and
+$d_{\mathrm{o}}\approx 0.27\,\mathrm{mm}$ for the PA\,/\,process proxy. The two
+capillary limits are much closer than a PA material-constant
+interpretation would suggest. Compact pitch geometries that are thermally
+attractive still require a controlled potting route, such as centrifugal
+potting, as an independent process constraint.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{14_capillary_rise_alu_pa_portrait}
+\caption{Predicted capillary rise $h_{\mathrm{cap}}$ for aluminum and PA
+  potting gaps under effective acceleration factors $G=1$, 5, and 10. Line and
+  symbol conventions as defined in Sect.~\ref{sec:plot-conventions}; the
+  $d_{\mathrm{o}}$ axis is logarithmic.}
+\label{fig:capillary_rise}
+\end{figure}
+
+\FloatBarrier
