@@ -97,7 +97,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M1 | MATLAB inventory and golden references | completed | M0 |
 | M2 | Contracts, units, defaults, validity policy | completed | M1 |
 | M3 | Python scientific core parity | completed | M2 |
-| M4 | Pyodide worker and browser integration | not-started | M2, M3 |
+| M4 | Pyodide worker and browser integration | in-progress | M2, M3 |
 | M5 | Application shell and input workflows | not-started | M2, M4 |
 | M6 | Plot system and results experience | not-started | M3–M5 |
 | M7 | Figure and report exports | not-started | M4, M6 |
@@ -315,11 +315,11 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Build and load the project wheel in Pyodide.
-- [ ] Run Python only in a dedicated Web Worker.
-- [ ] Implement typed request/response and transferable array transport.
-- [ ] Implement initialization, progress, cancellation, and supersession.
-- [ ] Implement stable request hashing and safe caching.
+- [x] Build and load the project wheel in Pyodide.
+- [x] Run Python only in a dedicated Web Worker.
+- [x] Implement typed request/response and transferable array transport.
+- [x] Implement initialization, progress, cancellation, and supersession.
+- [x] Implement stable request hashing and safe caching.
 - [ ] Transport structured warnings and exceptions.
 - [ ] Handle startup, worker, memory, and recovery failures.
 - [ ] Add direct-Python versus browser integration tests.
@@ -612,3 +612,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 comparison-delta slice added: same-geometry and tech-adjusted percent-delta fields are exported through comparison/API and tested from MATLAB ratio goldens. | Codex |
 | 2026-07-10 | M3 validity-warning slice added: API emits `W_OUTSIDE_VALIDITY` for VDI G1/G7 Reynolds and Prandtl range violations while preserving computed values. | Codex |
 | 2026-07-10 | M3 completed: Python scientific core parity, sweep/comparison/API payloads, warnings, provenance, equation docs, and golden regression suite verified (`uv run pytest` 51 passed, `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`, prohibited-file gate). | Codex |
+| 2026-07-10 | M4 started: Pyodide `314.0.2` pinned via `pnpm`, same-origin Pyodide assets and `microtubes_core` wheel generated at build time, typed worker protocol/client added with transferable float64 array transport and cache/supersession unit tests. | Codex |

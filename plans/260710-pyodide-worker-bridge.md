@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M4
 > **Workstream:** W4 (Contracts and bridge)
-> **Status:** ready
+> **Status:** in-progress
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -23,10 +23,10 @@ and caching; structured warnings/exceptions; startup/OOM/recovery handling.
 
 ## Tasks
 
-- [ ] Wheel build step and self-hosted wheel in `public/wheels/`.
-- [ ] Pyodide loading strategy (+ ADR for asset hosting).
-- [ ] Message protocol (init/compute/cancel/progress/error) with versions.
-- [ ] Request hash cache; supersession of stale requests.
+- [x] Wheel build step and self-hosted wheel in `public/wheels/`.
+- [x] Pyodide loading strategy (+ ADR for asset hosting).
+- [x] Message protocol (init/compute/cancel/progress/error) with versions.
+- [x] Request hash cache; supersession of stale requests.
 - [ ] Direct-Python vs browser parity integration test.
 
 ## Risks
@@ -38,13 +38,26 @@ and caching; structured warnings/exceptions; startup/OOM/recovery handling.
 
 ## Tests / evidence
 
-- Worker protocol unit tests; Playwright smoke (M8).
+- 2026-07-10: M4 foundation added:
+  `scripts/prepare_pyodide_assets.mjs` builds `public/wheels/` and copies
+  same-origin Pyodide assets; `src/workers/protocol.ts`,
+  `src/workers/pyodide.worker.ts`, and
+  `src/features/simulation/client.ts` define typed worker transport.
+- 2026-07-10: unit coverage added for protocol envelopes, stable client cache
+  keys, worker initialization handling, progress forwarding, result array
+  conversion, and cache reuse (`tests/frontend/worker-protocol.test.ts`,
+  `tests/frontend/simulation-client.test.ts`).
+- 2026-07-10: M4 foundation gates:
+  `pnpm prepare:pyodide`, `pnpm typecheck`, `pnpm test` (12 passed),
+  `pnpm lint` (0 errors; existing generated-file warnings only),
+  `pnpm format:check`, `pnpm build`, `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Plan created (M0). |
+| 2026-07-10 | M4 started: pinned Pyodide NPM runtime, same-origin asset preparation, core wheel build, typed worker protocol, Pyodide worker, and simulation client cache/supersession implemented. ADR-0006 records asset hosting. |
 
 ## Final commits
 

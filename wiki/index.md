@@ -22,6 +22,8 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
 - [model/symbol-glossary.md](model/symbol-glossary.md) — MATLAB → Python symbol map (M1).
 - [model/plot-catalog.md](model/plot-catalog.md) — approved plot families and IDs (M1).
 - [interfaces/contracts.md](interfaces/contracts.md) — frozen data contracts (M2).
+- [interfaces/worker-protocol.md](interfaces/worker-protocol.md) — Pyodide worker
+  messages, transferables, caching, and cancellation boundary (M4).
 
 ## Conventions for contributors
 

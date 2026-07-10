@@ -10,3 +10,4 @@ Numbering is sequential and never reused.
 | [ADR-0003](ADR-0003-operating-mode-scope.md) | Operating-mode scope: no air-side pressure-drop modes without a model basis | accepted |
 | [ADR-0004](ADR-0004-cost-count-floor-and-reference-normalization.md) | Cost count floor and reference normalization | accepted |
 | [ADR-0005](ADR-0005-sweep-axis-generation-for-golden-parity.md) | Sweep axis generation for golden parity | accepted |
+| [ADR-0006](ADR-0006-pyodide-asset-hosting.md) | Pyodide and core-wheel asset hosting | accepted |
