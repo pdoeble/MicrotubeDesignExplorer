@@ -30,7 +30,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - [ ] Boundary-lines family with individual screen boundaries.
 - [x] KPI summary panel (roadmap §9 quantities).
 - [x] Tandem mode with shared finite color scales.
-- [ ] Delta/ratio switching for comparison fields.
+- [x] Delta/ratio switching for comparison fields.
 - [x] PNG + SVG export with provenance footer.
 
 ## Risks
@@ -60,6 +60,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - 2026-07-10 tandem slice: `pnpm test` (30 passed), `pnpm lint` (0 errors; 2
   generated-contract warnings), `pnpm typecheck`, `pnpm format:check`, and
   `pnpm build`.
+- 2026-07-10 delta/ratio slice: `pnpm test` (32 passed), `pnpm lint` (0
+  errors; 2 generated-contract warnings), `pnpm typecheck`,
+  `pnpm format:check`, and `pnpm build`.
 
 ## Status log
 
@@ -70,6 +73,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 | 2026-07-10 | Figure export slice completed: Plotly specs moved into a tested factory, every registered plot exposes PNG and SVG export buttons, and exports include request/version provenance in the figure footer. |
 | 2026-07-10 | Overlay slice completed: Python summaries now expose design geometry and material minimum wall values; Plotly specs draw composite feasible boundaries, minimum-wall lines, and design-point markers from `SimulationResult` only. |
 | 2026-07-10 | Tandem slice completed: cooler-scoped plots can render left/right panels together with a shared finite color domain; comparison percent-delta plots keep symmetric zero-centered scales. |
+| 2026-07-10 | Delta/ratio slice completed: comparison plot variants are linked by registry group, ratio companions render exported ratio fields, and the Result Plots tab switches between delta and ratio without deriving values in the UI. |
 
 ## Final commits
 

@@ -19,7 +19,8 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 - `src/features/plots/ResultPlotsTab.tsx` owns the user workflow for running the
   worker simulation, selecting a registered plot, selecting a cooler when the
   plot is cooler-scoped, switching cooler-scoped plots between single and
-  tandem display, and showing scalar KPI summaries.
+  tandem display, switching comparison groups between delta and ratio variants,
+  and showing scalar KPI summaries.
 - No WebGL trace family is allowed in the registry because SVG export is an M7
   requirement.
 - Exported figures include a provenance footer with contract version, core
@@ -32,6 +33,9 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 - Tandem display renders the left and right cooler with a shared finite color
   domain computed from the selected `SimulationResult` fields. Comparison
   percent-delta plots use a symmetric diverging color domain around zero.
+- Comparison plot variants are linked in `plotRegistry.ts` by variant group
+  and variant kind (`delta` or `ratio`). The selector changes plot IDs; it does
+  not derive ratios or deltas in the UI.
 
 ## Open M6 requirements
 

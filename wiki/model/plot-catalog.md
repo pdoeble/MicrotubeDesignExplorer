@@ -29,9 +29,12 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `capillary-rise-grid` | log-map-grid | 14 | h_cap (mm) | log color | rows = acceleration {1g, 5g, 10g} |
 | `tube-supply-cost-map` | log-map | 16, 17 | C_tube/C_fin (–) | log color, reversed | footprint cost orientation |
 | `tech-adjusted-delta-k` | percent-delta | 09 | Δk_o,feas (%) | diverging linear | PA vs nearest feasible Al reference; needs both coolers feasible |
+| `tech-adjusted-ratio-k` | ratio-map | 09 data companion | k_o,B/k_o,A,feas (-) | linear color | ratio companion for `tech-adjusted-delta-k` |
 | `tech-adjusted-delta-ka` | percent-delta | 22 | Δ(k_o·A_o)_feas (%) | diverging linear | as above, bundle scale |
+| `tech-adjusted-ratio-ka` | ratio-map | 22 data companion | (k_o·A_o)_B/(k_o·A_o)_A,feas (-) | linear color | ratio companion for `tech-adjusted-delta-ka` |
 | `design-boundary-lines` | boundary-summary | 20_design | kA + 6 screen boundaries | log color + lines | one panel per cooler; legend explains all screens |
 | `same-geometry-ratio` | percent-delta | (computed, not exported) | k_B/k_A − 1 (%) | diverging linear | approved diagnostic; masked below max(t_min) |
+| `same-geometry-ratio-value` | ratio-map | (computed, not exported) | k_B/k_A (-) | linear color | ratio companion for `same-geometry-ratio` |
 
 ## Excluded MATLAB figures (documented exclusions, M6 exit gate)
 

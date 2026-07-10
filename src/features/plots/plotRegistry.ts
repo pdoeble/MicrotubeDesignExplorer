@@ -1,5 +1,13 @@
 export type PlotFamily =
-  "boundary-summary" | "linear-map" | "log-map" | "log-map-grid" | "percent-delta" | "share-grid";
+  | "boundary-summary"
+  | "linear-map"
+  | "log-map"
+  | "log-map-grid"
+  | "percent-delta"
+  | "ratio-map"
+  | "share-grid";
+
+export type PlotVariantKind = "delta" | "ratio";
 
 export type PlotDefinition = {
   id: string;
@@ -9,6 +17,8 @@ export type PlotDefinition = {
   unit: string;
   source: "cooler" | "comparison";
   description: string;
+  variantGroup?: string;
+  variantKind?: PlotVariantKind;
 };
 
 export const plotRegistry = [
@@ -137,6 +147,19 @@ export const plotRegistry = [
     unit: "%",
     source: "comparison",
     description: "Right cooler versus nearest feasible left reference.",
+    variantGroup: "tech-adjusted-k",
+    variantKind: "delta",
+  },
+  {
+    id: "tech-adjusted-ratio-k",
+    title: "Tech-adjusted coefficient ratio",
+    family: "ratio-map",
+    field: "ratio_tech_adjusted",
+    unit: "-",
+    source: "comparison",
+    description: "Right cooler coefficient divided by nearest feasible left reference.",
+    variantGroup: "tech-adjusted-k",
+    variantKind: "ratio",
   },
   {
     id: "tech-adjusted-delta-ka",
@@ -146,6 +169,19 @@ export const plotRegistry = [
     unit: "%",
     source: "comparison",
     description: "Bundle-conductance delta against nearest feasible left reference.",
+    variantGroup: "tech-adjusted-ka",
+    variantKind: "delta",
+  },
+  {
+    id: "tech-adjusted-ratio-ka",
+    title: "Tech-adjusted conductance ratio",
+    family: "ratio-map",
+    field: "ratio_bundle_conductance_tech_adjusted",
+    unit: "-",
+    source: "comparison",
+    description: "Right cooler bundle conductance divided by nearest feasible left reference.",
+    variantGroup: "tech-adjusted-ka",
+    variantKind: "ratio",
   },
   {
     id: "same-geometry-ratio",
@@ -155,6 +191,20 @@ export const plotRegistry = [
     unit: "%",
     source: "comparison",
     description: "Right versus left coefficient delta at the same geometry.",
+    variantGroup: "same-geometry-k",
+    variantKind: "delta",
+  },
+  {
+    id: "same-geometry-ratio-value",
+    title: "Same-geometry coefficient ratio",
+    family: "ratio-map",
+    field: "ratio_same_geometry",
+    unit: "-",
+    source: "comparison",
+    description:
+      "Right cooler coefficient divided by left cooler coefficient at the same geometry.",
+    variantGroup: "same-geometry-k",
+    variantKind: "ratio",
   },
 ] as const satisfies readonly PlotDefinition[];
 
@@ -164,4 +214,15 @@ export function plotById(id: PlotId): PlotDefinition {
   const found = plotRegistry.find((plot) => plot.id === id);
   if (!found) throw new Error(`Unknown plot id: ${id}`);
   return found;
+}
+
+export function variantPlot(
+  plot: PlotDefinition,
+  variantKind: PlotVariantKind,
+): PlotDefinition | undefined {
+  if (!plot.variantGroup) return undefined;
+  return (plotRegistry as readonly PlotDefinition[]).find(
+    (candidate) =>
+      candidate.variantGroup === plot.variantGroup && candidate.variantKind === variantKind,
+  );
 }

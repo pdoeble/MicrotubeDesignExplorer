@@ -3,7 +3,14 @@ import { useSimulationStore } from "../../state/simulationStore";
 import { SimulationWorkerClient, type SimulationProgressHandler } from "../simulation/client";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { PlotFigure } from "./PlotFigure";
-import { plotRegistry, type PlotFamily, type PlotId } from "./plotRegistry";
+import {
+  plotById,
+  plotRegistry,
+  variantPlot,
+  type PlotFamily,
+  type PlotId,
+  type PlotVariantKind,
+} from "./plotRegistry";
 import { colorDomainForPlot } from "./plotSpec";
 
 const plotFamilyLabels: Record<PlotFamily, string> = {
@@ -12,6 +19,7 @@ const plotFamilyLabels: Record<PlotFamily, string> = {
   "log-map": "Log maps",
   "log-map-grid": "Log-map grids",
   "percent-delta": "Comparison deltas",
+  "ratio-map": "Comparison ratios",
   "share-grid": "Resistance shares",
 };
 
@@ -19,6 +27,7 @@ const plotFamilyOrder: PlotFamily[] = [
   "log-map",
   "linear-map",
   "percent-delta",
+  "ratio-map",
   "boundary-summary",
   "log-map-grid",
   "share-grid",
@@ -36,11 +45,9 @@ export function ResultPlotsTab() {
   );
   const [displayMode, setDisplayMode] = useState<"single" | "tandem">("single");
   const clientRef = useRef<SimulationWorkerClient | null>(null);
-  const selectedDefinition = useMemo(
-    () => plotRegistry.find((plot) => plot.id === selectedPlot),
-    [selectedPlot],
-  );
-  const isComparisonPlot = selectedDefinition?.source === "comparison";
+  const selectedDefinition = useMemo(() => plotById(selectedPlot), [selectedPlot]);
+  const isComparisonPlot = selectedDefinition.source === "comparison";
+  const comparisonVariant = selectedDefinition.variantKind;
   const tandemColorDomain = useMemo(
     () =>
       result && !isComparisonPlot && displayMode === "tandem"
@@ -143,6 +150,25 @@ export function ResultPlotsTab() {
                 <option value="tandem">Tandem</option>
               </select>
             </label>
+            <label className="text-field" htmlFor="comparison-variant">
+              <span>Comparison value</span>
+              <select
+                id="comparison-variant"
+                value={comparisonVariant ?? ""}
+                onChange={(event) => {
+                  const next = variantPlot(
+                    selectedDefinition,
+                    event.target.value as PlotVariantKind,
+                  );
+                  if (next) setSelectedPlot(next.id as PlotId);
+                }}
+                disabled={!comparisonVariant}
+              >
+                <option value="">n/a</option>
+                <option value="delta">Delta (%)</option>
+                <option value="ratio">Ratio</option>
+              </select>
+            </label>
             <label className="text-field" htmlFor="plot-cooler">
               <span>Cooler</span>
               <select
@@ -159,7 +185,7 @@ export function ResultPlotsTab() {
             </label>
           </fieldset>
           {!isComparisonPlot && displayMode === "tandem" ? (
-            <div className="plot-tandem-grid" aria-label={`${selectedDefinition?.title} tandem`}>
+            <div className="plot-tandem-grid" aria-label={`${selectedDefinition.title} tandem`}>
               <PlotFigure
                 colorDomain={tandemColorDomain}
                 result={result}

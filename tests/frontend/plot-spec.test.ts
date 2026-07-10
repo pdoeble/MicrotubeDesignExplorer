@@ -169,6 +169,30 @@ describe("plot spec", () => {
     ).toEqual({ zmax: 8, zmin: 1 });
   });
 
+  it("computes non-symmetric domains for comparison ratio maps", () => {
+    const ratioField: GridFieldRef = {
+      buffer_index: 6,
+      name: "ratio_tech_adjusted",
+      shape: [2, 2],
+      unit: "-",
+    };
+    const ratioPayload: SimulationResultPayload = {
+      ...payload,
+      comparison: {
+        fields: [...payload.comparison.fields, ratioField],
+        warnings: [],
+      },
+    };
+    const arrays = [...overlayArrays, new Float64Array([0.5, 1, 1.5, Number.NaN])] as const;
+
+    expect(
+      colorDomainForPlot(ratioPayload, arrays, "tech-adjusted-ratio-k", ["cooler_left"]),
+    ).toEqual({
+      zmax: 1.5,
+      zmin: 0.5,
+    });
+  });
+
   it("applies an explicit color domain to generated heatmaps", () => {
     const spec = createPlotSpec({
       colorDomain: { zmax: 8, zmin: 1 },
