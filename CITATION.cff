@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite both the software itself and the
+  accompanying paper.
+type: software
+title: Microtube Design Explorer
+abstract: >-
+  Interactive static web application accompanying the paper "Local
+  Resistance-Based Design-Space Analysis of Polyamide Microtubes for Compact
+  Heat Exchangers". Ports the approved MATLAB screening model to Python,
+  executes it in the browser via Pyodide, and renders the design-space maps
+  with Plotly.js.
+authors:
+  - family-names: Döbler
+    given-names: Philip
+    affiliation: Esslingen University of Applied Sciences
+version: 0.0.0
+date-released: "2026-07-10"
+license: MIT
+repository-code: https://github.com/pdoeble/MicrotubeDesignExplorer
+preferred-citation:
+  type: conference-paper
+  title: >-
+    Local Resistance-Based Design-Space Analysis of Polyamide Microtubes for
+    Compact Heat Exchangers
+  authors:
+    - family-names: Döbler
+      given-names: Philip
+      affiliation: Esslingen University of Applied Sciences
+    - family-names: Henzler
+      given-names: Michael
+      affiliation: Esslingen University of Applied Sciences
+    - family-names: Auerbach
+      given-names: Michael
+      affiliation: Esslingen University of Applied Sciences

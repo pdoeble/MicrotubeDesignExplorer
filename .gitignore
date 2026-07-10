@@ -1,0 +1,33 @@
+# Node / frontend
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+python/dist/
+python/build/
+*.egg-info/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local scratch (never commit local caches)
+.scratch/
+*.local.json
+
+# MATLAB scratch outputs from golden generation (final goldens live in /reference)
+scripts/golden/_scratch/

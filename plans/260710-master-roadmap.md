@@ -93,8 +93,8 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 
 | ID | Milestone | Status | Primary dependency |
 |---|---|---:|---|
-| M0 | Repository and governance baseline | not-started | — |
-| M1 | MATLAB inventory and golden references | not-started | M0 |
+| M0 | Repository and governance baseline | completed | — |
+| M1 | MATLAB inventory and golden references | in-progress | M0 |
 | M2 | Contracts, units, defaults, validity policy | not-started | M1 |
 | M3 | Python scientific core parity | not-started | M2 |
 | M4 | Pyodide worker and browser integration | not-started | M2, M3 |
@@ -171,18 +171,22 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Create the fixed repository structure from `/AGENTS.md`.
-- [ ] Add wiki index and sections for decisions, model, interfaces, and UI.
-- [ ] Add ADR and living-plan templates.
-- [ ] Configure `pnpm`, `uv`, formatting, linting, typing, and baseline tests.
-- [ ] Add initial CI and prohibited-file checks.
-- [ ] Document branch, commit, merge, and ownership conventions.
+- [x] Create the fixed repository structure from `/AGENTS.md`.
+- [x] Add wiki index and sections for decisions, model, interfaces, and UI.
+- [x] Add ADR and living-plan templates.
+- [x] Configure `pnpm`, `uv`, formatting, linting, typing, and baseline tests.
+- [x] Add initial CI and prohibited-file checks.
+- [x] Document branch, commit, merge, and ownership conventions (`wiki/conventions.md`).
 
 ### Exit gate
 
-- [ ] Clean checkout builds and runs baseline CI.
-- [ ] A new agent can locate architecture, commands, plans, and interfaces.
-- [ ] No secret, proprietary PDF, cache, or unlicensed artifact is tracked.
+- [x] Clean checkout builds and runs baseline CI (pnpm install/test/build,
+      uv sync/pytest/ruff/mypy verified locally 2026-07-10; workflows in `.github/workflows/`).
+- [x] A new agent can locate architecture, commands, plans, and interfaces
+      (README §Governance, wiki/index.md).
+- [x] No secret, proprietary PDF, cache, or unlicensed artifact is tracked
+      outside the read-only `references/` area (`scripts/check_prohibited_files.py`;
+      the paper PDF lives in user-provided `references/` by design).
 
 ---
 
@@ -488,15 +492,15 @@ Where applicable, expose in the UI and reports:
 
 Create before substantial work begins:
 
-- [ ] `YYMMDD-matlab-inventory-and-golden-data.md`
-- [ ] `YYMMDD-contracts-units-and-validity.md`
-- [ ] `YYMMDD-python-core-port.md`
-- [ ] `YYMMDD-pyodide-worker-bridge.md`
-- [ ] `YYMMDD-frontend-state-and-inputs.md`
-- [ ] `YYMMDD-plot-registry-and-rendering.md`
-- [ ] `YYMMDD-report-and-export-system.md`
-- [ ] `YYMMDD-validation-accessibility-performance.md`
-- [ ] `YYMMDD-ci-pages-release.md`
+- [x] `260710-matlab-inventory-and-golden-data.md`
+- [x] `260710-contracts-units-and-validity.md`
+- [x] `260710-python-core-port.md`
+- [x] `260710-pyodide-worker-bridge.md`
+- [x] `260710-frontend-state-and-inputs.md`
+- [x] `260710-plot-registry-and-rendering.md`
+- [x] `260710-report-and-export-system.md`
+- [x] `260710-validation-accessibility-performance.md`
+- [x] `260710-ci-pages-release.md`
 
 ---
 
@@ -513,6 +517,7 @@ Create before substantial work begins:
 | Outside-validity results appear authoritative | Explicit warnings and visual state |
 | Parallel contract drift | ADR and semantic contract versioning |
 | Wiki/plan drift | Mandatory pre-commit documentation review |
+| Provisional MIT license not confirmed by authors | Confirm before M10 (ADR-0001 §4) |
 
 ---
 
@@ -575,4 +580,5 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | Date | Change | Author/agent |
 |---|---|---|
 | 2026-07-10 | Initial master roadmap created | planning agent |
+| 2026-07-10 | M0 completed: layout, toolchain (pnpm 11/uv 0.11, lockfiles), wiki sections, templates, 9 subplans, CI + Pages scaffold, prohibited-file gate, ADR-0001..0003. MATLAB R2024b found on dev machine → golden data will come from real MATLAB (ADR-0002). M1 started. | implementation agent (Claude) |
 
