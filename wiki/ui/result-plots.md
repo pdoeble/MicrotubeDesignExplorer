@@ -11,7 +11,8 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   field names, units, source (`cooler` or `comparison`), and family metadata.
 - `src/features/plots/plotSpec.ts` owns testable Plotly trace/layout/config
   generation, row-major `Float64Array` to matrix conversion, compact
-  provenance footer text, and image export options.
+  provenance footer text, composite feasible-boundary overlays, design-point
+  markers, minimum-wall lines, and image export options.
 - `src/features/plots/PlotFigure.tsx` renders heatmap traces with Plotly from
   `SimulationResult` field metadata and buffer indices, then exposes explicit
   PNG and SVG figure export buttons.
@@ -23,10 +24,14 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 - Exported figures include a provenance footer with contract version, core
   version, request hash, generation timestamp, and golden-reference identifier
   when present.
+- Overlay traces are drawn only from `SimulationResult`: comparison boundary
+  vectors plus cooler summary geometry/minimum-wall fields. For comparison
+  plots, both coolers' overlays are shown; for cooler-scoped plots, only the
+  selected cooler's overlays are shown.
 
 ## Open M6 requirements
 
-- Boundary overlays, minimum-wall lines, benchmark markers, tandem scaling, and
-  full MATLAB plot-family coverage are still open.
+- Individual screen-boundary line families, tandem scaling, and full MATLAB
+  plot-family coverage are still open.
 - Detailed figure descriptions and tabular grid access remain part of the M6/M8
   accessibility work.

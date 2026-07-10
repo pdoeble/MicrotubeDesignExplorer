@@ -137,6 +137,23 @@ def test_api_default_masks_match_goldens() -> None:
     )
 
 
+def test_api_summary_exposes_plot_marker_geometry() -> None:
+    request = paper_default_request()
+    result = simulate(request)
+
+    for cooler_key in ("cooler_left", "cooler_right"):
+        cooler = getattr(request, cooler_key)
+        summary = getattr(result.payload, cooler_key).summary
+        assert summary.values["design_outer_diameter"] == cooler.design_point.outer_diameter
+        assert summary.values["design_wall_thickness"] == cooler.design_point.wall_thickness
+        assert summary.values["design_wall_ratio"] == 10.0
+        assert summary.values["material_min_wall_thickness"] == cooler.material.min_wall_thickness
+        assert summary.units["design_outer_diameter"] == "m"
+        assert summary.units["design_wall_thickness"] == "m"
+        assert summary.units["design_wall_ratio"] == "%"
+        assert summary.units["material_min_wall_thickness"] == "m"
+
+
 def test_api_reports_correlation_validity_warnings() -> None:
     request = paper_default_request()
     air_fluid = request.cooler_left.air_side.fluid.model_copy(update={"prandtl": 0.05})

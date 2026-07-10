@@ -9,6 +9,9 @@ declare module "plotly.js-dist-min" {
     colorscale?: string;
     colorbar?: { title?: { text: string } };
     hovertemplate?: string;
+    line?: { color?: string; dash?: string; width?: number };
+    marker?: { color?: string; size?: number; symbol?: string };
+    showlegend?: boolean;
     showscale?: boolean;
     zauto?: boolean;
     zmax?: number;
@@ -22,6 +25,7 @@ declare module "plotly.js-dist-min" {
     yaxis?: { title?: { text: string }; type?: "linear" | "log" };
     margin?: { l?: number; r?: number; t?: number; b?: number };
     annotations?: Array<Record<string, unknown>>;
+    legend?: { orientation?: "h" | "v"; x?: number; y?: number };
   };
 
   export type PlotlyConfig = {

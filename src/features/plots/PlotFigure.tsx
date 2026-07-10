@@ -7,6 +7,7 @@ import {
   fieldForPlot,
   imageExportOptions,
   matrixFromArray,
+  overlayTracesForPlot,
   supportedImageFormats,
   titleScopeForPlot,
   type CoolerKey,
@@ -35,12 +36,17 @@ export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
     [result.payload.wall_thickness_axis],
   );
   const titleScope = titleScopeForPlot(result.payload, plot, cooler);
+  const overlays = useMemo(
+    () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
+    [cooler, plot, result.arrays, result.payload],
+  );
   const plotSpec = useMemo(
     () =>
       field && zValues
         ? createPlotSpec({
             cooler,
             field,
+            overlays,
             plot,
             provenance: result.payload.provenance,
             titleScope,
@@ -49,7 +55,17 @@ export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
             zValues,
           })
         : undefined,
-    [cooler, field, plot, result.payload.provenance, titleScope, xValues, yValues, zValues],
+    [
+      cooler,
+      field,
+      overlays,
+      plot,
+      result.payload.provenance,
+      titleScope,
+      xValues,
+      yValues,
+      zValues,
+    ],
   );
 
   useEffect(() => {

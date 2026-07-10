@@ -25,7 +25,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 
 - [x] Plot registry typed against catalog IDs.
 - [x] Log-color map family (contour/heatmap, no WebGL traces).
-- [ ] Percent-delta family, boundary-lines family.
+- [x] Percent-delta family with symmetric diverging color scale.
+- [x] Composite feasible boundary, minimum-wall line, and design-point overlays.
+- [ ] Boundary-lines family with individual screen boundaries.
 - [x] KPI summary panel (roadmap §9 quantities).
 - [ ] Tandem/delta/ratio switching with common scales.
 - [x] PNG + SVG export with provenance footer.
@@ -49,6 +51,11 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - 2026-07-10 figure-export slice: `pnpm typecheck`, `pnpm lint` (0 errors; 2
   generated-contract warnings), `pnpm format:check`, `pnpm test` (26 passed),
   `pnpm build`, and `python scripts/check_prohibited_files.py`.
+- 2026-07-10 overlay slice: `uv run pytest` (52 passed), `uv run mypy .`,
+  `uv run ruff check ..`, `uv run ruff format --check ..`, `pnpm typecheck`,
+  `pnpm test` (28 passed), `pnpm lint` (0 errors; 2 generated-contract
+  warnings), `pnpm format:check`, `pnpm build`, and
+  `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
@@ -57,6 +64,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-10 | M6 implementation started: added typed registry, Plotly heatmap renderer, simulation-run result workflow, cooler/comparison plot selection, and KPI summary; exports, boundary overlays, detailed alt views, and complete plot-family parity remain open. |
 | 2026-07-10 | Figure export slice completed: Plotly specs moved into a tested factory, every registered plot exposes PNG and SVG export buttons, and exports include request/version provenance in the figure footer. |
+| 2026-07-10 | Overlay slice completed: Python summaries now expose design geometry and material minimum wall values; Plotly specs draw composite feasible boundaries, minimum-wall lines, and design-point markers from `SimulationResult` only. |
 
 ## Final commits
 

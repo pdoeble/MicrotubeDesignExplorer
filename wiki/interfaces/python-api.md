@@ -53,6 +53,10 @@ safe, matching the M2 validity policy.
 
 ## Current field groups
 
+Each cooler summary includes design-point outer diameter, wall thickness,
+wall ratio, and material minimum wall thickness so frontend plots can draw
+markers and minimum-wall lines without reading the original request.
+
 Each cooler exports heat-transfer coefficients, Reynolds numbers, coolant
 velocity, pressure drop, hydraulic power, volume and mass flow, tube count,
 bundle area, overall coefficient, bundle conductance, configured-screen burst

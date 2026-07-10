@@ -235,7 +235,13 @@ def _cooler_payload(
         label=cooler.label,
         fields=fields,
         masks=masks,
-        summary=_scalar_summary(design_diameter, design_wall, result, grid),
+        summary=_scalar_summary(
+            design_diameter,
+            design_wall,
+            cooler.material.min_wall_thickness,
+            result,
+            grid,
+        ),
         warnings=_warnings_for_result(result, cooler, grid, design_diameter, design_wall),
     )
 
@@ -243,10 +249,15 @@ def _cooler_payload(
 def _scalar_summary(
     design_diameter: float,
     design_wall: float,
+    material_min_wall_thickness: float,
     result: CoolerSweepResult,
     grid: DesignGrid,
 ) -> ScalarSummary:
     values = {
+        "design_outer_diameter": design_diameter,
+        "design_wall_thickness": design_wall,
+        "design_wall_ratio": 100.0 * design_wall / design_diameter,
+        "material_min_wall_thickness": material_min_wall_thickness,
         "overall_coefficient": _sample_field(
             grid, result.overall_coefficient, design_diameter, design_wall
         ),
@@ -282,6 +293,10 @@ def _scalar_summary(
         "cost_index": _sample_field(grid, result.cost_index, design_diameter, design_wall),
     }
     units = {
+        "design_outer_diameter": "m",
+        "design_wall_thickness": "m",
+        "design_wall_ratio": "%",
+        "material_min_wall_thickness": "m",
         "overall_coefficient": "W/(m^2 K)",
         "bundle_conductance": "W/K",
         "tube_pressure_drop": "Pa",

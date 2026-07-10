@@ -24,6 +24,7 @@ export type PlotSpec = {
 type PlotSpecInput = {
   cooler: CoolerKey;
   field: GridFieldRef;
+  overlays?: PlotlyData[];
   plot: PlotDefinition;
   provenance: Provenance;
   titleScope: string;
@@ -78,6 +79,7 @@ export function titleScopeForPlot(
 export function createPlotSpec({
   cooler,
   field,
+  overlays = [],
   plot,
   provenance,
   titleScope,
@@ -107,7 +109,7 @@ export function createPlotSpec({
   }
 
   return {
-    data: [heatmap],
+    data: [heatmap, ...overlays],
     layout: {
       annotations: [
         {
@@ -122,7 +124,8 @@ export function createPlotSpec({
           yref: "paper",
         },
       ],
-      margin: { b: 86, l: 70, r: 24, t: 48 },
+      legend: { orientation: "h", x: 0, y: -0.14 },
+      margin: { b: 112, l: 70, r: 24, t: 48 },
       title: { text: `${plot.title} - ${titleScope}` },
       xaxis: { title: { text: "Outer diameter d_o [mm]" }, type: "log" },
       yaxis: { title: { text: "Wall thickness t [mm]" } },
@@ -133,6 +136,25 @@ export function createPlotSpec({
       toImageButtonOptions: imageExportOptions(plot.id as PlotId, cooler, "png"),
     },
   };
+}
+
+export function overlayTracesForPlot(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  plot: PlotDefinition,
+  cooler: CoolerKey,
+): PlotlyData[] {
+  const coolers =
+    plot.source === "comparison" ? (["cooler_left", "cooler_right"] as const) : [cooler];
+  const traces: PlotlyData[] = [];
+  for (const current of coolers) {
+    traces.push(...boundaryTraces(payload, arrays, current));
+    const minWallTrace = minimumWallTrace(payload, current);
+    if (minWallTrace) traces.push(minWallTrace);
+    const markerTrace = designPointTrace(payload, current);
+    if (markerTrace) traces.push(markerTrace);
+  }
+  return traces;
 }
 
 export function imageExportOptions(
@@ -174,4 +196,114 @@ function symmetricFiniteLimit(values: number[][]): number | undefined {
 
 function shortIdentifier(value: string): string {
   return value.length > 12 ? value.slice(0, 12) : value;
+}
+
+function boundaryTraces(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  cooler: CoolerKey,
+): PlotlyData[] {
+  const ratio = vectorForField(payload.comparison.fields, arrays, "boundary_wall_ratio");
+  const diameter = vectorForField(
+    payload.comparison.fields,
+    arrays,
+    cooler === "cooler_left" ? "boundary_left_diameter" : "boundary_right_diameter",
+  );
+  if (!ratio || !diameter) return [];
+
+  const x: number[] = [];
+  const y: number[] = [];
+  const count = Math.min(ratio.length, diameter.length);
+  for (let index = 0; index < count; index += 1) {
+    const ratioPercent = ratio[index];
+    const diameterMeters = diameter[index];
+    if (ratioPercent === undefined || diameterMeters === undefined) continue;
+    if (Number.isFinite(ratioPercent) && Number.isFinite(diameterMeters) && diameterMeters > 0) {
+      x.push(diameterMeters * 1000);
+      y.push(diameterMeters * (ratioPercent / 100) * 1000);
+    }
+  }
+  if (x.length === 0) return [];
+
+  const label = payload[cooler].label;
+  return [
+    {
+      hovertemplate: "d_o=%{x:.4g} mm<br>t=%{y:.4g} mm<extra>Feasible boundary</extra>",
+      line: { color: coolerColor(cooler), width: 2 },
+      mode: "lines",
+      name: `Feasible boundary - ${label}`,
+      showlegend: true,
+      type: "scatter",
+      x,
+      y,
+    },
+  ];
+}
+
+function minimumWallTrace(
+  payload: SimulationResultPayload,
+  cooler: CoolerKey,
+): PlotlyData | undefined {
+  const minWall = finiteSummaryValue(payload, cooler, "material_min_wall_thickness");
+  if (minWall === undefined || payload.outer_diameter_axis.length === 0) return undefined;
+  const xValues = axisMillimeters(payload.outer_diameter_axis);
+  const xMin = Math.min(...xValues);
+  const xMax = Math.max(...xValues);
+  const label = payload[cooler].label;
+  return {
+    hovertemplate: "minimum wall=%{y:.4g} mm<extra></extra>",
+    line: { color: coolerColor(cooler), dash: "dash", width: 1.5 },
+    mode: "lines",
+    name: `Minimum wall - ${label}`,
+    showlegend: true,
+    type: "scatter",
+    x: [xMin, xMax],
+    y: [minWall * 1000, minWall * 1000],
+  };
+}
+
+function designPointTrace(
+  payload: SimulationResultPayload,
+  cooler: CoolerKey,
+): PlotlyData | undefined {
+  const diameter = finiteSummaryValue(payload, cooler, "design_outer_diameter");
+  const wall = finiteSummaryValue(payload, cooler, "design_wall_thickness");
+  if (diameter === undefined || wall === undefined) return undefined;
+  const label = payload[cooler].label;
+  return {
+    hovertemplate: "d_o=%{x:.4g} mm<br>t=%{y:.4g} mm<extra>Design point</extra>",
+    marker: {
+      color: coolerColor(cooler),
+      size: 10,
+      symbol: cooler === "cooler_left" ? "circle" : "diamond",
+    },
+    mode: "markers",
+    name: `Design point - ${label}`,
+    showlegend: true,
+    type: "scatter",
+    x: [diameter * 1000],
+    y: [wall * 1000],
+  };
+}
+
+function finiteSummaryValue(
+  payload: SimulationResultPayload,
+  cooler: CoolerKey,
+  key: string,
+): number | undefined {
+  const value = payload[cooler].summary.values[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function vectorForField(
+  refs: GridFieldRef[],
+  arrays: readonly Float64Array[],
+  name: string,
+): Float64Array | undefined {
+  const ref = refs.find((field) => field.name === name);
+  return ref ? arrays[ref.buffer_index] : undefined;
+}
+
+function coolerColor(cooler: CoolerKey): string {
+  return cooler === "cooler_left" ? "#00427e" : "#b35c00";
 }
