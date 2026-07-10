@@ -414,7 +414,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 - [ ] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plots.
 - [ ] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
-- [ ] Provide hover values with units and validity status.
+- [x] Provide hover values with units and validity status.
 - [ ] Provide tabular access, alt text, and detailed descriptions.
 - [ ] Keep physics out of plotting code.
 - [x] Export every registered figure as PNG and SVG with provenance footer.
@@ -663,3 +663,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 overlay slice completed: cooler summaries expose plot-marker geometry; registered plots draw composite feasible boundaries, minimum-wall lines, and design-point markers from `SimulationResult`; individual screen-boundary family remains open. | Codex |
 | 2026-07-10 | M6 tandem slice completed: cooler-scoped plots now support single/tandem display with shared finite color domains; percent-delta comparison maps use symmetric zero-centered domains. | Codex |
 | 2026-07-10 | M6 delta/ratio slice completed: registry variants now expose exported ratio fields next to approved percent-delta maps, and the Result Plots tab switches comparison groups between delta and ratio. | Codex |
+| 2026-07-10 | M6 hover-status slice completed: cooler heatmap hover now reports value, unit, and validity/screening state from exported masks; comparison plots remain direct exported fields. | Codex |

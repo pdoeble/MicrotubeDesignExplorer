@@ -9,6 +9,7 @@ import {
   imageExportOptions,
   matrixFromArray,
   overlayTracesForPlot,
+  statusMatrixForPlot,
   supportedImageFormats,
   titleScopeForPlot,
   type CoolerKey,
@@ -42,6 +43,10 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
     [cooler, plot, result.arrays, result.payload],
   );
+  const statusValues = useMemo(
+    () => statusMatrixForPlot(result.payload, result.arrays, plot, cooler),
+    [cooler, plot, result.arrays, result.payload],
+  );
   const plotSpec = useMemo(
     () =>
       field && zValues
@@ -52,6 +57,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
             overlays,
             plot,
             provenance: result.payload.provenance,
+            statusValues,
             titleScope,
             xValues,
             yValues,
@@ -65,6 +71,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
       overlays,
       plot,
       result.payload.provenance,
+      statusValues,
       titleScope,
       xValues,
       yValues,

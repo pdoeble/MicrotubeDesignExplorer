@@ -34,6 +34,7 @@ type PlotSpecInput = {
   overlays?: PlotlyData[];
   plot: PlotDefinition;
   provenance: Provenance;
+  statusValues?: string[][] | undefined;
   titleScope: string;
   xValues: number[];
   yValues: number[];
@@ -90,6 +91,7 @@ export function createPlotSpec({
   overlays = [],
   plot,
   provenance,
+  statusValues,
   titleScope,
   xValues,
   yValues,
@@ -98,8 +100,8 @@ export function createPlotSpec({
   const heatmap: PlotlyData = {
     colorbar: { title: { text: field.unit } },
     colorscale: plot.family === "percent-delta" ? "RdBu" : "Viridis",
-    hovertemplate:
-      "d_o=%{x:.4g} mm<br>t=%{y:.4g} mm<br>value=%{z:.4g} " + field.unit + "<extra></extra>",
+    customdata: statusValues,
+    hovertemplate: heatmapHoverTemplate(field.unit, statusValues !== undefined),
     type: "heatmap",
     x: xValues,
     y: yValues,
@@ -162,6 +164,43 @@ export function overlayTracesForPlot(
     if (markerTrace) traces.push(markerTrace);
   }
   return traces;
+}
+
+export function statusMatrixForPlot(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  plot: PlotDefinition,
+  cooler: CoolerKey,
+): string[][] | undefined {
+  if (plot.source === "comparison") return undefined;
+
+  const maskInvalid = matrixForField(payload[cooler].masks, arrays, "mask_invalid_geometry");
+  const maskWallRatio = matrixForField(payload[cooler].masks, arrays, "mask_wall_ratio_range");
+  const maskBelowMinWall = matrixForField(payload[cooler].masks, arrays, "mask_below_min_wall");
+  const maskFeasible = matrixForField(payload[cooler].masks, arrays, "mask_all_screens_feasible");
+  const maskOperating = matrixForField(payload[cooler].masks, arrays, "mask_operating_unsolvable");
+  const required = [maskInvalid, maskWallRatio, maskBelowMinWall, maskFeasible, maskOperating];
+  if (required.some((matrix) => matrix === undefined)) return undefined;
+
+  const rows = maskInvalid?.length ?? 0;
+  const columns = maskInvalid?.[0]?.length ?? 0;
+  const statuses: string[][] = [];
+  for (let row = 0; row < rows; row += 1) {
+    const statusRow: string[] = [];
+    for (let column = 0; column < columns; column += 1) {
+      statusRow.push(
+        statusAtCell(
+          maskInvalid?.[row]?.[column],
+          maskWallRatio?.[row]?.[column],
+          maskBelowMinWall?.[row]?.[column],
+          maskFeasible?.[row]?.[column],
+          maskOperating?.[row]?.[column],
+        ),
+      );
+    }
+    statuses.push(statusRow);
+  }
+  return statuses;
 }
 
 export function colorDomainForPlot(
@@ -243,6 +282,11 @@ function applyColorDomain(trace: PlotlyData, domain: ColorDomain): void {
   if (domain.zmid !== undefined) {
     trace.zmid = domain.zmid;
   }
+}
+
+function heatmapHoverTemplate(unit: string, includeStatus: boolean): string {
+  const statusLine = includeStatus ? "<br>status=%{customdata}" : "";
+  return `d_o=%{x:.4g} mm<br>t=%{y:.4g} mm<br>value=%{z:.4g} ${unit}${statusLine}<extra></extra>`;
 }
 
 function collectFiniteValues(array: Float64Array | undefined, values: number[]): void {
@@ -360,6 +404,34 @@ function vectorForField(
 ): Float64Array | undefined {
   const ref = refs.find((field) => field.name === name);
   return ref ? arrays[ref.buffer_index] : undefined;
+}
+
+function matrixForField(
+  refs: GridFieldRef[],
+  arrays: readonly Float64Array[],
+  name: string,
+): number[][] | undefined {
+  const ref = refs.find((field) => field.name === name);
+  return ref ? matrixFromArray(arrays[ref.buffer_index], ref) : undefined;
+}
+
+function statusAtCell(
+  invalid: number | undefined,
+  wallRatio: number | undefined,
+  belowMinWall: number | undefined,
+  feasible: number | undefined,
+  operating: number | undefined,
+): string {
+  if (isMasked(invalid)) return "invalid geometry";
+  if (isMasked(wallRatio)) return "outside wall-ratio range";
+  if (isMasked(operating)) return "operating point unsolved";
+  if (isMasked(belowMinWall)) return "below minimum wall";
+  if (!isMasked(feasible)) return "screened out";
+  return "valid";
+}
+
+function isMasked(value: number | undefined): boolean {
+  return value !== undefined && Number.isFinite(value) && value > 0.5;
 }
 
 function coolerColor(cooler: CoolerKey): string {

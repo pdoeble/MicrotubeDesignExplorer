@@ -36,6 +36,9 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 - Comparison plot variants are linked in `plotRegistry.ts` by variant group
   and variant kind (`delta` or `ratio`). The selector changes plot IDs; it does
   not derive ratios or deltas in the UI.
+- Cooler-scoped heatmap hover text includes value, unit, and status derived
+  from exported masks: invalid geometry, outside wall-ratio range, operating
+  point unsolved, below minimum wall, screened out, or valid.
 
 ## Open M6 requirements
 

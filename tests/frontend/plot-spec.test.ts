@@ -12,6 +12,7 @@ import {
   matrixFromArray,
   overlayTracesForPlot,
   provenanceFooter,
+  statusMatrixForPlot,
 } from "../../src/features/plots/plotSpec";
 
 const field: GridFieldRef = {
@@ -256,6 +257,44 @@ describe("plot spec", () => {
       "Design point - Polyamide",
     ]);
     expect(traces[3]?.x).toEqual([1.5, 2.5]);
+  });
+
+  it("builds hover validity status from exported masks", () => {
+    const maskRefs: GridFieldRef[] = [
+      { buffer_index: 7, name: "mask_invalid_geometry", shape: [2, 2], unit: "-" },
+      { buffer_index: 8, name: "mask_wall_ratio_range", shape: [2, 2], unit: "-" },
+      { buffer_index: 9, name: "mask_below_min_wall", shape: [2, 2], unit: "-" },
+      { buffer_index: 10, name: "mask_all_screens_feasible", shape: [2, 2], unit: "-" },
+      { buffer_index: 11, name: "mask_operating_unsolvable", shape: [2, 2], unit: "-" },
+    ];
+    const statusPayload: SimulationResultPayload = {
+      ...payload,
+      cooler_left: {
+        ...payload.cooler_left,
+        masks: maskRefs,
+      },
+    };
+    const arrays = [
+      ...overlayArrays,
+      new Float64Array(),
+      new Float64Array([1, 0, 0, 0]),
+      new Float64Array([0, 1, 0, 0]),
+      new Float64Array([0, 0, 1, 0]),
+      new Float64Array([1, 1, 1, 0]),
+      new Float64Array([0, 0, 0, 0]),
+    ] as const;
+
+    expect(
+      statusMatrixForPlot(
+        statusPayload,
+        arrays,
+        plotById("overall-coefficient-map"),
+        "cooler_left",
+      ),
+    ).toEqual([
+      ["invalid geometry", "outside wall-ratio range"],
+      ["below minimum wall", "screened out"],
+    ]);
   });
 
   it("keeps provenance footer identifiers compact", () => {

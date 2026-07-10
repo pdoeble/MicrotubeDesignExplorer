@@ -8,6 +8,7 @@ declare module "plotly.js-dist-min" {
     name?: string;
     colorscale?: string;
     colorbar?: { title?: { text: string } };
+    customdata?: unknown;
     hovertemplate?: string;
     line?: { color?: string; dash?: string; width?: number };
     marker?: { color?: string; size?: number; symbol?: string };
