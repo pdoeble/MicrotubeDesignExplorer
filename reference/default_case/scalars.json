@@ -1,0 +1,751 @@
+{
+  "note": "Fields harvested after Y_calc_mask application, before technology masks (matching screen inputs).",
+  "params": {
+    "v_a_ms": 5,
+    "v_i_ms": 0.5,
+    "color_prct": [
+      1,
+      99
+    ],
+    "mask_invalid_di": true,
+    "contours_mode": "auto",
+    "n_contours": 6,
+    "ko_contour_step_Wm2K": 50,
+    "burst_contour_step_Al_bar": 200,
+    "burst_contour_step_Poly_bar": 10,
+    "share_contour_levels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99
+    ],
+    "re_i_contour_levels": [
+      10,
+      20,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2300,
+      4000
+    ],
+    "re_o_contour_levels": [
+      20,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2300,
+      5000,
+      10000
+    ],
+    "re_transition_level": 2300,
+    "spacing_contour_levels_mm": [
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2,
+      5,
+      10
+    ],
+    "dp_i_contour_levels_bar": [
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2,
+      5
+    ],
+    "coolant_flow_Lmin_contour_levels": [
+      1,
+      2,
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      40
+    ],
+    "kA_abs_contour_levels_WK": [
+      5,
+      10,
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      300,
+      500,
+      750,
+      1000,
+      1500,
+      2000,
+      3000
+    ],
+    "cost_contour_levels": [
+      0.01,
+      0.02,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      1,
+      2,
+      5,
+      10,
+      20,
+      50,
+      100
+    ],
+    "capillary_contour_levels_mm": [
+      0.2,
+      0.5,
+      1,
+      2,
+      5,
+      10,
+      20,
+      50,
+      100
+    ],
+    "capillary_log_caxis_mm": [
+      0.1,
+      150
+    ],
+    "capillary_label_spacing": 520,
+    "capillary_contour_line_width": 0.7,
+    "dp_i_log_caxis_bar": [
+      0.05,
+      5
+    ],
+    "coolant_flow_Lmin_caxis": [
+      0,
+      30
+    ],
+    "cost_log_caxis": [
+      0.01,
+      100
+    ],
+    "ratio_pct_caxis_2d": [
+      -19.999999999999996,
+      80
+    ],
+    "ratio_pct_tick_step": 20,
+    "ratio_pct_contour_step": 20,
+    "ratio_pct_labeled_step": 40,
+    "ratio_pct_label_levels": [
+      0,
+      20,
+      40
+    ],
+    "ratio_pct_label_spacing": 900,
+    "t_mm_min": 0.001,
+    "t_mm_max": 4.5,
+    "da_mm_min": 0.1,
+    "da_mm_max": 10,
+    "N_t": 250,
+    "N_da": 250,
+    "coolant_flow_ref": {
+      "do_mm": 1,
+      "t_mm": 0.1,
+      "N": 1080,
+      "v_i_ms": 0.5,
+      "Vdot_Lmin": 16.286016316209487
+    },
+    "bundle_ref": {
+      "do_mm": 1,
+      "t_mm": 0.1,
+      "N": 1080,
+      "L_m": 0.16,
+      "di_mm": 0.8,
+      "Ao_ref_m2": 0.54286721054031628,
+      "k_Al_ref_Wm2K": 284.554678880602,
+      "kA_Al_ref_WK": 154.47540477010787
+    },
+    "validated_ref": {
+      "do_mm": 1,
+      "t_mm": 0.1,
+      "tau_pct": 10,
+      "marker": "x",
+      "color": [
+        0,
+        0.1,
+        0.9
+      ],
+      "marker_size": 10,
+      "line_width": 2.2,
+      "show_label": false
+    },
+    "y_mode": "t_over_da_percent",
+    "y_pct_plot_lim": [
+      0,
+      40
+    ],
+    "y_pct_calc_lim": [
+      0,
+      45
+    ],
+    "y_pct_lim": [
+      0,
+      40
+    ],
+    "tmin_Al_mm": 0.07,
+    "tmin_Poly_mm": 0.025,
+    "mark_tech_in_ratio": true,
+    "composite_boundary_samples": 600,
+    "wall_tol_standard_mm": 0.02,
+    "wall_tol_medical_mm": 0.005,
+    "wall_tol_Al_mm": 0.02,
+    "wall_tol_Poly_standard_mm": 0.02,
+    "wall_tol_Poly_medical_mm": 0.005,
+    "wall_tol_Poly_mm": 0.02,
+    "x_mm_lim": [
+      0.1,
+      10
+    ],
+    "ratio_caxis_3d": [
+      0.95,
+      1.05
+    ],
+    "slice_y_pct": [
+      10,
+      20,
+      30
+    ],
+    "slice_line_w": 2,
+    "slice_use_cmap": true,
+    "make_3d_plot": false,
+    "single_panel_figure_size_cm": [
+      16.5,
+      13.2
+    ],
+    "single_panel_axes_cm": [
+      2.65,
+      2.8,
+      9.7,
+      8.75
+    ],
+    "single_panel_colorbar_cm": [
+      13.35,
+      2.8,
+      0.35,
+      8.75
+    ],
+    "share_panel_figure_size_cm": [
+      24,
+      15.1
+    ],
+    "share_panel_axes_cm": [
+      2.25,
+      2.2,
+      13.05,
+      12.2
+    ],
+    "share_panel_colorbar_cm": [
+      16.1,
+      2.2,
+      0.45,
+      12.2
+    ],
+    "share_grid_figure_size_cm": [
+      19,
+      22.2
+    ],
+    "share_grid_axes_cm": [
+      [
+        2.7,
+        13.81,
+        6.65,
+        5.14
+      ],
+      [
+        10.35,
+        13.81,
+        6.65,
+        5.14
+      ],
+      [
+        2.7,
+        7.68,
+        6.65,
+        5.14
+      ],
+      [
+        10.35,
+        7.68,
+        6.65,
+        5.14
+      ],
+      [
+        2.7,
+        1.55,
+        6.65,
+        5.14
+      ],
+      [
+        10.35,
+        1.55,
+        6.65,
+        5.14
+      ]
+    ],
+    "share_grid_colorbar_cm": [
+      2.7,
+      19.9,
+      14.3,
+      0.34
+    ],
+    "share_grid_font_size": 15,
+    "capillary_grid_figure_size_cm": [
+      19,
+      22.7
+    ],
+    "capillary_grid_colorbar_cm": [
+      2.7,
+      20.1,
+      14.3,
+      0.34
+    ],
+    "burst_grid_figure_size_cm": [
+      19,
+      16.4
+    ],
+    "burst_grid_axes_cm": [
+      [
+        2.7,
+        7.85,
+        6.65,
+        5.14
+      ],
+      [
+        10.35,
+        7.85,
+        6.65,
+        5.14
+      ],
+      [
+        2.7,
+        1.56,
+        6.65,
+        5.14
+      ],
+      [
+        10.35,
+        1.56,
+        6.65,
+        5.14
+      ]
+    ],
+    "burst_grid_colorbar_cm": [
+      2.7,
+      14.05,
+      14.3,
+      0.34
+    ],
+    "burst_grid_font_size": 15,
+    "triple_share_figure_size_cm": [
+      34,
+      13
+    ],
+    "triple_share_axes_cm": [
+      [
+        2.5,
+        2.2,
+        8.7,
+        9.4
+      ],
+      [
+        11.8,
+        2.2,
+        8.7,
+        9.4
+      ],
+      [
+        21.1,
+        2.2,
+        8.7,
+        9.4
+      ]
+    ],
+    "triple_share_colorbar_cm": [
+      30.4,
+      2.2,
+      0.5,
+      9.4
+    ],
+    "design_boundary_figure_size_cm": [
+      19,
+      28.4
+    ],
+    "design_boundary_axes_cm": [
+      [
+        3,
+        15.1,
+        13.7,
+        10
+      ],
+      [
+        3,
+        4.2,
+        13.7,
+        10
+      ]
+    ],
+    "design_boundary_colorbar_cm": [
+      3,
+      26.15,
+      13.7,
+      0.34
+    ],
+    "design_boundary_legend_cm": [
+      2.2,
+      0.25,
+      14.6,
+      2.3
+    ],
+    "design_boundary_font_size": 15,
+    "design_boundary_kA_caxis_WK": [
+      50,
+      500
+    ],
+    "design_boundary_min_flow_Lmin": 10,
+    "design_boundary_max_dp_bar": 0.5,
+    "design_boundary_max_cost_index": 5,
+    "design_boundary_min_burst_bar": 6,
+    "design_boundary_max_capillary_mm": 2,
+    "design_boundary_wall_tol_mm": 0.02,
+    "design_boundary_capillary_accel_over_g": 10,
+    "design_boundary_line_width": 1.45,
+    "design_boundary_hatch_length": 0.026,
+    "design_boundary_hatch_spacing": 0.055,
+    "design_boundary_hatch_angle_deg": 35,
+    "design_boundary_color_min_wall": [
+      0,
+      0,
+      0
+    ],
+    "design_boundary_color_flow": [
+      0,
+      0.32,
+      0.74
+    ],
+    "design_boundary_color_dp": [
+      0.9,
+      0.55,
+      0
+    ],
+    "design_boundary_color_cost": [
+      0.58,
+      0,
+      0.83
+    ],
+    "design_boundary_color_burst": [
+      0,
+      0.58,
+      0.2
+    ],
+    "design_boundary_color_capillary": [
+      0.8,
+      0,
+      0
+    ],
+    "bundle_kA_figure_size_cm": [
+      19,
+      24.2
+    ],
+    "bundle_kA_axes_cm": [
+      [
+        4.2,
+        12.45,
+        11.25,
+        8.2
+      ],
+      [
+        4.2,
+        3.3,
+        11.25,
+        8.2
+      ]
+    ],
+    "bundle_kA_colorbar_cm": [
+      2.1,
+      22.1,
+      14.8,
+      0.34
+    ],
+    "bundle_kA_font_size": 15,
+    "bundle_kA_colorbar_ticks_WK": [
+      5,
+      10,
+      20,
+      50,
+      100,
+      200,
+      500,
+      1000,
+      2000
+    ],
+    "bundle_kA_y_ticks_pct": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "font_name": "Times New Roman",
+    "font_size": 19,
+    "title_font_size": 19,
+    "panel_title_y_norm": 1.012,
+    "axis_line_width": 1.3,
+    "grid_axis_line_width": 1,
+    "colorbar_width": 0.02,
+    "contour_label_spacing": 900,
+    "colormap_name": "spectral",
+    "vector_fill_levels": 64,
+    "plot3d_mesh_stride": 4,
+    "show_cross_section_sketches": true,
+    "cross_section_da_mm": [
+      0.25,
+      1,
+      6
+    ],
+    "cross_section_y_pct": [
+      7.5,
+      20,
+      32.5
+    ],
+    "cross_section_radius_pct": 1.2,
+    "cross_section_reference_da_mm": 1,
+    "cross_section_quarter_da_threshold_mm": 6,
+    "cross_section_reference_axes_cm": [
+      9.7,
+      8.75
+    ],
+    "cross_section_color": [
+      0.30196078431372547,
+      0.30196078431372547,
+      0.30196078431372547
+    ],
+    "tech_Al_color": [
+      0,
+      0.1,
+      0.6
+    ],
+    "tech_Poly_color": [
+      0,
+      0.5,
+      0.1
+    ],
+    "tech_line_width": 2.6,
+    "grid_tech_line_width": 2,
+    "g_ms2": 9.80665,
+    "capillary": {
+      "accel_over_g": [
+        1,
+        5,
+        10
+      ],
+      "Ccap_pa_eff_mm2": 5.4,
+      "Ccap_pa_eff_unc_k2_mm2": 0.5,
+      "rho_potting_kgm3": 1110,
+      "gamma_al_mNm": 45.6,
+      "theta_al_deg": 41.39,
+      "Ccap_al_mm2": 6.2855541512827058
+    },
+    "cost": {
+      "arrangement": "inline",
+      "reference_do_mm": 1,
+      "reference_n_transverse": 30,
+      "reference_n_longitudinal": 36,
+      "active_length_mm": 160,
+      "overhang_total_mm": 0,
+      "scrap_factor": 1,
+      "reference_index_Al": 2.0962256955754528,
+      "reference_index_Poly": 0.62690182033039921
+    },
+    "export_figures": false,
+    "export_dir": "C:\\Users\\Doebler\\Documents\\Modelle\\MicrotubeDesignExplorer\\scripts\\golden\\_scratch\\exports",
+    "clean_export_dir": false,
+    "export_svg": true,
+    "export_svg_renderer": "-painters",
+    "export_png": false,
+    "export_pdf": true,
+    "export_png_resolution": 300
+  },
+  "fluid": {
+    "air": {
+      "name": "air_20C_1bar",
+      "T_C": 20,
+      "rho_kgm3": 1.189,
+      "cp_JkgK": 1006,
+      "lambda_WmK": 0.02587,
+      "nu_m2s": 1.532E-5,
+      "mu_Pas": 1.821548E-5,
+      "Pr": 0.70834
+    },
+    "liquid": {
+      "name": "EGL5050_70C",
+      "T_C": 70,
+      "rho_kgm3": 1041.5,
+      "cp_JkgK": 3555,
+      "lambda_WmK": 0.423,
+      "nu_m2s": 1.23E-6,
+      "mu_Pas": 0.0012825,
+      "Pr": 10.77846
+    }
+  },
+  "mat": {
+    "Al": {
+      "lambda_WmK": 220,
+      "Rm_MPa": 200
+    },
+    "Poly": {
+      "lambda_WmK": 0.25,
+      "Rm_MPa": 10
+    }
+  },
+  "model_outer": {
+    "chapter": "VDI2013_G7_inline_tube_bank",
+    "a_pitch_transverse": 3.28,
+    "b_pitch_longitudinal": 2,
+    "n_rows": 36,
+    "use_finite_row_correction": false,
+    "property_correction_K": 1
+  },
+  "model_inner": {
+    "chapter": "VDI2013_G1_internal_tube_flow",
+    "length_m": 0.16,
+    "boundary_condition": "constant_wall_temperature",
+    "apply_liquid_Pr_wall_correction": false,
+    "Pr_wall": null
+  },
+  "checks": {
+    "alpha_o_check": 333.07165611865207,
+    "alpha_i_check": 2444.2754927920241,
+    "R_o_check": 0.0030023569452087033,
+    "Rii_check": 0.00040911918601193735
+  },
+  "bundle_ref": {
+    "do_mm": 1,
+    "t_mm": 0.1,
+    "N": 1080,
+    "L_m": 0.16,
+    "di_mm": 0.8,
+    "Ao_ref_m2": 0.54286721054031628,
+    "k_Al_ref_Wm2K": 284.554678880602,
+    "kA_Al_ref_WK": 154.47540477010787
+  },
+  "coolant_flow_ref": {
+    "do_mm": 1,
+    "t_mm": 0.1,
+    "N": 1080,
+    "v_i_ms": 0.5,
+    "Vdot_Lmin": 16.286016316209487
+  },
+  "diagnostics": {
+    "n_feasible_al": 8482,
+    "n_feasible_pa": 7787,
+    "n_pa_with_al_reference": 7787
+  }
+}

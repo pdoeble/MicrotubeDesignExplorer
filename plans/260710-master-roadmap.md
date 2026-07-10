@@ -94,8 +94,8 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | ID | Milestone | Status | Primary dependency |
 |---|---|---:|---|
 | M0 | Repository and governance baseline | completed | — |
-| M1 | MATLAB inventory and golden references | in-progress | M0 |
-| M2 | Contracts, units, defaults, validity policy | not-started | M1 |
+| M1 | MATLAB inventory and golden references | completed | M0 |
+| M2 | Contracts, units, defaults, validity policy | in-progress | M1 |
 | M3 | Python scientific core parity | not-started | M2 |
 | M4 | Pyodide worker and browser integration | not-started | M2, M3 |
 | M5 | Application shell and input workflows | not-started | M2, M4 |
@@ -196,28 +196,40 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Inventory every input, default, unit, equation branch, mask, screen, and plot.
-- [ ] Separate scientific logic from presentation-only or dead MATLAB code.
-- [ ] Resolve paper/MATLAB ambiguities through ADRs.
-- [ ] Create MATLAB-to-Python symbol glossary and plot catalog.
-- [ ] Generate immutable scalar, grid, boundary, and transition references.
-- [ ] Record MATLAB revision, input hashes, generation method, and provenance.
+- [x] Inventory every input, default, unit, equation branch, mask, screen, and plot
+      (`wiki/model/matlab-inventory.md`).
+- [x] Separate scientific logic from presentation-only or dead MATLAB code (inventory §7).
+- [x] Resolve paper/MATLAB ambiguities through ADRs (ADR-0002 golden generation,
+      ADR-0003 operating-mode scope).
+- [x] Create MATLAB-to-Python symbol glossary and plot catalog
+      (`wiki/model/symbol-glossary.md`, `wiki/model/plot-catalog.md`).
+- [x] Generate immutable scalar, grid, boundary, and transition references
+      (`/reference`, MATLAB R2024b Update 1, ADR-0002).
+- [x] Record MATLAB revision, input hashes, generation method, and provenance
+      (`reference/provenance.json`, `reference/manifest.json`).
 
 ### Minimum golden coverage
 
-- [ ] Default aluminum and PA cases.
-- [ ] Equal geometry/different material comparison.
-- [ ] Different geometry/same material comparison.
-- [ ] Invalid inner diameter boundary.
-- [ ] Reynolds transitions.
-- [ ] Minimum-wall, throughput, pressure-drop, burst, capillary, and cost boundaries.
-- [ ] Representative plot fields, masks, and contour-relevant boundaries.
+- [x] Default aluminum and PA cases (`reference/default_case/`).
+- [x] Equal geometry/different material comparison (`ratio_same_geometry`,
+      tech-adjusted ratios, `dAlNearest_mm`).
+- [x] Different geometry/same material comparison (app-level arithmetic over
+      per-case results; physics pinned by function-level goldens — see
+      `wiki/model/golden-data.md` §Comparison-mode note).
+- [x] Invalid inner diameter boundary (invalid mask; d ≤ 0 rows; t_loc ≤ 0 NaN region).
+- [x] Reynolds transitions (exact Re = 2300/10000 anchor points in G1/friction sweeps).
+- [x] Minimum-wall, throughput, pressure-drop, burst, capillary, and cost boundaries
+      (screen masks + composite boundary vectors).
+- [x] Representative plot fields, masks, and contour-relevant boundaries
+      (36 grid fields + 6 masks + boundary vectors).
 
 ### Exit gate
 
-- [ ] Every planned input and output has an authoritative source.
-- [ ] Golden references are reproducible and immutable.
-- [ ] No scientific ambiguity remains undocumented.
+- [x] Every planned input and output has an authoritative source (inventory tables).
+- [x] Golden references are reproducible and immutable (regeneration procedure +
+      SHA-256 manifest; AGENTS §10 rules restated in `wiki/model/golden-data.md`).
+- [x] No scientific ambiguity remains undocumented (ADR-0002, ADR-0003; open
+      geometry-representation semantics are an M2 contract topic, not a MATLAB ambiguity).
 
 ---
 
@@ -581,4 +593,5 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 |---|---|---|
 | 2026-07-10 | Initial master roadmap created | planning agent |
 | 2026-07-10 | M0 completed: layout, toolchain (pnpm 11/uv 0.11, lockfiles), wiki sections, templates, 9 subplans, CI + Pages scaffold, prohibited-file gate, ADR-0001..0003. MATLAB R2024b found on dev machine → golden data will come from real MATLAB (ADR-0002). M1 started. | implementation agent (Claude) |
+| 2026-07-10 | M1 completed: MATLAB inventory/glossary/plot catalog in wiki; golden references generated from unmodified reference script with MATLAB R2024b (278 files, default case + 24 function-level branch sweeps, SHA-256 manifest). M2 started. | implementation agent (Claude) |
 

@@ -1,0 +1,14 @@
+{
+  "tol_mm": [
+    0.02,
+    0.005,
+    0
+  ],
+  "tol_names": [
+    "std",
+    "med",
+    "none"
+  ],
+  "Rm_Al_MPa": 200,
+  "Rm_Poly_MPa": 10
+}

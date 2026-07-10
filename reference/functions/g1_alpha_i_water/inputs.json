@@ -1,0 +1,20 @@
+{
+  "v_i_ms": 0.5,
+  "model_inner": {
+    "chapter": "VDI2013_G1_internal_tube_flow",
+    "length_m": 0.16,
+    "boundary_condition": "constant_wall_temperature",
+    "apply_liquid_Pr_wall_correction": false,
+    "Pr_wall": null
+  },
+  "liquid": {
+    "name": "water_like_alt",
+    "T_C": 60,
+    "rho_kgm3": 998,
+    "cp_JkgK": 4180,
+    "lambda_WmK": 0.6,
+    "nu_m2s": 1E-6,
+    "mu_Pas": 0.000998,
+    "Pr": 7
+  }
+}

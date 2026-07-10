@@ -1,0 +1,20 @@
+{
+  "v_i_ms": 2,
+  "model_inner": {
+    "chapter": "VDI2013_G1_internal_tube_flow",
+    "length_m": 0.16,
+    "boundary_condition": "constant_wall_temperature",
+    "apply_liquid_Pr_wall_correction": false,
+    "Pr_wall": null
+  },
+  "liquid": {
+    "name": "EGL5050_70C",
+    "T_C": 70,
+    "rho_kgm3": 1041.5,
+    "cp_JkgK": 3555,
+    "lambda_WmK": 0.423,
+    "nu_m2s": 1.23E-6,
+    "mu_Pas": 0.0012825,
+    "Pr": 10.77846
+  }
+}

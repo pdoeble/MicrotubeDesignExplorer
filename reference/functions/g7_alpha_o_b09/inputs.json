@@ -1,0 +1,21 @@
+{
+  "v_a_ms": 5,
+  "model_outer": {
+    "chapter": "VDI2013_G7_inline_tube_bank",
+    "a_pitch_transverse": 3.28,
+    "b_pitch_longitudinal": 0.9,
+    "n_rows": 36,
+    "use_finite_row_correction": false,
+    "property_correction_K": 1
+  },
+  "air": {
+    "name": "air_20C_1bar",
+    "T_C": 20,
+    "rho_kgm3": 1.189,
+    "cp_JkgK": 1006,
+    "lambda_WmK": 0.02587,
+    "nu_m2s": 1.532E-5,
+    "mu_Pas": 1.821548E-5,
+    "Pr": 0.70834
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "cost_params": {
+    "arrangement": "staggered",
+    "reference_do_mm": 1,
+    "reference_n_transverse": 30,
+    "reference_n_longitudinal": 36,
+    "active_length_mm": 160,
+    "overhang_total_mm": 0,
+    "scrap_factor": 1,
+    "reference_index_Al": 2.0962256955754528,
+    "reference_index_Poly": 0.62690182033039921
+  },
+  "model_outer": {
+    "chapter": "VDI2013_G7_inline_tube_bank",
+    "a_pitch_transverse": 3.28,
+    "b_pitch_longitudinal": 2,
+    "n_rows": 36,
+    "use_finite_row_correction": false,
+    "property_correction_K": 1
+  },
+  "material": "Al"
+}

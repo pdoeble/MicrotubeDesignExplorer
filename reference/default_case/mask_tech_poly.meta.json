@@ -1,0 +1,9 @@
+{
+  "dtype": "uint8",
+  "shape": [
+    250,
+    250
+  ],
+  "order": "F",
+  "endian": "little"
+}
