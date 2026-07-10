@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M3
 > **Workstream:** W3 (Python core)
-> **Status:** ready
+> **Status:** in-progress
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -26,12 +26,14 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 
 ## Tasks
 
-- [ ] models: correlations (G1/G7), friction, burst, capillary, cost.
-- [ ] geometry: tube, bundle, footprint counts, volume/aspect conversion.
+- [x] models: correlations (G1/G7), friction, burst, capillary, cost.
+- [x] geometry: tube, bundle, footprint counts.
+- [ ] geometry: integrate volume/aspect conversion into sweep/API evaluation.
 - [ ] operating modes incl. deterministic Δp/P inversion.
 - [ ] sweeps: grids, masks (invalid d_i, τ-range, tech), screens, boundaries.
 - [ ] comparison: same-geometry ratio, nearest-feasible-Al reference.
-- [ ] equation-level unit tests + golden regression tests.
+- [ ] full golden regression tests for default-case sweep and comparison.
+- [x] function-level golden tests for ported isolated submodels.
 
 ## Risks
 
@@ -42,13 +44,17 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 
 ## Tests / evidence
 
-- `tests/python/test_correlations.py`, `test_golden_parity.py`, etc.
+- `tests/python/test_function_parity.py` covers all current function-level
+  goldens for G1/G7, Darcy friction factor, tube pressure drop, Lamé burst,
+  cost, default-grid geometry, capillary, and resistance fields.
+- 2026-07-10: `uv run pytest` (36), `uv run mypy .`, `uv run ruff check ..`.
 
 ## Status log
 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Plan created (M0). |
+| 2026-07-10 | M3 first core slice implemented: isolated models for G1/G7 correlations, pressure/burst, geometry, capillary, cost, and resistance aggregation; function-level goldens green. ADR-0004 records the cost-count floor/reference-normalization decision. |
 
 ## Final commits
 

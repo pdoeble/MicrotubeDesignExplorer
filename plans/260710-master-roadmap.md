@@ -282,13 +282,13 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Implement geometry and discrete tube-count logic.
+- [x] Implement geometry and discrete tube-count logic.
 - [ ] Implement static fluid and material inputs.
 - [ ] Implement all air- and coolant-side operating modes.
-- [ ] Implement VDI G1, VDI G7, wall conduction, and resistance aggregation.
+- [x] Implement VDI G1, VDI G7, wall conduction, and resistance aggregation.
 - [ ] Implement flow, pressure loss, hydraulic power, and diagnostics.
-- [ ] Implement tolerance-adjusted pressure integrity.
-- [ ] Implement capillary-rise and cost models.
+- [x] Implement tolerance-adjusted pressure integrity.
+- [x] Implement capillary-rise and cost models.
 - [ ] Implement all screens, masks, sweeps, warnings, and provenance.
 - [ ] Implement comparison, delta, and ratio result generation.
 - [ ] Add equation-level tests and golden regression tests.
@@ -603,4 +603,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M0 completed: layout, toolchain (pnpm 11/uv 0.11, lockfiles), wiki sections, templates, 9 subplans, CI + Pages scaffold, prohibited-file gate, ADR-0001..0003. MATLAB R2024b found on dev machine → golden data will come from real MATLAB (ADR-0002). M1 started. | implementation agent (Claude) |
 | 2026-07-10 | M1 completed: MATLAB inventory/glossary/plot catalog in wiki; golden references generated from unmodified reference script with MATLAB R2024b (278 files, default case + 24 function-level branch sweeps, SHA-256 manifest). M2 started. | implementation agent (Claude) |
 | 2026-07-10 | M2 completed: contracts v1.0.0 frozen (Pydantic → JSON Schema → TS with CI drift gates), paper defaults cross-checked against MATLAB snapshot, parameter manifest (47 specs), validity policy + error/warning catalog in wiki/interfaces/contracts.md. M3 started. | implementation agent (Claude) |
-
+| 2026-07-10 | M3 first core slice completed: pure model modules for G1/G7 correlations, Darcy pressure drop, Lamé burst, geometry/counts, capillary, cost, and resistance aggregation; function-level MATLAB golden parity passes (36 pytest) with mypy and ruff green. ADR-0004 added for cost count floor/reference normalization. | Codex |
