@@ -87,6 +87,22 @@ def test_api_default_axes_and_fields_match_goldens() -> None:
         read_f64(case_dir / "ratio_tech_adjusted"),
     )
     assert_float_matches_golden(
+        _field(result, result.payload.comparison.fields, "delta_same_geometry_percent"),
+        100.0 * (read_f64(case_dir / "ratio_same_geometry") - 1.0),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.comparison.fields, "delta_tech_adjusted_percent"),
+        100.0 * (read_f64(case_dir / "ratio_tech_adjusted") - 1.0),
+    )
+    assert_float_matches_golden(
+        _field(
+            result,
+            result.payload.comparison.fields,
+            "delta_bundle_conductance_tech_adjusted_percent",
+        ),
+        100.0 * (read_f64(case_dir / "ratio_kA_tech_adjusted") - 1.0),
+    )
+    assert_float_matches_golden(
         _field(result, result.payload.comparison.fields, "nearest_left_reference_diameter")
         * M_TO_MM,
         read_f64(case_dir / "dAlNearest_mm"),

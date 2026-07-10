@@ -26,6 +26,10 @@ def test_default_comparison_fields_match_goldens() -> None:
         read_f64(case_dir / "ratio_same_geometry"),
     )
     assert_float_matches_golden(
+        comparison.delta_same_geometry_percent,
+        100.0 * (read_f64(case_dir / "ratio_same_geometry") - 1.0),
+    )
+    assert_float_matches_golden(
         comparison.nearest_left_reference.diameter * M_TO_MM,
         read_f64(case_dir / "dAlNearest_mm"),
     )
@@ -34,8 +38,16 @@ def test_default_comparison_fields_match_goldens() -> None:
         read_f64(case_dir / "ratio_tech_adjusted"),
     )
     assert_float_matches_golden(
+        comparison.delta_tech_adjusted_percent,
+        100.0 * (read_f64(case_dir / "ratio_tech_adjusted") - 1.0),
+    )
+    assert_float_matches_golden(
         comparison.ratio_bundle_conductance_tech_adjusted,
         read_f64(case_dir / "ratio_kA_tech_adjusted"),
+    )
+    assert_float_matches_golden(
+        comparison.delta_bundle_conductance_tech_adjusted_percent,
+        100.0 * (read_f64(case_dir / "ratio_kA_tech_adjusted") - 1.0),
     )
     assert int(np.count_nonzero(np.isfinite(comparison.nearest_left_reference.diameter))) == 7787
 

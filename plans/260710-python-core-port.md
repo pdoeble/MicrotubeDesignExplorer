@@ -35,6 +35,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - [x] sweeps: grids, masks (invalid d_i, τ-range, tech), screens.
 - [x] sweeps: composite feasible boundaries.
 - [x] comparison: same-geometry ratio, nearest-feasible-Al reference.
+- [x] comparison: same-geometry and tech-adjusted percent-delta fields.
 - [x] burst tolerance sensitivity fields: standard and medical Lamé grids.
 - [x] capillary acceleration sensitivity fields: 1g, 5g, and 10g grids.
 - [x] full golden regression tests for remaining tolerance/sensitivity fields.
@@ -65,6 +66,13 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
   `uv run pytest` (50 passed), `uv run mypy .`,
   `uv run ruff check ..`, touched-file
   `uv run ruff format --check ...`, `python scripts/check_prohibited_files.py`.
+- 2026-07-10: targeted comparison-delta parity:
+  `uv run pytest ../tests/python/test_comparison_parity.py ../tests/python/test_api.py`
+  from `/python` (5 passed).
+- 2026-07-10: comparison-delta slice full checks:
+  `uv run pytest` (50 passed), `uv run mypy .`,
+  `uv run ruff check ..`, touched-file
+  `uv run ruff format --check ...`, `python scripts/check_prohibited_files.py`.
 - 2026-07-10: targeted burst-tolerance parity:
   `uv run pytest ../tests/python/test_sweep_parity.py ../tests/python/test_api.py`
   from `/python` (7 passed).
@@ -81,6 +89,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Public Python `simulate(request)` API added with contract payload, C-order float64 array registry, request hash, provenance, scalar summaries, masks, comparison fields, and API-level golden checks. |
 | 2026-07-10 | Burst tolerance sensitivity fields added for the MATLAB standard (0.020 mm) and medical (0.005 mm) rows; sweep and API golden checks cover both materials. |
 | 2026-07-10 | Capillary acceleration sensitivity fields added for the MATLAB 1g, 5g, and 10g rows; remaining tolerance/sensitivity golden regression task completed. |
+| 2026-07-10 | Comparison percent-delta fields added for same-geometry, tech-adjusted k, and tech-adjusted kA ratios, matching MATLAB `100*(ratio-1)` plot convention. |
 
 ## Final commits
 

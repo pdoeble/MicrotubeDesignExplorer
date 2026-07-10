@@ -290,7 +290,7 @@ A breaking change requires:
 - [x] Implement tolerance-adjusted pressure integrity.
 - [x] Implement capillary-rise and cost models.
 - [ ] Implement all screens, masks, sweeps, warnings, and provenance.
-- [ ] Implement comparison, delta, and ratio result generation.
+- [x] Implement comparison, delta, and ratio result generation.
 - [ ] Add equation-level tests and golden regression tests.
 
 ### Numerical gate
@@ -609,3 +609,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 API slice added: `simulate(request)` now returns contract payload plus C-order float64 array registry, request hash, provenance, scalar summaries, cooler fields/masks, and comparison fields; API golden checks pass (50 pytest). | Codex |
 | 2026-07-10 | M3 burst-tolerance slice added: standard and medical Lamé sensitivity grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
 | 2026-07-10 | M3 capillary-sensitivity slice added: 1g, 5g, and 10g capillary-rise grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
+| 2026-07-10 | M3 comparison-delta slice added: same-geometry and tech-adjusted percent-delta fields are exported through comparison/API and tested from MATLAB ratio goldens. | Codex |

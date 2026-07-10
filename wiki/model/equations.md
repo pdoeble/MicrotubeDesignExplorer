@@ -173,6 +173,9 @@ feasible right-cooler cell, candidate left-cooler points are scanned at equal
 wall ratio and equal-or-larger diameter. The first candidate passing all
 screens supplies `k_left,ref`, `kA_left,ref`, and `d_left,ref`.
 
+Percent-delta comparison fields use the MATLAB plot convention
+`Delta [%] = 100 (ratio - 1)`, after the ratio masks have been applied.
+
 Composite feasible boundaries sample 600 wall-ratio values from `0.05 %` to
 the plot limit `40 %`, and scan `4 * 600` log-spaced diameter candidates over
 the sweep diameter range.

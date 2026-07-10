@@ -46,5 +46,6 @@ pressure, fixed standard/medical burst-tolerance sensitivity fields,
 spacings, configured-screen capillary rise, fixed `1g`/`5g`/`10g`
 capillary-rise sensitivity fields, cost index, and thermal resistance parts.
 
-Comparison exports same-geometry ratio, nearest left-reference diameter,
-tech-adjusted ratios, and composite feasible boundary vectors.
+Comparison exports same-geometry ratio and percent delta, nearest
+left-reference diameter, tech-adjusted ratios and percent deltas, and
+composite feasible boundary vectors.

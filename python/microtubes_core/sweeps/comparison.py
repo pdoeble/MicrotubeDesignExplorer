@@ -55,9 +55,12 @@ class SweepComparisonResult:
     """Default right-vs-left comparison fields."""
 
     ratio_same_geometry: FloatArray
+    delta_same_geometry_percent: FloatArray
     nearest_left_reference: NearestReferenceResult
     ratio_tech_adjusted: FloatArray
+    delta_tech_adjusted_percent: FloatArray
     ratio_bundle_conductance_tech_adjusted: FloatArray
+    delta_bundle_conductance_tech_adjusted_percent: FloatArray
     boundary_left: CompositeBoundaryResult
     boundary_right: CompositeBoundaryResult
 
@@ -78,6 +81,7 @@ def compare_sweeps(
     )
     ratio_same_geometry = np.array(ratio_same_geometry, dtype=np.float64, copy=True)
     ratio_same_geometry[left.grid.wall_thickness < min_common_wall] = np.nan
+    delta_same_geometry = _percent_delta_from_ratio(ratio_same_geometry)
 
     nearest = nearest_feasible_reference(
         left.grid,
@@ -90,14 +94,14 @@ def compare_sweeps(
 
     with np.errstate(invalid="ignore", divide="ignore"):
         ratio_tech_adjusted = right.overall_coefficient / nearest.overall_coefficient
-        ratio_k_a_tech_adjusted = (
-            right.bundle_conductance / nearest.bundle_conductance
-        )
+        ratio_k_a_tech_adjusted = right.bundle_conductance / nearest.bundle_conductance
     invalid_reference = ~right.mask_all_screens_feasible | ~np.isfinite(nearest.diameter)
     ratio_tech_adjusted = np.array(ratio_tech_adjusted, dtype=np.float64, copy=True)
     ratio_k_a_tech_adjusted = np.array(ratio_k_a_tech_adjusted, dtype=np.float64, copy=True)
     ratio_tech_adjusted[invalid_reference] = np.nan
     ratio_k_a_tech_adjusted[invalid_reference] = np.nan
+    delta_tech_adjusted = _percent_delta_from_ratio(ratio_tech_adjusted)
+    delta_k_a_tech_adjusted = _percent_delta_from_ratio(ratio_k_a_tech_adjusted)
 
     boundary_left = composite_feasible_boundary(
         left.grid,
@@ -118,12 +122,19 @@ def compare_sweeps(
 
     return SweepComparisonResult(
         ratio_same_geometry=ratio_same_geometry,
+        delta_same_geometry_percent=delta_same_geometry,
         nearest_left_reference=nearest,
         ratio_tech_adjusted=ratio_tech_adjusted,
+        delta_tech_adjusted_percent=delta_tech_adjusted,
         ratio_bundle_conductance_tech_adjusted=ratio_k_a_tech_adjusted,
+        delta_bundle_conductance_tech_adjusted_percent=delta_k_a_tech_adjusted,
         boundary_left=boundary_left,
         boundary_right=boundary_right,
     )
+
+
+def _percent_delta_from_ratio(ratio: FloatArray) -> FloatArray:
+    return np.asarray(100.0 * (ratio - 1.0), dtype=np.float64)
 
 
 def nearest_feasible_reference(

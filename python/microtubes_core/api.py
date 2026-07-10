@@ -100,15 +100,30 @@ def simulate(request: SimulationRequest) -> SimulationResult:
         fields=[
             registry.add("ratio_same_geometry", "-", comparison.ratio_same_geometry),
             registry.add(
+                "delta_same_geometry_percent",
+                "%",
+                comparison.delta_same_geometry_percent,
+            ),
+            registry.add(
                 "nearest_left_reference_diameter",
                 "m",
                 comparison.nearest_left_reference.diameter,
             ),
             registry.add("ratio_tech_adjusted", "-", comparison.ratio_tech_adjusted),
             registry.add(
+                "delta_tech_adjusted_percent",
+                "%",
+                comparison.delta_tech_adjusted_percent,
+            ),
+            registry.add(
                 "ratio_bundle_conductance_tech_adjusted",
                 "-",
                 comparison.ratio_bundle_conductance_tech_adjusted,
+            ),
+            registry.add(
+                "delta_bundle_conductance_tech_adjusted_percent",
+                "%",
+                comparison.delta_bundle_conductance_tech_adjusted_percent,
             ),
             registry.add(
                 "boundary_wall_ratio",
