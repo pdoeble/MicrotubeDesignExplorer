@@ -99,7 +99,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M3 | Python scientific core parity | completed | M2 |
 | M4 | Pyodide worker and browser integration | completed | M2, M3 |
 | M5 | Application shell and input workflows | completed | M2, M4 |
-| M6 | Plot system and results experience | not-started | M3–M5 |
+| M6 | Plot system and results experience | in-progress | M3–M5 |
 | M7 | Figure and report exports | not-started | M4, M6 |
 | M8 | Validation, accessibility, performance | not-started | M3–M7 |
 | M9 | GitHub Pages release candidate | not-started | M8 |
@@ -373,8 +373,8 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Create stable plot IDs and typed plot registry.
-- [ ] Implement grouped plot selector.
+- [x] Create stable plot IDs and typed plot registry.
+- [x] Implement grouped plot selector.
 - [ ] Implement tandem mode with common comparison scales where required.
 - [ ] Implement approved delta and ratio plots.
 - [ ] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
@@ -615,3 +615,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M4 started: Pyodide `314.0.2` pinned via `pnpm`, same-origin Pyodide assets and `microtubes_core` wheel generated at build time, typed worker protocol/client added with transferable float64 array transport and cache/supersession unit tests. | Codex |
 | 2026-07-10 | M4 completed: same-origin Pyodide runtime plus required package wheels are generated with SHA-256 verification; Playwright browser worker parity against direct Python passes for a reduced default request; structured worker errors, startup retry, cancellation, and client cache behavior are unit-tested. | Codex |
 | 2026-07-10 | M5 completed: manifest-driven two-cooler input workflow, editable materials/fluids, geometry representation conversion, group linking/restoration, versioned URL state, complete reset, and responsive scientific form styling added and validated. | Codex |
+| 2026-07-10 | M6 started: typed Plotly heatmap registry, result-run workflow, KPI summary table, and initial thermal/flow/pressure/Reynolds/spacing/cost/delta plot selection render from `SimulationResult`; export, boundaries, tandem scaling, and full MATLAB plot coverage remain open. | Codex |

@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M6
 > **Workstream:** W7 (Plots)
-> **Status:** ready
+> **Status:** in-progress
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -23,10 +23,10 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 
 ## Tasks
 
-- [ ] Plot registry typed against catalog IDs.
-- [ ] Log-color map family (contour/heatmap, no WebGL traces).
+- [x] Plot registry typed against catalog IDs.
+- [x] Log-color map family (contour/heatmap, no WebGL traces).
 - [ ] Percent-delta family, boundary-lines family.
-- [ ] KPI summary panel (roadmap §9 quantities).
+- [x] KPI summary panel (roadmap §9 quantities).
 - [ ] Tandem/delta/ratio switching with common scales.
 - [ ] PNG + SVG export with provenance footer.
 
@@ -40,12 +40,19 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 ## Tests / evidence
 
 - Vitest registry/spec tests; numerical assertions on plotted arrays.
+- 2026-07-10 registry/rendering slice: `pnpm typecheck`, `pnpm test`
+  (21 passed), `pnpm format:check`, `pnpm lint` (0 errors; generated
+  contract warnings only), `pnpm build`, `pnpm test:e2e`, and
+  `python scripts/check_prohibited_files.py`.
+- 2026-07-10 field-name spot check: plot registry fields exist in the Python
+  paper-default `SimulationResult` for cooler and comparison scopes.
 
 ## Status log
 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Plan created (M0). |
+| 2026-07-10 | M6 implementation started: added typed registry, Plotly heatmap renderer, simulation-run result workflow, cooler/comparison plot selection, and KPI summary; exports, boundary overlays, detailed alt views, and complete plot-family parity remain open. |
 
 ## Final commits
 

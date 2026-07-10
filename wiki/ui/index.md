@@ -7,6 +7,7 @@ restrained Springer-like scientific visual language.
 |---|---|---|
 | [visual-conventions.md](visual-conventions.md) | Typography, color tokens, spacing, table style | M5 |
 | [accessibility.md](accessibility.md) | Tabs pattern, keyboard rules, focus, figure alt text | M5/M8 |
+| [result-plots.md](result-plots.md) | Plot registry, result-source rules, current M6 rendering scope | M6 |
 
 ## Already fixed in M0
 
