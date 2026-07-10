@@ -51,6 +51,9 @@ Implemented in `models.pressure`, ported from MATLAB lines 3880-3933.
   `d_i,eff = d_o - 2 (t_nom - tolerance)`, NaN when `t_nom - tolerance <= 0`
 - Lamé burst pressure:
   `p = Rm (d_o^2 - d_i,eff^2) / (d_o^2 + d_i,eff^2)`
+- the sweep keeps `burst_pressure` as the configured design-screen value and
+  additionally exports the MATLAB sensitivity tolerances `0.020 mm`
+  (standard) and `0.005 mm` (medical) from lines 136-137
 - Darcy-Weisbach straight-tube pressure drop:
   `Delta p = f_D (L/d_i) (rho v_i^2 / 2)`
 - smooth-tube Darcy friction factor:
@@ -142,7 +145,7 @@ All-screen feasibility ports MATLAB `maskDesignBoundaryKAMap`:
 
 - finite positive `kA`;
 - `t >= t_min`;
-- burst pressure above threshold;
+- configured tolerance-adjusted burst pressure above threshold;
 - coolant volume flow above threshold;
 - tube pressure drop below threshold;
 - cost index strictly below threshold;

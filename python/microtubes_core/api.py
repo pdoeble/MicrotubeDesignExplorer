@@ -172,6 +172,12 @@ def _cooler_payload(
         ("overall_coefficient", "W/(m^2 K)", result.overall_coefficient),
         ("bundle_conductance", "W/K", result.bundle_conductance),
         ("burst_pressure", "Pa", result.burst_pressure),
+        (
+            "burst_pressure_tolerance_standard",
+            "Pa",
+            result.burst_pressure_tolerance_standard,
+        ),
+        ("burst_pressure_tolerance_medical", "Pa", result.burst_pressure_tolerance_medical),
         ("clear_spacing_transverse", "m", result.clear_spacing_transverse),
         ("clear_spacing_longitudinal", "m", result.clear_spacing_longitudinal),
         ("clear_spacing_closest_inline", "m", result.clear_spacing_closest_inline),
@@ -234,6 +240,12 @@ def _scalar_summary(
             grid, result.coolant_volume_flow, design_diameter, design_wall
         ),
         "burst_pressure": _sample_field(grid, result.burst_pressure, design_diameter, design_wall),
+        "burst_pressure_tolerance_standard": _sample_field(
+            grid, result.burst_pressure_tolerance_standard, design_diameter, design_wall
+        ),
+        "burst_pressure_tolerance_medical": _sample_field(
+            grid, result.burst_pressure_tolerance_medical, design_diameter, design_wall
+        ),
         "capillary_rise": _sample_field(grid, result.capillary_rise, design_diameter, design_wall),
         "cost_index": _sample_field(grid, result.cost_index, design_diameter, design_wall),
     }
@@ -244,6 +256,8 @@ def _scalar_summary(
         "hydraulic_power": "W",
         "coolant_volume_flow": "m^3/s",
         "burst_pressure": "Pa",
+        "burst_pressure_tolerance_standard": "Pa",
+        "burst_pressure_tolerance_medical": "Pa",
         "capillary_rise": "m",
         "cost_index": "-",
     }

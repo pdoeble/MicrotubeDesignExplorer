@@ -35,6 +35,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - [x] sweeps: grids, masks (invalid d_i, τ-range, tech), screens.
 - [x] sweeps: composite feasible boundaries.
 - [x] comparison: same-geometry ratio, nearest-feasible-Al reference.
+- [x] burst tolerance sensitivity fields: standard and medical Lamé grids.
 - [ ] full golden regression tests for remaining tolerance/sensitivity fields.
 - [x] default-case sweep/comparison/API golden regression tests.
 - [x] function-level golden tests for ported isolated submodels.
@@ -52,6 +53,13 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
   goldens for G1/G7, Darcy friction factor, tube pressure drop, Lamé burst,
   cost, default-grid geometry, capillary, and resistance fields.
 - 2026-07-10: `uv run pytest` (50), `uv run mypy .`, `uv run ruff check ..`.
+- 2026-07-10: burst-tolerance slice full checks:
+  `uv run pytest` (50 passed), `uv run mypy .`,
+  `uv run ruff check ..`, touched-file
+  `uv run ruff format --check ...`, `python scripts/check_prohibited_files.py`.
+- 2026-07-10: targeted burst-tolerance parity:
+  `uv run pytest ../tests/python/test_sweep_parity.py ../tests/python/test_api.py`
+  from `/python` (7 passed).
 
 ## Status log
 
@@ -63,6 +71,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Single-cooler sweep pipeline implemented for grids, invalid/Y/tech masks, operating-mode integration, raw fields, screen inputs, and all-screen feasibility masks. ADR-0005 records MATLAB-compatible axis generation for mask parity. |
 | 2026-07-10 | Comparison helpers implemented for interp2-style screen queries, nearest feasible left reference, same-geometry ratio, tech-adjusted ratios, and composite feasible boundaries. |
 | 2026-07-10 | Public Python `simulate(request)` API added with contract payload, C-order float64 array registry, request hash, provenance, scalar summaries, masks, comparison fields, and API-level golden checks. |
+| 2026-07-10 | Burst tolerance sensitivity fields added for the MATLAB standard (0.020 mm) and medical (0.005 mm) rows; sweep and API golden checks cover both materials. |
 
 ## Final commits
 

@@ -41,7 +41,8 @@ future packaging concern.
 
 Each cooler exports heat-transfer coefficients, Reynolds numbers, coolant
 velocity, pressure drop, hydraulic power, volume and mass flow, tube count,
-bundle area, overall coefficient, bundle conductance, burst pressure,
+bundle area, overall coefficient, bundle conductance, configured-screen burst
+pressure, fixed standard/medical burst-tolerance sensitivity fields,
 spacings, capillary rise, cost index, and thermal resistance parts.
 
 Comparison exports same-geometry ratio, nearest left-reference diameter,

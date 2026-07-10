@@ -82,6 +82,16 @@ def test_default_material_sweep_fields_and_masks_match_goldens(
         (result.overall_coefficient, f"k_{prefix}_raw", 1.0),
         (result.bundle_conductance, f"kA_{prefix}_raw_WK", 1.0),
         (result.burst_pressure, f"pB_{prefix}_bar_raw", PA_TO_BAR),
+        (
+            result.burst_pressure_tolerance_standard,
+            f"pB_{prefix}_tol_std_bar",
+            PA_TO_BAR,
+        ),
+        (
+            result.burst_pressure_tolerance_medical,
+            f"pB_{prefix}_tol_med_bar",
+            PA_TO_BAR,
+        ),
         (result.cost_index, f"cost_{prefix}_index_raw", 1.0),
         (result.resistance_inner, f"Ri_{prefix}_raw", 1.0),
         (result.resistance_wall, f"Rw_{prefix}_raw", 1.0),

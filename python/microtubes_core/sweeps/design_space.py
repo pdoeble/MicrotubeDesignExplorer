@@ -58,6 +58,12 @@ from microtubes_core.sweeps.screens import (
     all_screen_feasible_mask,
 )
 
+STANDARD_BURST_TOLERANCE = 0.020e-3
+"""Standard local wall-thickness tolerance for burst sensitivity fields (MATLAB line 136)."""
+
+MEDICAL_BURST_TOLERANCE = 0.005e-3
+"""Medical local wall-thickness tolerance for burst sensitivity fields (MATLAB line 137)."""
+
 
 @dataclass(frozen=True)
 class DesignGrid:
@@ -94,6 +100,8 @@ class CoolerSweepResult:
     overall_coefficient: FloatArray
     bundle_conductance: FloatArray
     burst_pressure: FloatArray
+    burst_pressure_tolerance_standard: FloatArray
+    burst_pressure_tolerance_medical: FloatArray
     clear_spacing_transverse: FloatArray
     clear_spacing_longitudinal: FloatArray
     clear_spacing_closest_inline: FloatArray
@@ -270,6 +278,16 @@ def evaluate_cooler_sweep(
         burst_inner,
         cooler.material.tensile_strength,
     )
+    burst_standard = _burst_pressure_for_tolerance(
+        design_grid,
+        cooler.material.tensile_strength,
+        STANDARD_BURST_TOLERANCE,
+    )
+    burst_medical = _burst_pressure_for_tolerance(
+        design_grid,
+        cooler.material.tensile_strength,
+        MEDICAL_BURST_TOLERANCE,
+    )
     spacing_t, spacing_l, spacing_inline, spacing_staggered = clear_spacings(
         design_grid.outer_diameter,
         pitch_transverse_ratio=geometry.pitch_transverse_ratio,
@@ -281,6 +299,8 @@ def evaluate_cooler_sweep(
     masked_overall = _masked(overall, design_grid.mask_wall_ratio_range)
     masked_conductance = _masked(conductance, design_grid.mask_wall_ratio_range)
     masked_burst = _masked(burst, design_grid.mask_wall_ratio_range)
+    masked_burst_standard = _masked(burst_standard, design_grid.mask_wall_ratio_range)
+    masked_burst_medical = _masked(burst_medical, design_grid.mask_wall_ratio_range)
     masked_re_inner = _masked(re_inner, design_grid.mask_wall_ratio_range)
     masked_re_outer_simple = _masked(re_outer_simple, design_grid.mask_wall_ratio_range)
     masked_re_outer_vdi = _masked(re_outer_vdi, design_grid.mask_wall_ratio_range)
@@ -360,6 +380,8 @@ def evaluate_cooler_sweep(
         overall_coefficient=masked_overall,
         bundle_conductance=masked_conductance,
         burst_pressure=masked_burst,
+        burst_pressure_tolerance_standard=masked_burst_standard,
+        burst_pressure_tolerance_medical=masked_burst_medical,
         clear_spacing_transverse=masked_spacing_t,
         clear_spacing_longitudinal=masked_spacing_l,
         clear_spacing_closest_inline=masked_spacing_inline,
@@ -373,6 +395,23 @@ def evaluate_cooler_sweep(
         mask_all_screens_feasible=feasible,
         screen_inputs=screen_inputs,
         screen_thresholds=screen_thresholds,
+    )
+
+
+def _burst_pressure_for_tolerance(
+    design_grid: DesignGrid,
+    tensile_strength: float,
+    tolerance: float,
+) -> FloatArray:
+    burst_inner = effective_inner_diameter_for_burst(
+        design_grid.outer_diameter,
+        design_grid.wall_thickness,
+        tolerance,
+    )
+    return lame_burst_pressure(
+        design_grid.outer_diameter,
+        burst_inner,
+        tensile_strength,
     )
 
 

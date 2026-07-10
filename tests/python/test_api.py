@@ -10,6 +10,7 @@ from microtubes_core.contracts import GridFieldRef, SimulationResultPayload
 from microtubes_core.defaults import paper_default_request
 
 M_TO_MM = 1.0e3
+PA_TO_BAR = 1.0e-5
 
 
 def test_simulate_returns_valid_payload_and_buffers() -> None:
@@ -47,6 +48,26 @@ def test_api_default_axes_and_fields_match_goldens() -> None:
     assert_float_matches_golden(
         _field(result, result.payload.cooler_right.fields, "overall_coefficient"),
         read_f64(case_dir / "k_Poly_raw"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_left.fields, "burst_pressure_tolerance_standard")
+        * PA_TO_BAR,
+        read_f64(case_dir / "pB_Al_tol_std_bar"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_left.fields, "burst_pressure_tolerance_medical")
+        * PA_TO_BAR,
+        read_f64(case_dir / "pB_Al_tol_med_bar"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_right.fields, "burst_pressure_tolerance_standard")
+        * PA_TO_BAR,
+        read_f64(case_dir / "pB_Poly_tol_std_bar"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_right.fields, "burst_pressure_tolerance_medical")
+        * PA_TO_BAR,
+        read_f64(case_dir / "pB_Poly_tol_med_bar"),
     )
     assert_float_matches_golden(
         _field(result, result.payload.comparison.fields, "ratio_tech_adjusted"),
