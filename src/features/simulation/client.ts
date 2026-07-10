@@ -139,7 +139,8 @@ export class SimulationWorkerClient {
 
     this.pending.delete(value.request_id);
     if (this.activeComputeRequestId === value.request_id) this.activeComputeRequestId = null;
-    pending.reject(new Error(`${value.code}: ${value.message}`));
+    const detail = value.detail ? `\n${value.detail}` : "";
+    pending.reject(new Error(`${value.code}: ${value.message}${detail}`));
   }
 
   private rejectAll(message: string): void {

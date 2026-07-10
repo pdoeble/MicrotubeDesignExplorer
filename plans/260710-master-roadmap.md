@@ -97,7 +97,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M1 | MATLAB inventory and golden references | completed | M0 |
 | M2 | Contracts, units, defaults, validity policy | completed | M1 |
 | M3 | Python scientific core parity | completed | M2 |
-| M4 | Pyodide worker and browser integration | in-progress | M2, M3 |
+| M4 | Pyodide worker and browser integration | completed | M2, M3 |
 | M5 | Application shell and input workflows | not-started | M2, M4 |
 | M6 | Plot system and results experience | not-started | M3–M5 |
 | M7 | Figure and report exports | not-started | M4, M6 |
@@ -320,15 +320,15 @@ A breaking change requires:
 - [x] Implement typed request/response and transferable array transport.
 - [x] Implement initialization, progress, cancellation, and supersession.
 - [x] Implement stable request hashing and safe caching.
-- [ ] Transport structured warnings and exceptions.
-- [ ] Handle startup, worker, memory, and recovery failures.
-- [ ] Add direct-Python versus browser integration tests.
+- [x] Transport structured warnings and exceptions.
+- [x] Handle startup, worker, memory, and recovery failures.
+- [x] Add direct-Python versus browser integration tests.
 
 ### Exit gate
 
-- [ ] Default computation does not block the UI.
-- [ ] Browser and direct Python results are identical.
-- [ ] Cancellation and failure recovery are deterministic.
+- [x] Default computation does not block the UI.
+- [x] Browser and direct Python results are identical.
+- [x] Cancellation and failure recovery are deterministic.
 
 ---
 
@@ -613,3 +613,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 validity-warning slice added: API emits `W_OUTSIDE_VALIDITY` for VDI G1/G7 Reynolds and Prandtl range violations while preserving computed values. | Codex |
 | 2026-07-10 | M3 completed: Python scientific core parity, sweep/comparison/API payloads, warnings, provenance, equation docs, and golden regression suite verified (`uv run pytest` 51 passed, `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`, prohibited-file gate). | Codex |
 | 2026-07-10 | M4 started: Pyodide `314.0.2` pinned via `pnpm`, same-origin Pyodide assets and `microtubes_core` wheel generated at build time, typed worker protocol/client added with transferable float64 array transport and cache/supersession unit tests. | Codex |
+| 2026-07-10 | M4 completed: same-origin Pyodide runtime plus required package wheels are generated with SHA-256 verification; Playwright browser worker parity against direct Python passes for a reduced default request; structured worker errors, startup retry, cancellation, and client cache behavior are unit-tested. | Codex |

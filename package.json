@@ -9,13 +9,14 @@
     "build": "pnpm prepare:pyodide && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests/frontend",
     "generate:contracts": "node scripts/generate-contract-types.mjs",
     "prepare:pyodide": "node scripts/prepare_pyodide_assets.mjs",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"tests/frontend/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"tests/frontend/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"tests/frontend/**/*.{ts,tsx}\" \"tests/e2e/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"tests/frontend/**/*.{ts,tsx}\" \"tests/e2e/**/*.ts\""
   },
   "dependencies": {
     "plotly.js-dist-min": "^2.35.2",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "@playwright/test": "^1.61.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",

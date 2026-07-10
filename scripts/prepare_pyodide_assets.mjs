@@ -15,6 +15,15 @@ const pyodidePackageDir = path.dirname(require.resolve("pyodide/package.json"));
 const pyodidePackageJson = JSON.parse(
   await readFile(path.join(pyodidePackageDir, "package.json"), "utf8"),
 );
+const pyodideLockPath = path.join(pyodidePackageDir, "pyodide-lock.json");
+const pyodideLock = JSON.parse(await readFile(pyodideLockPath, "utf8"));
+const packageCacheDir = path.join(
+  repoRoot,
+  "node_modules",
+  ".cache",
+  "microtubes-pyodide",
+  pyodidePackageJson.version,
+);
 
 const pyodideAssets = [
   "pyodide.asm.mjs",
@@ -22,6 +31,7 @@ const pyodideAssets = [
   "pyodide-lock.json",
   "python_stdlib.zip",
 ];
+const pyodidePackageRoots = ["numpy", "pydantic"];
 const expectedWheel = "microtubes_core-0.1.0-py3-none-any.whl";
 
 async function sha256(filePath) {
@@ -43,9 +53,11 @@ function run(command, args, options) {
 await mkdir(publicDir, { recursive: true });
 await rm(publicPyodideDir, { force: true, recursive: true });
 await mkdir(publicPyodideDir, { recursive: true });
+await mkdir(packageCacheDir, { recursive: true });
 
 const pyodideManifest = {
   assets: {},
+  packages: {},
   pyodide_version: pyodidePackageJson.version,
 };
 
@@ -54,6 +66,16 @@ for (const asset of pyodideAssets) {
   const destination = path.join(publicPyodideDir, asset);
   await copyFile(source, destination);
   pyodideManifest.assets[asset] = await sha256(destination);
+}
+
+for (const packageName of collectPyodidePackages(pyodidePackageRoots)) {
+  const metadata = packageMetadata(packageName);
+  const destination = path.join(publicPyodideDir, metadata.file_name);
+  await copyPyodidePackage(metadata, destination);
+  pyodideManifest.packages[packageName] = {
+    file: metadata.file_name,
+    sha256: await sha256(destination),
+  };
 }
 
 await writeFile(
@@ -83,3 +105,58 @@ await writeFile(
   path.join(publicWheelsDir, "manifest.json"),
   `${JSON.stringify(wheelManifest, null, 2)}\n`,
 );
+
+function collectPyodidePackages(roots) {
+  const seen = new Set();
+  const ordered = [];
+  const visit = (name) => {
+    const normalized = normalizePackageName(name);
+    if (seen.has(normalized)) return;
+    seen.add(normalized);
+    const metadata = packageMetadata(normalized);
+    for (const dependency of metadata.depends ?? []) visit(dependency);
+    ordered.push(normalized);
+  };
+  for (const root of roots) visit(root);
+  return ordered;
+}
+
+function packageMetadata(name) {
+  const normalized = normalizePackageName(name);
+  const metadata = pyodideLock.packages[normalized];
+  if (!metadata) throw new Error(`Pyodide package ${name} is missing from pyodide-lock.json`);
+  return metadata;
+}
+
+function normalizePackageName(name) {
+  const canonical = name.toLowerCase().replaceAll("_", "-");
+  if (pyodideLock.packages[canonical]) return canonical;
+  return name;
+}
+
+async function copyPyodidePackage(metadata, destination) {
+  const cachePath = path.join(packageCacheDir, metadata.file_name);
+  if (!(await fileHasSha256(cachePath, metadata.sha256))) {
+    const url = `https://cdn.jsdelivr.net/pyodide/v${pyodidePackageJson.version}/full/${metadata.file_name}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to download ${url}: ${response.status} ${response.statusText}`);
+    }
+    await writeFile(cachePath, Buffer.from(await response.arrayBuffer()));
+    if (!(await fileHasSha256(cachePath, metadata.sha256))) {
+      throw new Error(`SHA-256 mismatch for downloaded Pyodide package ${metadata.file_name}`);
+    }
+  }
+  await copyFile(cachePath, destination);
+}
+
+async function fileHasSha256(filePath, expected) {
+  try {
+    return (await sha256(filePath)) === expected;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+}

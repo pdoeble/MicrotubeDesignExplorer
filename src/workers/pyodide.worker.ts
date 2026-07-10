@@ -127,7 +127,10 @@ async function compute(message: WorkerComputeRequest): Promise<void> {
 }
 
 async function ensureRuntime(requestId: string): Promise<Runtime> {
-  runtimePromise ??= initializeRuntime(requestId);
+  runtimePromise ??= initializeRuntime(requestId).catch((error: unknown) => {
+    runtimePromise = null;
+    throw error;
+  });
   return runtimePromise;
 }
 

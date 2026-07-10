@@ -88,6 +88,76 @@ describe("SimulationWorkerClient", () => {
     client.dispose();
   });
 
+  it("rejects structured worker errors with detail", async () => {
+    const worker = new MockWorker();
+    const client = new SimulationWorkerClient(() => worker);
+
+    const initialized = client.initialize();
+    const initMessage = worker.messages[0];
+    if (!initMessage) throw new Error("missing init message");
+
+    worker.emit({
+      code: "WORKER_INIT_FAILED",
+      detail: "ModuleNotFoundError: No module named 'numpy'",
+      message: "Pyodide initialization failed.",
+      protocol_version: WORKER_PROTOCOL_VERSION,
+      request_id: initMessage.request_id,
+      type: "error",
+    });
+
+    await expect(initialized).rejects.toThrow("ModuleNotFoundError");
+    client.dispose();
+  });
+
+  it("rejects superseded compute requests and resolves the latest request", async () => {
+    const worker = new MockWorker();
+    const client = new SimulationWorkerClient(() => worker);
+
+    const first = client.compute(request);
+    await waitFor(() =>
+      expect(worker.messages.find((message) => message.type === "compute")).toBeDefined(),
+    );
+    const firstCompute = worker.messages.find((message) => message.type === "compute");
+    if (!firstCompute) throw new Error("missing first compute message");
+
+    const second = client.compute({
+      ...request,
+      cooler_left: { ...request.cooler_left, label: "changed" },
+    });
+    await waitFor(() =>
+      expect(
+        worker.messages.filter((message) => message.type === "compute").length,
+      ).toBeGreaterThanOrEqual(2),
+    );
+    const cancelMessage = worker.messages.find(
+      (message) =>
+        message.type === "cancel" && message.target_request_id === firstCompute.request_id,
+    );
+    expect(cancelMessage).toBeDefined();
+    worker.emit({
+      message: "Request was cancelled before its result was delivered.",
+      protocol_version: WORKER_PROTOCOL_VERSION,
+      request_id: firstCompute.request_id,
+      type: "cancelled",
+    });
+
+    const secondCompute = worker.messages.filter((message) => message.type === "compute").at(-1);
+    if (!secondCompute) throw new Error("missing second compute message");
+    worker.emit({
+      arrays: [new Float64Array([4]).buffer],
+      payload: minimalPayload("second"),
+      protocol_version: WORKER_PROTOCOL_VERSION,
+      request_id: secondCompute.request_id,
+      type: "result",
+    });
+
+    await expect(first).rejects.toThrow("cancelled");
+    await expect(second).resolves.toMatchObject({
+      payload: { request_hash: "second" },
+    });
+    client.dispose();
+  });
+
   it("builds deterministic local request-cache keys", async () => {
     await expect(requestCacheKey(request)).resolves.toMatch(/^[0-9a-f]{64}$/);
   });

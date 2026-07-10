@@ -23,6 +23,10 @@ Before `vite build` or local `vite` dev startup, run
 
 - copies the pinned Pyodide runtime files from `node_modules/pyodide` to
   `public/vendor/pyodide/`;
+- downloads the transitive Pyodide package wheels required by the worker
+  (`numpy`, `pydantic`, and their lockfile dependencies) from the versioned
+  Pyodide CDN path and verifies each file against `pyodide-lock.json`
+  SHA-256 before copying it to `public/vendor/pyodide/`;
 - builds the local Python wheel with `uv build --wheel`;
 - writes the wheel to `public/wheels/`;
 - writes SHA-256 manifests for generated public artifacts.
@@ -37,5 +41,7 @@ Git and are reproduced from committed lockfiles and source.
   static.
 - Build determinism depends on `pnpm-lock.yaml`, `python/uv.lock`, and the
   `microtubes_core` source tree.
+- The build needs network access the first time a Pyodide package wheel is not
+  present in the local `node_modules/.cache/microtubes-pyodide/` cache.
 - Any Pyodide version change must update the lockfile and rerun the M4/M8
   browser parity checks.
