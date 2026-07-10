@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M6
 > **Workstream:** W7 (Plots)
-> **Status:** in-progress
+> **Status:** completed
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -100,4 +100,12 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 
 ## Final commits
 
-—
+- `34c8935` — `feat(plots): add result plot registry slice`
+- `b9f10f0` — `feat(plots): add provenance figure exports`
+- `31b14a7` — `feat(plots): add result-driven boundary overlays`
+- `6b647bc` — `feat(plots): add tandem shared scale mode`
+- `91d19ea` — `feat(plots): add comparison ratio variants`
+- `c38c241` — `feat(plots): add hover validity status`
+- `0d5f862` — `feat(plots): expand plot family coverage`
+- `d9e07b7` — `feat(plots): add plot data summaries`
+- `8bc8710` — `feat(plots): render screen boundary contours`

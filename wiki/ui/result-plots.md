@@ -47,7 +47,8 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   `aria-describedby`: plot ID, field name, unit, finite-cell count, min/max,
   and status counts where status masks are available.
 
-## Open M6 requirements
+## M6 completion note
 
-- Full grid-value table export remains part of the later report/export work if
-  needed; the M6 figure view provides plot-level tabular summaries.
+M6 has no open rendering requirement. Full grid-value table export remains part
+of the later report/export work if needed; the M6 figure view provides
+plot-level tabular summaries.

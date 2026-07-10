@@ -99,8 +99,8 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M3 | Python scientific core parity | completed | M2 |
 | M4 | Pyodide worker and browser integration | completed | M2, M3 |
 | M5 | Application shell and input workflows | completed | M2, M4 |
-| M6 | Plot system and results experience | in-progress | M3–M5 |
-| M7 | Figure and report exports | not-started | M4, M6 |
+| M6 | Plot system and results experience | completed | M3–M5 |
+| M7 | Figure and report exports | ready | M4, M6 |
 | M8 | Validation, accessibility, performance | not-started | M3–M7 |
 | M9 | GitHub Pages release candidate | not-started | M8 |
 | M10 | Scientific release and handover | not-started | M9 |
@@ -416,15 +416,15 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 - [x] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
 - [x] Provide hover values with units and validity status.
 - [x] Provide tabular access, alt text, and detailed descriptions.
-- [ ] Keep physics out of plotting code.
+- [x] Keep physics out of plotting code.
 - [x] Export every registered figure as PNG and SVG with provenance footer.
 
 ### Exit gate
 
-- [ ] Every approved MATLAB plot has a web equivalent or documented exclusion.
-- [ ] Paper plots reproduce from paper defaults.
-- [ ] Plot values come only from `SimulationResult`.
-- [ ] Legends explain every non-obvious marker and line.
+- [x] Every approved MATLAB plot has a web equivalent or documented exclusion.
+- [x] Paper plots reproduce from paper defaults.
+- [x] Plot values come only from `SimulationResult`.
+- [x] Legends explain every non-obvious marker and line.
 
 ---
 
@@ -599,7 +599,7 @@ The project is complete only when:
 - [ ] Two linked or independent coolers can be configured.
 - [ ] Both geometry input representations work.
 - [ ] Materials, fluids, and all approved operating modes are editable.
-- [ ] All approved plot families are available.
+- [x] All approved plot families are available.
 - [ ] PNG, SVG, HTML, PDF, and JSON exports work.
 - [ ] Scientific state can be shared through a versioned URL.
 
@@ -667,3 +667,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 plot-family coverage slice completed: registry entries now cover the remaining thermal, resistance, flow, burst, capillary, hydraulic-power, geometry, and feasibility fields already exported by `SimulationResult`. | Codex |
 | 2026-07-10 | M6 plot data summary slice completed: figure canvases now reference tabular summaries with field, unit, finite-cell count, min/max, and status counts for non-visual inspection. | Codex |
 | 2026-07-10 | M6 screen-boundary slice completed: per-screen failure masks are exported from Python and rendered as SVG-compatible contour lines for minimum-wall, burst, flow, pressure-drop, cost, and capillary screens. | Codex |
+| 2026-07-10 | M6 completed: plot registry, grouped selection, tandem scales, delta/ratio variants, exported-value-only Plotly specs, screen/benchmark overlays, hover status, tabular summaries, PNG/SVG figure export, plot catalog coverage, and browser worker parity are verified. M7 is ready. | Codex |
