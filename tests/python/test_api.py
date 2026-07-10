@@ -6,7 +6,7 @@ import numpy as np
 from golden_loader import assert_float_matches_golden, default_case, read_f64, read_u8
 
 from microtubes_core.api import SimulationResult, request_sha256, simulate
-from microtubes_core.contracts import GridFieldRef, SimulationResultPayload
+from microtubes_core.contracts import GridFieldRef, SimulationResultPayload, WarningCode
 from microtubes_core.defaults import paper_default_request
 
 M_TO_MM = 1.0e3
@@ -21,6 +21,8 @@ def test_simulate_returns_valid_payload_and_buffers() -> None:
     assert restored == result.payload
     assert result.payload.request_hash == request_sha256(request)
     assert result.payload.provenance.request_hash == result.payload.request_hash
+    assert result.payload.cooler_left.warnings == []
+    assert result.payload.cooler_right.warnings == []
     refs = _all_refs(result)
     assert [ref.buffer_index for ref in refs] == list(range(len(refs)))
     assert len(result.arrays) == len(refs)
@@ -133,6 +135,34 @@ def test_api_default_masks_match_goldens() -> None:
         _field(result, result.payload.cooler_right.masks, "mask_all_screens_feasible"),
         read_u8(case_dir / "mask_design_feasible_pa").astype(np.float64),
     )
+
+
+def test_api_reports_correlation_validity_warnings() -> None:
+    request = paper_default_request()
+    air_fluid = request.cooler_left.air_side.fluid.model_copy(update={"prandtl": 0.05})
+    air_side = request.cooler_left.air_side.model_copy(update={"fluid": air_fluid})
+    coolant_side = request.cooler_left.coolant_side.model_copy(update={"value": 2000.0})
+    request = request.model_copy(
+        update={
+            "cooler_left": request.cooler_left.model_copy(
+                update={"air_side": air_side, "coolant_side": coolant_side}
+            ),
+            "cooler_right": request.cooler_right.model_copy(
+                update={"air_side": air_side, "coolant_side": coolant_side}
+            ),
+        }
+    )
+
+    result = simulate(request)
+
+    outside = [
+        warning
+        for warning in result.payload.cooler_left.warnings
+        if warning.code == WarningCode.outside_validity
+    ]
+    affected = {warning.affected_quantity for warning in outside}
+    assert {"air_side.fluid.prandtl", "re_inner"}.issubset(affected)
+    assert all(warning.recommendation for warning in outside)
 
 
 def _all_refs(result: SimulationResult) -> list[GridFieldRef]:

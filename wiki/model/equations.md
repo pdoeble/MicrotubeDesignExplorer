@@ -25,6 +25,8 @@ chapter G7.
 Validity warnings are emitted by the later sweep/API layer; this function
 preserves numerically safe MATLAB behavior and returns NaN for invalid
 diameters.
+The API marks VDI G7 values outside `10 <= Re_c,l <= 1e6` or
+`0.6 <= Pr <= 1e3` with `W_OUTSIDE_VALIDITY`.
 
 ## VDI G1 internal tube flow
 
@@ -42,6 +44,8 @@ MATLAB line 3756. Source: VDI-Waermeatlas 2013, chapter G1.
 
 The `Re=2300` transition anchors intentionally differ from simply evaluating
 the laminar all-Re expression at `Re=2300`, matching the MATLAB reference.
+The API marks VDI G1 values outside `Re_i <= 1e6` or
+`0.1 <= Pr <= 1e3` with `W_OUTSIDE_VALIDITY`.
 
 ## Pressure and burst integrity
 

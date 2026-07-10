@@ -18,6 +18,7 @@ import numpy as np
 import microtubes_core
 from microtubes_core.contracts import (
     ComparisonResultPayload,
+    CoolerConfiguration,
     CoolerResultPayload,
     GridFieldRef,
     Provenance,
@@ -40,6 +41,14 @@ from microtubes_core.sweeps.design_space import (
     build_design_grid,
     evaluate_cooler_sweep,
 )
+
+G7_RE_MIN = 10.0
+G7_RE_MAX = 1.0e6
+G7_PR_MIN = 0.6
+G7_PR_MAX = 1.0e3
+G1_RE_MAX = 1.0e6
+G1_PR_MIN = 0.1
+G1_PR_MAX = 1.0e3
 
 
 @dataclass(frozen=True)
@@ -81,17 +90,13 @@ def simulate(request: SimulationRequest) -> SimulationResult:
 
     registry = _ArrayRegistry(arrays=[])
     left_payload = _cooler_payload(
-        request.cooler_left.label,
-        request.cooler_left.design_point.outer_diameter,
-        request.cooler_left.design_point.wall_thickness,
+        request.cooler_left,
         left,
         grid,
         registry,
     )
     right_payload = _cooler_payload(
-        request.cooler_right.label,
-        request.cooler_right.design_point.outer_diameter,
-        request.cooler_right.design_point.wall_thickness,
+        request.cooler_right,
         right,
         grid,
         registry,
@@ -164,13 +169,13 @@ def request_sha256(request: SimulationRequest) -> str:
 
 
 def _cooler_payload(
-    label: str,
-    design_diameter: float,
-    design_wall: float,
+    cooler: CoolerConfiguration,
     result: CoolerSweepResult,
     grid: DesignGrid,
     registry: _ArrayRegistry,
 ) -> CoolerResultPayload:
+    design_diameter = cooler.design_point.outer_diameter
+    design_wall = cooler.design_point.wall_thickness
     field_specs = [
         ("alpha_outer", "W/(m^2 K)", result.alpha_outer),
         ("alpha_inner", "W/(m^2 K)", result.alpha_inner),
@@ -227,11 +232,11 @@ def _cooler_payload(
         ),
     ]
     return CoolerResultPayload(
-        label=label,
+        label=cooler.label,
         fields=fields,
         masks=masks,
         summary=_scalar_summary(design_diameter, design_wall, result, grid),
-        warnings=_warnings_for_result(result),
+        warnings=_warnings_for_result(result, cooler, grid, design_diameter, design_wall),
     )
 
 
@@ -341,7 +346,13 @@ def _mask_array(mask: BoolArray) -> FloatArray:
     return np.asarray(mask, dtype=np.float64)
 
 
-def _warnings_for_result(result: CoolerSweepResult) -> list[WarningItem]:
+def _warnings_for_result(
+    result: CoolerSweepResult,
+    cooler: CoolerConfiguration,
+    grid: DesignGrid,
+    design_diameter: float,
+    design_wall: float,
+) -> list[WarningItem]:
     warnings: list[WarningItem] = []
     if np.any(result.mask_operating_unsolvable):
         warnings.append(
@@ -352,7 +363,129 @@ def _warnings_for_result(result: CoolerSweepResult) -> list[WarningItem]:
                 recommendation="Adjust the coolant operating target or sweep range.",
             )
         )
+    warnings.extend(
+        _correlation_validity_warnings(result, cooler, grid, design_diameter, design_wall)
+    )
     return warnings
+
+
+def _correlation_validity_warnings(
+    result: CoolerSweepResult,
+    cooler: CoolerConfiguration,
+    grid: DesignGrid,
+    design_diameter: float,
+    design_wall: float,
+) -> list[WarningItem]:
+    warnings: list[WarningItem] = []
+    warnings.extend(
+        _range_warning_for_grid(
+            result.re_outer_vdi,
+            affected_quantity="re_outer_vdi",
+            label="VDI G7 tube-bank Reynolds number",
+            lower=G7_RE_MIN,
+            upper=G7_RE_MAX,
+            design_value=_sample_field(grid, result.re_outer_vdi, design_diameter, design_wall),
+            recommendation="Treat cells outside the VDI G7 range as outside-validity.",
+        )
+    )
+    warnings.extend(
+        _range_warning_for_value(
+            cooler.air_side.fluid.prandtl,
+            affected_quantity="air_side.fluid.prandtl",
+            label="VDI G7 air-side Prandtl number",
+            lower=G7_PR_MIN,
+            upper=G7_PR_MAX,
+            recommendation="Use a fluid property set within the VDI G7 Prandtl range.",
+        )
+    )
+    warnings.extend(
+        _range_warning_for_grid(
+            result.re_inner,
+            affected_quantity="re_inner",
+            label="VDI G1 tube-side Reynolds number",
+            lower=None,
+            upper=G1_RE_MAX,
+            design_value=_sample_field(grid, result.re_inner, design_diameter, design_wall),
+            recommendation="Treat cells above the VDI G1 Reynolds limit as outside-validity.",
+        )
+    )
+    warnings.extend(
+        _range_warning_for_value(
+            cooler.coolant_side.fluid.prandtl,
+            affected_quantity="coolant_side.fluid.prandtl",
+            label="VDI G1 coolant-side Prandtl number",
+            lower=G1_PR_MIN,
+            upper=G1_PR_MAX,
+            recommendation="Use a fluid property set within the VDI G1 Prandtl range.",
+        )
+    )
+    return warnings
+
+
+def _range_warning_for_grid(
+    values: FloatArray,
+    *,
+    affected_quantity: str,
+    label: str,
+    lower: float | None,
+    upper: float,
+    design_value: float | None,
+    recommendation: str,
+) -> list[WarningItem]:
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        return []
+    outside = _outside_range(finite, lower=lower, upper=upper)
+    outside_count = int(np.count_nonzero(outside))
+    design_outside = (
+        design_value is not None
+        and np.isfinite(design_value)
+        and bool(_outside_range(np.array([design_value]), lower=lower, upper=upper)[0])
+    )
+    if outside_count == 0 and not design_outside:
+        return []
+    share = outside_count / int(finite.size)
+    message = (
+        f"{outside_count} of {int(finite.size)} finite grid cells "
+        f"({share:.1%}) are outside the {label} validity range"
+    )
+    if design_outside:
+        message = f"{message}; the design point is also outside the range"
+    return [
+        WarningItem(
+            code=WarningCode.outside_validity,
+            message=message,
+            affected_quantity=affected_quantity,
+            recommendation=recommendation,
+        )
+    ]
+
+
+def _range_warning_for_value(
+    value: float,
+    *,
+    affected_quantity: str,
+    label: str,
+    lower: float,
+    upper: float,
+    recommendation: str,
+) -> list[WarningItem]:
+    if not bool(_outside_range(np.array([value], dtype=np.float64), lower=lower, upper=upper)[0]):
+        return []
+    return [
+        WarningItem(
+            code=WarningCode.outside_validity,
+            message=f"{label}={value:g} is outside the validity range [{lower:g}, {upper:g}].",
+            affected_quantity=affected_quantity,
+            recommendation=recommendation,
+        )
+    ]
+
+
+def _outside_range(values: FloatArray, *, lower: float | None, upper: float) -> BoolArray:
+    if lower is None:
+        return values > upper
+    return (values < lower) | (values > upper)
 
 
 def iter_field_arrays(result: SimulationResult) -> Iterable[FloatArray]:

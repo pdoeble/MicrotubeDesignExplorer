@@ -610,3 +610,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 burst-tolerance slice added: standard and medical Lamé sensitivity grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
 | 2026-07-10 | M3 capillary-sensitivity slice added: 1g, 5g, and 10g capillary-rise grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
 | 2026-07-10 | M3 comparison-delta slice added: same-geometry and tech-adjusted percent-delta fields are exported through comparison/API and tested from MATLAB ratio goldens. | Codex |
+| 2026-07-10 | M3 validity-warning slice added: API emits `W_OUTSIDE_VALIDITY` for VDI G1/G7 Reynolds and Prandtl range violations while preserving computed values. | Codex |

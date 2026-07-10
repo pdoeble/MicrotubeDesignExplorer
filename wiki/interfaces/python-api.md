@@ -37,6 +37,20 @@ The payload provenance includes core version, contract version, request hash,
 and UTC generation timestamp. Golden-reference manifest transport remains a
 future packaging concern.
 
+## Warnings
+
+Cooler-level warnings include numerically safe VDI validity violations:
+
+- VDI G7 air-side tube-bank Reynolds range `10 <= Re_c,l <= 1e6`;
+- VDI G7 Prandtl range `0.6 <= Pr <= 1e3`;
+- VDI G1 tube-side Reynolds upper limit `Re_i <= 1e6`;
+- VDI G1 Prandtl range `0.1 <= Pr <= 1e3`.
+
+Grid warnings report the number and share of finite cells outside the range
+and mark whether the design point is also outside. Fluid-property warnings
+name the offending Prandtl value. Values are still computed when numerically
+safe, matching the M2 validity policy.
+
 ## Current field groups
 
 Each cooler exports heat-transfer coefficients, Reynolds numbers, coolant
