@@ -8,12 +8,14 @@ export type PlotFamily =
   | "share-grid";
 
 export type PlotVariantKind = "delta" | "ratio";
+export type PlotFieldGroup = "fields" | "masks";
 
 export type PlotDefinition = {
   id: string;
   title: string;
   family: PlotFamily;
   field: string;
+  fieldGroup?: PlotFieldGroup;
   unit: string;
   source: "cooler" | "comparison";
   description: string;
@@ -22,6 +24,24 @@ export type PlotDefinition = {
 };
 
 export const plotRegistry = [
+  {
+    id: "inner-heat-transfer-map",
+    title: "Tube-side heat-transfer coefficient",
+    family: "log-map",
+    field: "alpha_inner",
+    unit: "W/(m^2 K)",
+    source: "cooler",
+    description: "VDI G1 tube-side heat-transfer coefficient.",
+  },
+  {
+    id: "outer-heat-transfer-map",
+    title: "Air-side heat-transfer coefficient",
+    family: "log-map",
+    field: "alpha_outer",
+    unit: "W/(m^2 K)",
+    source: "cooler",
+    description: "VDI G7 tube-bank heat-transfer coefficient.",
+  },
   {
     id: "overall-coefficient-map",
     title: "Overall heat-transfer coefficient",
@@ -41,6 +61,24 @@ export const plotRegistry = [
     description: "Overall coefficient scaled by continuous tube-bank outer area.",
   },
   {
+    id: "tube-count-map",
+    title: "Continuous tube count",
+    family: "log-map",
+    field: "tube_count_continuous",
+    unit: "-",
+    source: "cooler",
+    description: "Continuous tube-count model over the package footprint.",
+  },
+  {
+    id: "bundle-area-map",
+    title: "Bundle outer area",
+    family: "log-map",
+    field: "bundle_outer_area",
+    unit: "m^2",
+    source: "cooler",
+    description: "Tube-bank outer area used to scale package conductance.",
+  },
+  {
     id: "burst-pressure-map",
     title: "Tolerance-adjusted burst pressure",
     family: "log-map",
@@ -48,6 +86,15 @@ export const plotRegistry = [
     unit: "Pa",
     source: "cooler",
     description: "Lamé pressure integrity using the standard tolerance row.",
+  },
+  {
+    id: "burst-pressure-medical-map",
+    title: "Medical-tolerance burst pressure",
+    family: "log-map",
+    field: "burst_pressure_tolerance_medical",
+    unit: "Pa",
+    source: "cooler",
+    description: "Lamé pressure integrity using the medical tolerance row.",
   },
   {
     id: "reynolds-tube-side-map",
@@ -86,6 +133,15 @@ export const plotRegistry = [
     description: "Straight-tube Darcy-Weisbach diagnostic.",
   },
   {
+    id: "hydraulic-power-map",
+    title: "Hydraulic power",
+    family: "log-map",
+    field: "hydraulic_power",
+    unit: "W",
+    source: "cooler",
+    description: "Tube-side hydraulic power diagnostic, pressure drop times volume flow.",
+  },
+  {
     id: "coolant-throughput-map",
     title: "Coolant throughput",
     family: "linear-map",
@@ -93,6 +149,15 @@ export const plotRegistry = [
     unit: "m^3/s",
     source: "cooler",
     description: "Total bundle volume flow implied by the operating mode.",
+  },
+  {
+    id: "coolant-mass-flow-map",
+    title: "Coolant mass flow",
+    family: "linear-map",
+    field: "coolant_mass_flow",
+    unit: "kg/s",
+    source: "cooler",
+    description: "Total bundle mass flow implied by the coolant operating mode.",
   },
   {
     id: "tube-spacing-longitudinal-map",
@@ -131,6 +196,42 @@ export const plotRegistry = [
     description: "Closest center-to-center staggered spacing minus outer diameter.",
   },
   {
+    id: "capillary-rise-map",
+    title: "Configured capillary rise",
+    family: "log-map",
+    field: "capillary_rise",
+    unit: "m",
+    source: "cooler",
+    description: "Capillary-rise screen metric at the configured acceleration.",
+  },
+  {
+    id: "capillary-rise-1g-map",
+    title: "Capillary rise at 1g",
+    family: "log-map",
+    field: "capillary_rise_1g",
+    unit: "m",
+    source: "cooler",
+    description: "Fixed capillary-rise sensitivity field at 1g.",
+  },
+  {
+    id: "capillary-rise-5g-map",
+    title: "Capillary rise at 5g",
+    family: "log-map",
+    field: "capillary_rise_5g",
+    unit: "m",
+    source: "cooler",
+    description: "Fixed capillary-rise sensitivity field at 5g.",
+  },
+  {
+    id: "capillary-rise-10g-map",
+    title: "Capillary rise at 10g",
+    family: "log-map",
+    field: "capillary_rise_10g",
+    unit: "m",
+    source: "cooler",
+    description: "Fixed capillary-rise sensitivity field at 10g.",
+  },
+  {
     id: "tube-supply-cost-map",
     title: "Tube supply cost index",
     family: "log-map",
@@ -138,6 +239,43 @@ export const plotRegistry = [
     unit: "-",
     source: "cooler",
     description: "Relative tube-supply index normalized at the reference geometry.",
+  },
+  {
+    id: "resistance-inner-map",
+    title: "Tube-side thermal resistance",
+    family: "log-map",
+    field: "resistance_inner",
+    unit: "m^2 K/W",
+    source: "cooler",
+    description: "Tube-side convective resistance component.",
+  },
+  {
+    id: "resistance-wall-map",
+    title: "Wall thermal resistance",
+    family: "log-map",
+    field: "resistance_wall",
+    unit: "m^2 K/W",
+    source: "cooler",
+    description: "Cylindrical wall-conduction resistance component.",
+  },
+  {
+    id: "resistance-outer-map",
+    title: "Air-side thermal resistance",
+    family: "log-map",
+    field: "resistance_outer",
+    unit: "m^2 K/W",
+    source: "cooler",
+    description: "Air-side convective resistance component.",
+  },
+  {
+    id: "feasibility-mask-map",
+    title: "All-screen feasibility mask",
+    family: "linear-map",
+    field: "mask_all_screens_feasible",
+    fieldGroup: "masks",
+    unit: "-",
+    source: "cooler",
+    description: "Composite feasibility mask after all active design screens.",
   },
   {
     id: "tech-adjusted-delta-k",

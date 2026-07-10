@@ -8,7 +8,8 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 ## Current rendering slice
 
 - `src/features/plots/plotRegistry.ts` owns stable plot IDs, display titles,
-  field names, units, source (`cooler` or `comparison`), and family metadata.
+  field names, field group (`fields` or `masks`), units, source (`cooler` or
+  `comparison`), and family metadata.
 - `src/features/plots/plotSpec.ts` owns testable Plotly trace/layout/config
   generation, row-major `Float64Array` to matrix conversion, compact
   provenance footer text, composite feasible-boundary overlays, design-point

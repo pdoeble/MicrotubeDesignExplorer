@@ -411,7 +411,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 - [x] Implement grouped plot selector.
 - [x] Implement tandem mode with common comparison scales where required.
 - [x] Implement approved delta and ratio plots.
-- [ ] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
+- [x] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plots.
 - [ ] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
 - [x] Provide hover values with units and validity status.
@@ -664,3 +664,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 tandem slice completed: cooler-scoped plots now support single/tandem display with shared finite color domains; percent-delta comparison maps use symmetric zero-centered domains. | Codex |
 | 2026-07-10 | M6 delta/ratio slice completed: registry variants now expose exported ratio fields next to approved percent-delta maps, and the Result Plots tab switches comparison groups between delta and ratio. | Codex |
 | 2026-07-10 | M6 hover-status slice completed: cooler heatmap hover now reports value, unit, and validity/screening state from exported masks; comparison plots remain direct exported fields. | Codex |
+| 2026-07-10 | M6 plot-family coverage slice completed: registry entries now cover the remaining thermal, resistance, flow, burst, capillary, hydraulic-power, geometry, and feasibility fields already exported by `SimulationResult`. | Codex |

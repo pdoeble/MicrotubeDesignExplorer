@@ -49,7 +49,12 @@ export function fieldForPlot(
   cooler: CoolerKey,
 ): GridFieldRef | undefined {
   const plot = plotById(plotId);
-  const fields = plot.source === "comparison" ? payload.comparison.fields : payload[cooler].fields;
+  const fields =
+    plot.source === "comparison"
+      ? payload.comparison.fields
+      : plot.fieldGroup === "masks"
+        ? payload[cooler].masks
+        : payload[cooler].fields;
   return fields.find((field) => field.name === plot.field);
 }
 

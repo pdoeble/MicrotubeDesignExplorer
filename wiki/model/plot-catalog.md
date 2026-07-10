@@ -12,22 +12,37 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 
 | Web plot ID | Family | MATLAB export(s) | Field | Scale | Notes / availability |
 |---|---|---|---|---|---|
+| `inner-heat-transfer-map` | log-map | diagnostic companion | α_i (W/m²K) | log color | VDI G1 tube-side coefficient |
+| `outer-heat-transfer-map` | log-map | diagnostic companion | α_o (W/m²K) | log color | VDI G7 air-side coefficient |
 | `overall-coefficient-map` | log-map | 01, 02 | k (W/m²K) | log color | tandem per cooler; shared color limits across coolers |
+| `tube-count-map` | log-map | diagnostic companion | N_tube (-) | log color | continuous tube count |
+| `bundle-area-map` | log-map | diagnostic companion | A_o (m²) | log color | bundle area used for conductance |
 | `bundle-conductance-map` | log-map | 20, 21, 20_portrait | kA (W/K) | log color | fixed package scaling; shared limits |
 | `burst-pressure-map` | log-map | 03, 04 | p_b,tol (bar) | log color | tolerance-adjusted (standard tol) |
+| `burst-pressure-medical-map` | log-map | 15 data companion | p_b,tol,med (bar) | log color | medical tolerance sensitivity companion |
 | `burst-tolerance-grid` | log-map-grid | 15 | p_b,tol (bar) | log color | rows = tolerance {standard, medical} |
 | `reynolds-tube-side-map` | log-map | 05 | Re_i (–) | log color | Re=2300 transition contour highlighted |
 | `reynolds-air-simple-map` | log-map | 07 | Re_a,d (–) | log color | inlet/d_o convention |
 | `reynolds-air-vdi-map` | log-map | 08 | Re_c,l (–) | log color | VDI G7 convention (l=π·d_o/2, void factor) |
 | `friction-pressure-drop-map` | log-map | 18 | Δp_i (bar) | log color, reversed | straight-tube diagnostic; PA min-wall clip |
+| `hydraulic-power-map` | log-map | diagnostic companion | P_hyd (W) | log color | Δp_i · V̇ diagnostic |
 | `coolant-throughput-map` | linear-map | 19 | V̇ (L/min) | linear color | continuous tube-count model; PA min-wall clip |
+| `coolant-mass-flow-map` | linear-map | diagnostic companion | ṁ (kg/s) | linear color | coolant mass-flow companion |
 | `tube-spacing-longitudinal-map` | log-map | 06 | s_L (mm) | log color | |
 | `tube-spacing-transverse-map` | log-map | 10 | s_T (mm) | log color | |
 | `tube-spacing-closest-inline-map` | log-map | 11 | s_min,inline (mm) | log color | |
 | `tube-spacing-closest-staggered-map` | log-map | 13 | s_min,stag (mm) | log color | |
+| `resistance-inner-map` | log-map | 12 data companion | R_i (m²K/W) | log color | resistance-share source component |
+| `resistance-wall-map` | log-map | 12 data companion | R_w (m²K/W) | log color | resistance-share source component |
+| `resistance-outer-map` | log-map | 12 data companion | R_o (m²K/W) | log color | resistance-share source component |
 | `resistance-shares-grid` | share-grid | 12 | φ_i, φ_w, φ_o (%) | linear color 0–100 | 3 shares × 2 coolers, shared colorbar |
+| `capillary-rise-map` | log-map | 14 data companion | h_cap (mm) | log color | configured acceleration |
+| `capillary-rise-1g-map` | log-map | 14 data companion | h_cap,1g (mm) | log color | fixed sensitivity companion |
+| `capillary-rise-5g-map` | log-map | 14 data companion | h_cap,5g (mm) | log color | fixed sensitivity companion |
+| `capillary-rise-10g-map` | log-map | 14 data companion | h_cap,10g (mm) | log color | fixed sensitivity companion |
 | `capillary-rise-grid` | log-map-grid | 14 | h_cap (mm) | log color | rows = acceleration {1g, 5g, 10g} |
 | `tube-supply-cost-map` | log-map | 16, 17 | C_tube/C_fin (–) | log color, reversed | footprint cost orientation |
+| `feasibility-mask-map` | linear-map | 20_design data companion | feasible (-) | binary linear | composite all-screen mask from `SimulationResult.masks` |
 | `tech-adjusted-delta-k` | percent-delta | 09 | Δk_o,feas (%) | diverging linear | PA vs nearest feasible Al reference; needs both coolers feasible |
 | `tech-adjusted-ratio-k` | ratio-map | 09 data companion | k_o,B/k_o,A,feas (-) | linear color | ratio companion for `tech-adjusted-delta-k` |
 | `tech-adjusted-delta-ka` | percent-delta | 22 | Δ(k_o·A_o)_feas (%) | diverging linear | as above, bundle scale |

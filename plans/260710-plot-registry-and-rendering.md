@@ -32,6 +32,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - [x] Tandem mode with shared finite color scales.
 - [x] Delta/ratio switching for comparison fields.
 - [x] Hover values with units and validity/screening status.
+- [x] Thermal, resistance, Reynolds, flow, pressure, conductance, burst,
+      spacing, capillary, cost, and feasibility plot coverage from exported
+      fields/masks.
 - [x] PNG + SVG export with provenance footer.
 
 ## Risks
@@ -67,6 +70,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - 2026-07-10 hover-status slice: `pnpm typecheck`, `pnpm test` (33 passed),
   `pnpm lint` (0 errors; 2 generated-contract warnings),
   `pnpm format:check`, and `pnpm build`.
+- 2026-07-10 plot-family coverage slice: `pnpm typecheck`, `pnpm test`
+  (34 passed), `pnpm lint` (0 errors; 2 generated-contract warnings),
+  `pnpm format:check`, and `pnpm build`.
 
 ## Status log
 
@@ -79,6 +85,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 | 2026-07-10 | Tandem slice completed: cooler-scoped plots can render left/right panels together with a shared finite color domain; comparison percent-delta plots keep symmetric zero-centered scales. |
 | 2026-07-10 | Delta/ratio slice completed: comparison plot variants are linked by registry group, ratio companions render exported ratio fields, and the Result Plots tab switches between delta and ratio without deriving values in the UI. |
 | 2026-07-10 | Hover-status slice completed: cooler heatmaps attach exported mask status as Plotly customdata so hover text includes value, unit, and validity/screening state. |
+| 2026-07-10 | Plot-family coverage slice completed: the registry now exposes thermal coefficients, resistance components, hydraulic power, mass flow, tube count, bundle area, capillary sensitivity fields, medical burst tolerance, and feasibility mask plots from exported fields/masks. |
 
 ## Final commits
 

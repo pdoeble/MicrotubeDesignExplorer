@@ -8,6 +8,7 @@ import { plotById } from "../../src/features/plots/plotRegistry";
 import {
   colorDomainForPlot,
   createPlotSpec,
+  fieldForPlot,
   imageExportOptions,
   matrixFromArray,
   overlayTracesForPlot,
@@ -295,6 +296,24 @@ describe("plot spec", () => {
       ["invalid geometry", "outside wall-ratio range"],
       ["below minimum wall", "screened out"],
     ]);
+  });
+
+  it("can resolve mask-backed plot fields", () => {
+    const maskRef: GridFieldRef = {
+      buffer_index: 7,
+      name: "mask_all_screens_feasible",
+      shape: [2, 2],
+      unit: "-",
+    };
+    const maskPayload: SimulationResultPayload = {
+      ...payload,
+      cooler_left: {
+        ...payload.cooler_left,
+        masks: [maskRef],
+      },
+    };
+
+    expect(fieldForPlot(maskPayload, "feasibility-mask-map", "cooler_left")).toBe(maskRef);
   });
 
   it("keeps provenance footer identifiers compact", () => {
