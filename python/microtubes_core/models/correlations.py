@@ -57,16 +57,11 @@ def vdi_g7_inline_tube_bank_alpha(
         reynolds[good] = reynolds_tmp[good]
 
         nu_laminar = 0.664 * np.sqrt(reynolds_tmp) * float(prandtl) ** (1.0 / 3.0)
-        nu_turbulent = (
-            0.037 * reynolds_tmp**0.8 * float(prandtl)
-        ) / (
-            1.0
-            + 2.443 * reynolds_tmp ** (-0.1) * (float(prandtl) ** (2.0 / 3.0) - 1.0)
+        nu_turbulent = (0.037 * reynolds_tmp**0.8 * float(prandtl)) / (
+            1.0 + 2.443 * reynolds_tmp ** (-0.1) * (float(prandtl) ** (2.0 / 3.0) - 1.0)
         )
         nu_l0 = 0.3 + np.sqrt(nu_laminar**2 + nu_turbulent**2)
-        area_factor = 1.0 + 0.7 * c_void ** (-1.5) * (
-            (b / a - 0.3) / ((b / a + 0.7) ** 2)
-        )
+        area_factor = 1.0 + 0.7 * c_void ** (-1.5) * ((b / a - 0.3) / ((b / a + 0.7) ** 2))
         if use_finite_row_correction:
             row_factor = (1.0 + (float(n_rows) - 1.0) * area_factor) / float(n_rows)
         else:
@@ -197,9 +192,7 @@ def vdi_g1_laminar_transition_anchor_nu(
             return np.asarray(result, dtype=np.float64)
         if boundary_condition == "constant_heat_flux":
             nu_2 = 1.953 * (RE_LAMINAR_MAX * pr * diameter / tube_length) ** (1.0 / 3.0)
-            nu_3 = 0.924 * pr ** (1.0 / 3.0) * np.sqrt(
-                RE_LAMINAR_MAX * diameter / tube_length
-            )
+            nu_3 = 0.924 * pr ** (1.0 / 3.0) * np.sqrt(RE_LAMINAR_MAX * diameter / tube_length)
             result = (8.3**3 + (nu_2 - 0.6) ** 3 + nu_3**3) ** (1.0 / 3.0)
             return np.asarray(result, dtype=np.float64)
     raise ValueError(f"Unknown VDI G1 boundary condition: {boundary_condition}")

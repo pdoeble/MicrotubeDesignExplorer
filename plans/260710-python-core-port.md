@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M3
 > **Workstream:** W3 (Python core)
-> **Status:** in-progress
+> **Status:** completed
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -83,6 +83,10 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - 2026-07-10: targeted burst-tolerance parity:
   `uv run pytest ../tests/python/test_sweep_parity.py ../tests/python/test_api.py`
   from `/python` (7 passed).
+- 2026-07-10: M3 completion gate:
+  `uv run pytest` (51 passed), `uv run mypy .`,
+  `uv run ruff check ..`, `uv run ruff format --check ..`,
+  `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
@@ -98,7 +102,16 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Capillary acceleration sensitivity fields added for the MATLAB 1g, 5g, and 10g rows; remaining tolerance/sensitivity golden regression task completed. |
 | 2026-07-10 | Comparison percent-delta fields added for same-geometry, tech-adjusted k, and tech-adjusted kA ratios, matching MATLAB `100*(ratio-1)` plot convention. |
 | 2026-07-10 | API VDI validity warnings added for G1/G7 Reynolds and Prandtl limits, including grid-share and design-point reporting for Reynolds fields. |
+| 2026-07-10 | M3 marked completed after full pytest, mypy, ruff, format, and prohibited-file gates passed; model equations and API wiki pages verified current. |
 
 ## Final commits
 
-—
+- `feat(core): port initial physical submodels`
+- `feat(core): add operating mode conversions`
+- `feat(core): add single-cooler sweep pipeline`
+- `feat(core): add sweep comparison helpers`
+- `feat(core): expose simulation API payload`
+- `feat(core): add burst tolerance fields`
+- `feat(core): add capillary sensitivity fields`
+- `feat(core): add comparison delta fields`
+- `feat(core): add vdi validity warnings`

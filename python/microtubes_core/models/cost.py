@@ -81,7 +81,5 @@ def _reference_tube_count(
         rows_full = int(np.ceil(reference_n_longitudinal / 2.0))
         rows_shifted = int(np.floor(reference_n_longitudinal / 2.0))
         shifted_transverse = int(np.floor(reference_n_transverse - 0.5))
-        return float(
-            rows_full * reference_n_transverse + rows_shifted * max(shifted_transverse, 0)
-        )
+        return float(rows_full * reference_n_transverse + rows_shifted * max(shifted_transverse, 0))
     raise ValueError(f"Unknown tube arrangement: {arrangement}")

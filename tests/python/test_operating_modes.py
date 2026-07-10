@@ -19,15 +19,17 @@ LENGTH = 0.160
 
 def test_air_velocity_modes_use_face_area() -> None:
     area = 0.0984 * 0.160
-    assert air_velocity_from_mode(
-        "constant_velocity", 5.0, density=1.189, frontal_area=area
-    ) == 5.0
-    assert air_velocity_from_mode(
-        "constant_volume_flow", area * 4.0, density=1.189, frontal_area=area
-    ) == 4.0
-    assert air_velocity_from_mode(
-        "constant_mass_flow", 1.189 * area * 3.0, density=1.189, frontal_area=area
-    ) == 3.0
+    assert air_velocity_from_mode("constant_velocity", 5.0, density=1.189, frontal_area=area) == 5.0
+    assert (
+        air_velocity_from_mode("constant_volume_flow", area * 4.0, density=1.189, frontal_area=area)
+        == 4.0
+    )
+    assert (
+        air_velocity_from_mode(
+            "constant_mass_flow", 1.189 * area * 3.0, density=1.189, frontal_area=area
+        )
+        == 3.0
+    )
 
 
 def test_coolant_volume_and_mass_modes_use_total_tube_area() -> None:

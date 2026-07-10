@@ -96,7 +96,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M0 | Repository and governance baseline | completed | — |
 | M1 | MATLAB inventory and golden references | completed | M0 |
 | M2 | Contracts, units, defaults, validity policy | completed | M1 |
-| M3 | Python scientific core parity | in-progress | M2 |
+| M3 | Python scientific core parity | completed | M2 |
 | M4 | Pyodide worker and browser integration | not-started | M2, M3 |
 | M5 | Application shell and input workflows | not-started | M2, M4 |
 | M6 | Plot system and results experience | not-started | M3–M5 |
@@ -289,9 +289,9 @@ A breaking change requires:
 - [x] Implement flow, pressure loss, hydraulic power, and diagnostics.
 - [x] Implement tolerance-adjusted pressure integrity.
 - [x] Implement capillary-rise and cost models.
-- [ ] Implement all screens, masks, sweeps, warnings, and provenance.
+- [x] Implement all screens, masks, sweeps, warnings, and provenance.
 - [x] Implement comparison, delta, and ratio result generation.
-- [ ] Add equation-level tests and golden regression tests.
+- [x] Add equation-level tests and golden regression tests.
 
 ### Numerical gate
 
@@ -302,10 +302,10 @@ A breaking change requires:
 
 ### Exit gate
 
-- [ ] All approved MATLAB outputs are implemented.
-- [ ] Golden tests pass.
-- [ ] Core code is deterministic, side-effect free, and UI independent.
-- [ ] Every public model function has source and validity documentation.
+- [x] All approved MATLAB outputs are implemented.
+- [x] Golden tests pass.
+- [x] Core code is deterministic, side-effect free, and UI independent.
+- [x] Every public model function has source and validity documentation.
 
 ---
 
@@ -611,3 +611,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 capillary-sensitivity slice added: 1g, 5g, and 10g capillary-rise grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
 | 2026-07-10 | M3 comparison-delta slice added: same-geometry and tech-adjusted percent-delta fields are exported through comparison/API and tested from MATLAB ratio goldens. | Codex |
 | 2026-07-10 | M3 validity-warning slice added: API emits `W_OUTSIDE_VALIDITY` for VDI G1/G7 Reynolds and Prandtl range violations while preserving computed values. | Codex |
+| 2026-07-10 | M3 completed: Python scientific core parity, sweep/comparison/API payloads, warnings, provenance, equation docs, and golden regression suite verified (`uv run pytest` 51 passed, `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`, prohibited-file gate). | Codex |

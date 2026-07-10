@@ -84,11 +84,7 @@ def continuous_tube_count(
         count = (
             float(footprint_width)
             * float(footprint_depth)
-            / (
-                float(pitch_transverse_ratio)
-                * float(pitch_longitudinal_ratio)
-                * outer_diameter**2
-            )
+            / (float(pitch_transverse_ratio) * float(pitch_longitudinal_ratio) * outer_diameter**2)
         )
     return count
 
@@ -127,9 +123,7 @@ def tube_count_in_footprint(
         pitch_transverse = a * outer_diameter
         pitch_longitudinal = b * outer_diameter
         n_transverse = np.maximum(np.floor(footprint_transverse / pitch_transverse), 0.0)
-        n_longitudinal = np.maximum(
-            np.floor(footprint_longitudinal / pitch_longitudinal), 0.0
-        )
+        n_longitudinal = np.maximum(np.floor(footprint_longitudinal / pitch_longitudinal), 0.0)
 
         if arrangement == "inline":
             count = n_transverse * n_longitudinal

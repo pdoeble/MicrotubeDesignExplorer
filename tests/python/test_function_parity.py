@@ -176,8 +176,7 @@ def test_tube_supply_cost_matches_function_goldens(case_id: str) -> None:
     reference_index = (
         cost_params["reference_index_Al"]
         if material in {"al", "alu", "aluminum"}
-        else
-        cost_params["reference_index_Poly"]
+        else cost_params["reference_index_Poly"]
     )
     cost_index, tube_count, raw_length = tube_supply_cost_index(
         _as_m(read_f64(case_dir / "d_o_mm")),

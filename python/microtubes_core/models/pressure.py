@@ -46,9 +46,11 @@ def lame_burst_pressure(
         & (outer_diameter > inner_diameter)
     )
     with np.errstate(invalid="ignore", divide="ignore"):
-        pressure_tmp = float(tensile_strength) * (
-            outer_diameter**2 - inner_diameter**2
-        ) / (outer_diameter**2 + inner_diameter**2)
+        pressure_tmp = (
+            float(tensile_strength)
+            * (outer_diameter**2 - inner_diameter**2)
+            / (outer_diameter**2 + inner_diameter**2)
+        )
         pressure[good] = pressure_tmp[good]
     return pressure
 
@@ -102,12 +104,7 @@ def tube_friction_pressure_drop(
     """
     velocity, diameter = broadcast_float_arrays(coolant_velocity, d_i)
     pressure_drop = nan_array(diameter.shape)
-    good = (
-        np.isfinite(diameter)
-        & (diameter > 0.0)
-        & np.isfinite(velocity)
-        & (velocity > 0.0)
-    )
+    good = np.isfinite(diameter) & (diameter > 0.0) & np.isfinite(velocity) & (velocity > 0.0)
     if not np.any(good):
         return pressure_drop
 

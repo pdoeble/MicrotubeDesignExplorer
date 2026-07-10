@@ -26,8 +26,10 @@ def resistance_parts_outer(
     )
     with np.errstate(invalid="ignore", divide="ignore"):
         r_inner = outer_diameter / (inner_diameter * alpha_i)
-        r_wall = outer_diameter / (2.0 * float(wall_thermal_conductivity)) * np.log(
-            outer_diameter / inner_diameter
+        r_wall = (
+            outer_diameter
+            / (2.0 * float(wall_thermal_conductivity))
+            * np.log(outer_diameter / inner_diameter)
         )
         r_outer = 1.0 / alpha_o
     return r_inner, r_wall, r_outer
