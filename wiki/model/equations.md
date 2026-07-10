@@ -116,6 +116,37 @@ The inversion is deterministic bisection over `[1e-6, 100] m/s` for 80
 iterations. Cells outside the bracket or with invalid geometry return NaN
 velocity plus an explicit `unsolvable` flag for the sweep/API layer.
 
+## Sweep grid and masks
+
+Implemented in `sweeps.design_space` and `sweeps.screens`.
+
+The design grid follows the MATLAB reference orientation:
+
+- `d_o` columns and `t` rows;
+- array shape `(n_wall_thickness, n_outer_diameter)`;
+- `np.meshgrid(d_axis, t_axis)` default `xy` indexing;
+- logspace axes are generated using the MATLAB millimetre exponent convention
+  and immediately converted back to SI; see ADR-0005.
+
+Mask order:
+
+1. invalid geometry: `d_i <= 0`, applied before correlations by replacing
+   `d_i` with NaN;
+2. wall-ratio calculation range: `tau < tau_min` or `tau > tau_max`, applied
+   to screen-input fields but not to `alpha_o` or `alpha_i`;
+3. material technology mask: `t < t_min`, stored separately;
+4. all-screen feasibility, stored separately.
+
+All-screen feasibility ports MATLAB `maskDesignBoundaryKAMap`:
+
+- finite positive `kA`;
+- `t >= t_min`;
+- burst pressure above threshold;
+- coolant volume flow above threshold;
+- tube pressure drop below threshold;
+- cost index strictly below threshold;
+- capillary rise below threshold.
+
 ## Capillary rise
 
 Implemented in `models.capillary.capillary_rise`, ported from MATLAB lines

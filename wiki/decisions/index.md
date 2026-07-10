@@ -9,3 +9,4 @@ Numbering is sequential and never reused.
 | [ADR-0002](ADR-0002-golden-reference-generation.md) | Golden reference generation directly from the MATLAB reference (R2024b) | accepted |
 | [ADR-0003](ADR-0003-operating-mode-scope.md) | Operating-mode scope: no air-side pressure-drop modes without a model basis | accepted |
 | [ADR-0004](ADR-0004-cost-count-floor-and-reference-normalization.md) | Cost count floor and reference normalization | accepted |
+| [ADR-0005](ADR-0005-sweep-axis-generation-for-golden-parity.md) | Sweep axis generation for golden parity | accepted |

@@ -28,10 +28,12 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 
 - [x] models: correlations (G1/G7), friction, burst, capillary, cost.
 - [x] geometry: tube, bundle, footprint counts.
-- [ ] geometry: integrate volume/aspect conversion into sweep/API evaluation.
+- [x] geometry: integrate canonical dimensions into sweep evaluation.
+- [ ] geometry: expose volume/aspect conversion through public API evaluation.
 - [x] operating modes incl. deterministic Δp/P inversion.
-- [ ] integrate operating modes into sweep field generation.
-- [ ] sweeps: grids, masks (invalid d_i, τ-range, tech), screens, boundaries.
+- [x] integrate operating modes into sweep field generation.
+- [x] sweeps: grids, masks (invalid d_i, τ-range, tech), screens.
+- [ ] sweeps: composite feasible boundaries.
 - [ ] comparison: same-geometry ratio, nearest-feasible-Al reference.
 - [ ] full golden regression tests for default-case sweep and comparison.
 - [x] function-level golden tests for ported isolated submodels.
@@ -48,7 +50,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - `tests/python/test_function_parity.py` covers all current function-level
   goldens for G1/G7, Darcy friction factor, tube pressure drop, Lamé burst,
   cost, default-grid geometry, capillary, and resistance fields.
-- 2026-07-10: `uv run pytest` (41), `uv run mypy .`, `uv run ruff check ..`.
+- 2026-07-10: `uv run pytest` (45), `uv run mypy .`, `uv run ruff check ..`.
 
 ## Status log
 
@@ -57,6 +59,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-10 | M3 first core slice implemented: isolated models for G1/G7 correlations, pressure/burst, geometry, capillary, cost, and resistance aggregation; function-level goldens green. ADR-0004 records the cost-count floor/reference-normalization decision. |
 | 2026-07-10 | Operating-mode conversions implemented for air and coolant, including deterministic pressure-drop and hydraulic-power bisection with unbracketed/invalid masks. |
+| 2026-07-10 | Single-cooler sweep pipeline implemented for grids, invalid/Y/tech masks, operating-mode integration, raw fields, screen inputs, and all-screen feasibility masks. ADR-0005 records MATLAB-compatible axis generation for mask parity. |
 
 ## Final commits
 
