@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M7
 > **Workstream:** W8 (Reports)
-> **Status:** ready
+> **Status:** in-progress
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -25,10 +25,12 @@ and provenance.
 
 ## Tasks
 
-- [ ] ReportPayload builder in the Python core (single source).
+- [x] ReportPayload builder in the Python core (single source).
 - [ ] Standalone HTML report generator.
 - [ ] Client-side PDF (print-safe, grayscale-readable).
-- [ ] JSON sidecar with versions/hashes.
+- [x] Canonical JSON sidecar payload with versions, hashes, summaries, warnings,
+      and array manifests.
+- [ ] Browser JSON sidecar download.
 - [ ] Determinism test: same request + version ⇒ same report content.
 
 ## Risks
@@ -40,13 +42,15 @@ and provenance.
 
 ## Tests / evidence
 
-- Determinism tests, payload schema validation.
+- 2026-07-10 ReportPayload basis: `uv run pytest` (54 passed),
+  `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`.
 
 ## Status log
 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Plan created (M0). |
+| 2026-07-10 | M7 started: Python `microtubes_core.exports.report` builds canonical report payloads and JSON sidecars from one request/result pair with deterministic array manifests. |
 
 ## Final commits
 

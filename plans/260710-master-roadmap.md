@@ -100,7 +100,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M4 | Pyodide worker and browser integration | completed | M2, M3 |
 | M5 | Application shell and input workflows | completed | M2, M4 |
 | M6 | Plot system and results experience | completed | M3–M5 |
-| M7 | Figure and report exports | ready | M4, M6 |
+| M7 | Figure and report exports | in-progress | M4, M6 |
 | M8 | Validation, accessibility, performance | not-started | M3–M7 |
 | M9 | GitHub Pages release candidate | not-started | M8 |
 | M10 | Scientific release and handover | not-started | M9 |
@@ -668,3 +668,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 plot data summary slice completed: figure canvases now reference tabular summaries with field, unit, finite-cell count, min/max, and status counts for non-visual inspection. | Codex |
 | 2026-07-10 | M6 screen-boundary slice completed: per-screen failure masks are exported from Python and rendered as SVG-compatible contour lines for minimum-wall, burst, flow, pressure-drop, cost, and capillary screens. | Codex |
 | 2026-07-10 | M6 completed: plot registry, grouped selection, tandem scales, delta/ratio variants, exported-value-only Plotly specs, screen/benchmark overlays, hover status, tabular summaries, PNG/SVG figure export, plot catalog coverage, and browser worker parity are verified. M7 is ready. | Codex |
+| 2026-07-10 | M7 started: Python ReportPayload and canonical JSON sidecar basis added with request/result provenance, summaries, warnings, and SHA-256 array manifests. | Codex |
