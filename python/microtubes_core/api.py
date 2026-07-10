@@ -187,6 +187,9 @@ def _cooler_payload(
             result.clear_spacing_closest_staggered,
         ),
         ("capillary_rise", "m", result.capillary_rise),
+        ("capillary_rise_1g", "m", result.capillary_rise_1g),
+        ("capillary_rise_5g", "m", result.capillary_rise_5g),
+        ("capillary_rise_10g", "m", result.capillary_rise_10g),
         ("cost_index", "-", result.cost_index),
         ("resistance_inner", "m^2 K/W", result.resistance_inner),
         ("resistance_wall", "m^2 K/W", result.resistance_wall),
@@ -247,6 +250,15 @@ def _scalar_summary(
             grid, result.burst_pressure_tolerance_medical, design_diameter, design_wall
         ),
         "capillary_rise": _sample_field(grid, result.capillary_rise, design_diameter, design_wall),
+        "capillary_rise_1g": _sample_field(
+            grid, result.capillary_rise_1g, design_diameter, design_wall
+        ),
+        "capillary_rise_5g": _sample_field(
+            grid, result.capillary_rise_5g, design_diameter, design_wall
+        ),
+        "capillary_rise_10g": _sample_field(
+            grid, result.capillary_rise_10g, design_diameter, design_wall
+        ),
         "cost_index": _sample_field(grid, result.cost_index, design_diameter, design_wall),
     }
     units = {
@@ -259,6 +271,9 @@ def _scalar_summary(
         "burst_pressure_tolerance_standard": "Pa",
         "burst_pressure_tolerance_medical": "Pa",
         "capillary_rise": "m",
+        "capillary_rise_1g": "m",
+        "capillary_rise_5g": "m",
+        "capillary_rise_10g": "m",
         "cost_index": "-",
     }
     screen_query = evaluate_design_screen_at_queries(

@@ -183,6 +183,9 @@ Implemented in `models.capillary.capillary_rise`, ported from MATLAB lines
 649-669.
 
 - `h = C_cap / (s G)`
+- the sweep keeps `capillary_rise` as the configured design-screen value and
+  additionally exports the MATLAB acceleration sensitivity cases `1g`, `5g`,
+  and `10g` from line 309
 
 `s` is the closest inline full clear spacing in the paper model, and `G` is
 the acceleration multiplier opposing the rise.

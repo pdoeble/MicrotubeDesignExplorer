@@ -64,6 +64,11 @@ STANDARD_BURST_TOLERANCE = 0.020e-3
 MEDICAL_BURST_TOLERANCE = 0.005e-3
 """Medical local wall-thickness tolerance for burst sensitivity fields (MATLAB line 137)."""
 
+CAPILLARY_ACCELERATION_1G = 1.0
+CAPILLARY_ACCELERATION_5G = 5.0
+CAPILLARY_ACCELERATION_10G = 10.0
+"""Fixed capillary acceleration sensitivity cases from MATLAB line 309."""
+
 
 @dataclass(frozen=True)
 class DesignGrid:
@@ -107,6 +112,9 @@ class CoolerSweepResult:
     clear_spacing_closest_inline: FloatArray
     clear_spacing_closest_staggered: FloatArray
     capillary_rise: FloatArray
+    capillary_rise_1g: FloatArray
+    capillary_rise_5g: FloatArray
+    capillary_rise_10g: FloatArray
     cost_index: FloatArray
     resistance_inner: FloatArray
     resistance_wall: FloatArray
@@ -318,6 +326,21 @@ def evaluate_cooler_sweep(
         masked_spacing_inline,
         cooler.boundary_conditions.screens.capillary_acceleration_over_g,
     )
+    capillary_1g = capillary_rise(
+        cooler.material.capillary_constant,
+        masked_spacing_inline,
+        CAPILLARY_ACCELERATION_1G,
+    )
+    capillary_5g = capillary_rise(
+        cooler.material.capillary_constant,
+        masked_spacing_inline,
+        CAPILLARY_ACCELERATION_5G,
+    )
+    capillary_10g = capillary_rise(
+        cooler.material.capillary_constant,
+        masked_spacing_inline,
+        CAPILLARY_ACCELERATION_10G,
+    )
     arrangement = _arrangement_name(geometry.arrangement)
     cost, _, _ = tube_supply_cost_index(
         design_grid.outer_diameter,
@@ -387,6 +410,9 @@ def evaluate_cooler_sweep(
         clear_spacing_closest_inline=masked_spacing_inline,
         clear_spacing_closest_staggered=masked_spacing_staggered,
         capillary_rise=capillary,
+        capillary_rise_1g=capillary_1g,
+        capillary_rise_5g=capillary_5g,
+        capillary_rise_10g=capillary_10g,
         cost_index=masked_cost,
         resistance_inner=masked_r_inner,
         resistance_wall=masked_r_wall,

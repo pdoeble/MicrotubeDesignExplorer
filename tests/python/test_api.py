@@ -69,6 +69,19 @@ def test_api_default_axes_and_fields_match_goldens() -> None:
         * PA_TO_BAR,
         read_f64(case_dir / "pB_Poly_tol_med_bar"),
     )
+    for refs, prefix in (
+        (result.payload.cooler_left.fields, "Al"),
+        (result.payload.cooler_right.fields, "PA"),
+    ):
+        for field_name, acceleration in (
+            ("capillary_rise_1g", "g1"),
+            ("capillary_rise_5g", "g5"),
+            ("capillary_rise_10g", "g10"),
+        ):
+            assert_float_matches_golden(
+                _field(result, refs, field_name) * M_TO_MM,
+                read_f64(case_dir / f"capillaryRise{prefix}_raw_{acceleration}_mm"),
+            )
     assert_float_matches_golden(
         _field(result, result.payload.comparison.fields, "ratio_tech_adjusted"),
         read_f64(case_dir / "ratio_tech_adjusted"),

@@ -106,6 +106,16 @@ def test_default_material_sweep_fields_and_masks_match_goldens(
         result.capillary_rise * M_TO_MM,
         read_f64(case_dir / capillary_name),
     )
+    capillary_prefix = "Al" if prefix == "Al" else "PA"
+    for actual, acceleration in (
+        (result.capillary_rise_1g, "g1"),
+        (result.capillary_rise_5g, "g5"),
+        (result.capillary_rise_10g, "g10"),
+    ):
+        assert_float_matches_golden(
+            actual * M_TO_MM,
+            read_f64(case_dir / f"capillaryRise{capillary_prefix}_raw_{acceleration}_mm"),
+        )
 
 
 def test_default_feasibility_counts_match_matlab_diagnostics() -> None:

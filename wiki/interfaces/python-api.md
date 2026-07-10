@@ -43,7 +43,8 @@ Each cooler exports heat-transfer coefficients, Reynolds numbers, coolant
 velocity, pressure drop, hydraulic power, volume and mass flow, tube count,
 bundle area, overall coefficient, bundle conductance, configured-screen burst
 pressure, fixed standard/medical burst-tolerance sensitivity fields,
-spacings, capillary rise, cost index, and thermal resistance parts.
+spacings, configured-screen capillary rise, fixed `1g`/`5g`/`10g`
+capillary-rise sensitivity fields, cost index, and thermal resistance parts.
 
 Comparison exports same-geometry ratio, nearest left-reference diameter,
 tech-adjusted ratios, and composite feasible boundary vectors.

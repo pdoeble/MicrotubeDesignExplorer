@@ -36,7 +36,8 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - [x] sweeps: composite feasible boundaries.
 - [x] comparison: same-geometry ratio, nearest-feasible-Al reference.
 - [x] burst tolerance sensitivity fields: standard and medical Lamé grids.
-- [ ] full golden regression tests for remaining tolerance/sensitivity fields.
+- [x] capillary acceleration sensitivity fields: 1g, 5g, and 10g grids.
+- [x] full golden regression tests for remaining tolerance/sensitivity fields.
 - [x] default-case sweep/comparison/API golden regression tests.
 - [x] function-level golden tests for ported isolated submodels.
 
@@ -57,6 +58,13 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
   `uv run pytest` (50 passed), `uv run mypy .`,
   `uv run ruff check ..`, touched-file
   `uv run ruff format --check ...`, `python scripts/check_prohibited_files.py`.
+- 2026-07-10: targeted capillary-sensitivity parity:
+  `uv run pytest ../tests/python/test_sweep_parity.py ../tests/python/test_api.py`
+  from `/python` (7 passed).
+- 2026-07-10: capillary-sensitivity slice full checks:
+  `uv run pytest` (50 passed), `uv run mypy .`,
+  `uv run ruff check ..`, touched-file
+  `uv run ruff format --check ...`, `python scripts/check_prohibited_files.py`.
 - 2026-07-10: targeted burst-tolerance parity:
   `uv run pytest ../tests/python/test_sweep_parity.py ../tests/python/test_api.py`
   from `/python` (7 passed).
@@ -72,6 +80,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Comparison helpers implemented for interp2-style screen queries, nearest feasible left reference, same-geometry ratio, tech-adjusted ratios, and composite feasible boundaries. |
 | 2026-07-10 | Public Python `simulate(request)` API added with contract payload, C-order float64 array registry, request hash, provenance, scalar summaries, masks, comparison fields, and API-level golden checks. |
 | 2026-07-10 | Burst tolerance sensitivity fields added for the MATLAB standard (0.020 mm) and medical (0.005 mm) rows; sweep and API golden checks cover both materials. |
+| 2026-07-10 | Capillary acceleration sensitivity fields added for the MATLAB 1g, 5g, and 10g rows; remaining tolerance/sensitivity golden regression task completed. |
 
 ## Final commits
 

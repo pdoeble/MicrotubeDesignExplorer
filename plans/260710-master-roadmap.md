@@ -608,3 +608,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 comparison slice added: interp2-style screen queries, nearest feasible reference, same-geometry ratio, tech-adjusted ratios, and composite feasible boundaries; default comparison golden parity passes (47 pytest). | Codex |
 | 2026-07-10 | M3 API slice added: `simulate(request)` now returns contract payload plus C-order float64 array registry, request hash, provenance, scalar summaries, cooler fields/masks, and comparison fields; API golden checks pass (50 pytest). | Codex |
 | 2026-07-10 | M3 burst-tolerance slice added: standard and medical Lamé sensitivity grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
+| 2026-07-10 | M3 capillary-sensitivity slice added: 1g, 5g, and 10g capillary-rise grids are exported through sweep/API and checked against default-case MATLAB goldens. | Codex |
