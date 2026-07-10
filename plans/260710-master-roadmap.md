@@ -98,7 +98,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M2 | Contracts, units, defaults, validity policy | completed | M1 |
 | M3 | Python scientific core parity | completed | M2 |
 | M4 | Pyodide worker and browser integration | completed | M2, M3 |
-| M5 | Application shell and input workflows | not-started | M2, M4 |
+| M5 | Application shell and input workflows | completed | M2, M4 |
 | M6 | Plot system and results experience | not-started | M3–M5 |
 | M7 | Figure and report exports | not-started | M4, M6 |
 | M8 | Validation, accessibility, performance | not-started | M3–M7 |
@@ -338,32 +338,32 @@ A breaking change requires:
 
 ### Required pages
 
-- [ ] Start
-- [ ] Input
-- [ ] Materials
-- [ ] Result Plots
-- [ ] Settings
+- [x] Start
+- [x] Input
+- [x] Materials
+- [x] Result Plots
+- [x] Settings
 
 ### Major tasks
 
-- [ ] Build Springer-like scientific visual system.
-- [ ] Implement two-column cooler inputs with responsive fallback.
-- [ ] Implement group-level linking and independent restoration.
-- [ ] Support width/height/depth geometry input.
-- [ ] Support volume/aspect-ratio geometry input.
-- [ ] Support constant velocity, volume flow, mass flow, pressure drop, and hydraulic power.
-- [ ] Allow independent air- and coolant-side operating modes.
-- [ ] Implement slider, numeric entry, unit display, validation, and per-field reset.
-- [ ] Implement editable static material and fluid properties.
-- [ ] Default all values to the approved paper case.
-- [ ] Implement versioned URL state and complete reset behavior.
+- [x] Build Springer-like scientific visual system.
+- [x] Implement two-column cooler inputs with responsive fallback.
+- [x] Implement group-level linking and independent restoration.
+- [x] Support width/height/depth geometry input.
+- [x] Support volume/aspect-ratio geometry input.
+- [x] Support constant velocity, volume flow, mass flow, pressure drop, and hydraulic power.
+- [x] Allow independent air- and coolant-side operating modes.
+- [x] Implement slider, numeric entry, unit display, validation, and per-field reset.
+- [x] Implement editable static material and fluid properties.
+- [x] Default all values to the approved paper case.
+- [x] Implement versioned URL state and complete reset behavior.
 
 ### Exit gate
 
-- [ ] Paper defaults are reproducible without manual transcription.
-- [ ] Two fully different heat exchangers can be configured.
-- [ ] Every control has model impact and documented meaning.
-- [ ] Keyboard-only operation works.
+- [x] Paper defaults are reproducible without manual transcription.
+- [x] Two fully different heat exchangers can be configured.
+- [x] Every control has model impact and documented meaning.
+- [x] Keyboard-only operation works.
 
 ---
 
@@ -614,3 +614,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 completed: Python scientific core parity, sweep/comparison/API payloads, warnings, provenance, equation docs, and golden regression suite verified (`uv run pytest` 51 passed, `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`, prohibited-file gate). | Codex |
 | 2026-07-10 | M4 started: Pyodide `314.0.2` pinned via `pnpm`, same-origin Pyodide assets and `microtubes_core` wheel generated at build time, typed worker protocol/client added with transferable float64 array transport and cache/supersession unit tests. | Codex |
 | 2026-07-10 | M4 completed: same-origin Pyodide runtime plus required package wheels are generated with SHA-256 verification; Playwright browser worker parity against direct Python passes for a reduced default request; structured worker errors, startup retry, cancellation, and client cache behavior are unit-tested. | Codex |
+| 2026-07-10 | M5 completed: manifest-driven two-cooler input workflow, editable materials/fluids, geometry representation conversion, group linking/restoration, versioned URL state, complete reset, and responsive scientific form styling added and validated. | Codex |

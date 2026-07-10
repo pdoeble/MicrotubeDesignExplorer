@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M5
 > **Workstream:** W5/W6 (Frontend state, Input UX)
-> **Status:** ready
+> **Status:** completed
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-10
 
@@ -24,12 +24,12 @@ properties, paper defaults, versioned URL state, complete reset.
 
 ## Tasks
 
-- [ ] Global store (zustand) mirroring `SimulationRequest` pair + link groups.
-- [ ] Parameter control component (slider, numeric, unit, reset, error text).
-- [ ] Geometry mode toggle with canonical conversion.
-- [ ] Group link/unlink with restoration of previous independent values.
-- [ ] URL state (versioned) round-trip.
-- [ ] Keyboard-only operation checks.
+- [x] Global store (zustand) mirroring `SimulationRequest` pair + link groups.
+- [x] Parameter control component (slider, numeric, unit, reset, error text).
+- [x] Geometry mode toggle with canonical conversion.
+- [x] Group link/unlink with restoration of previous independent values.
+- [x] URL state (versioned) round-trip.
+- [x] Keyboard-only operation checks.
 
 ## Risks
 
@@ -40,14 +40,22 @@ properties, paper defaults, versioned URL state, complete reset.
 
 ## Tests / evidence
 
-- Vitest component/state tests; URL round-trip tests.
+- 2026-07-10: M5 input workflow added:
+  `src/state/simulationStore.ts`, `src/state/urlState.ts`,
+  manifest-driven `ParameterControl`, two-cooler Input and Materials tabs,
+  reset/settings summary, URL-state documentation.
+- 2026-07-10: M5 gates:
+  `pnpm typecheck`, `pnpm test` (18 passed), `pnpm lint` (0 errors; existing
+  generated-file warnings only), `pnpm format:check`, `pnpm build`,
+  `pnpm test:e2e` (1 passed), `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
 | Date | Change |
 |---|---|
 | 2026-07-10 | Plan created (M0). |
+| 2026-07-10 | M5 completed: global SimulationRequest store, link/unlink restoration, geometry-mode conversion, URL state, manifest-driven controls, editable materials/fluids, settings reset, and tests added. |
 
 ## Final commits
 
-—
+- `feat(ui): add input state workflow`
