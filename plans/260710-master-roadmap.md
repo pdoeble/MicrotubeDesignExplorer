@@ -95,8 +95,8 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 |---|---|---:|---|
 | M0 | Repository and governance baseline | completed | — |
 | M1 | MATLAB inventory and golden references | completed | M0 |
-| M2 | Contracts, units, defaults, validity policy | in-progress | M1 |
-| M3 | Python scientific core parity | not-started | M2 |
+| M2 | Contracts, units, defaults, validity policy | completed | M1 |
+| M3 | Python scientific core parity | in-progress | M2 |
 | M4 | Pyodide worker and browser integration | not-started | M2, M3 |
 | M5 | Application shell and input workflows | not-started | M2, M4 |
 | M6 | Plot system and results experience | not-started | M3–M5 |
@@ -239,17 +239,23 @@ A breaking change requires:
 
 ### Major tasks
 
-- [ ] Define versioned `SimulationRequest` and `SimulationResult`.
-- [ ] Define two-cooler comparison structures.
-- [ ] Define geometry representations and canonical conversion rules.
-- [ ] Define group-level link/unlink semantics.
-- [ ] Define separate air- and coolant-side operating-mode enums.
-- [ ] Define material, fluid, screen, sweep, warning, and provenance schemas.
-- [ ] Define SI units and display conversions.
-- [ ] Define one versioned defaults source.
-- [ ] Define slider ranges, scale type, precision, and reset behavior.
-- [ ] Define URL serialization and worker protocol.
-- [ ] Generate TypeScript types from Python schemas.
+- [x] Define versioned `SimulationRequest` and `SimulationResult` (v1.0.0).
+- [x] Define two-cooler comparison structures (`cooler_left/right`, `comparison`).
+- [x] Define geometry representations and canonical conversion rules
+      (dimensions canonical; exact volume/aspect conversion).
+- [x] Define group-level link/unlink semantics (5 groups, equality-validated).
+- [x] Define separate air- and coolant-side operating-mode enums (ADR-0003).
+- [x] Define material, fluid, screen, sweep, warning, and provenance schemas.
+- [x] Define SI units and display conversions (SI in contracts; display only
+      in parameter manifest).
+- [x] Define one versioned defaults source (`microtubes_core.defaults`, 1.0.0).
+- [x] Define slider ranges, scale type, precision, and reset behavior
+      (parameter manifest, 47 specs; reset = manifest default).
+- [x] Define URL serialization and worker protocol — schema-level contract
+      frozen here; transport details documented in M4/M5 wiki pages on top of
+      this contract (no contract change).
+- [x] Generate TypeScript types from Python schemas (json-schema-to-typescript,
+      CI drift gates).
 
 ### Binding validity behavior
 
@@ -262,9 +268,11 @@ A breaking change requires:
 
 ### Exit gate
 
-- [ ] Python, frontend, plot, export, and test agents share stable contracts.
-- [ ] Example payloads validate in Python and TypeScript.
-- [ ] Contract compatibility tests pass.
+- [x] Python, frontend, plot, export, and test agents share stable contracts
+      (single Pydantic source; generated JSON Schema + TS).
+- [x] Example payloads validate in Python and TypeScript (paper defaults
+      fixture validated by pytest and Ajv).
+- [x] Contract compatibility tests pass (11 pytest, 5 Vitest — 2026-07-10).
 
 ---
 
@@ -594,4 +602,5 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | Initial master roadmap created | planning agent |
 | 2026-07-10 | M0 completed: layout, toolchain (pnpm 11/uv 0.11, lockfiles), wiki sections, templates, 9 subplans, CI + Pages scaffold, prohibited-file gate, ADR-0001..0003. MATLAB R2024b found on dev machine → golden data will come from real MATLAB (ADR-0002). M1 started. | implementation agent (Claude) |
 | 2026-07-10 | M1 completed: MATLAB inventory/glossary/plot catalog in wiki; golden references generated from unmodified reference script with MATLAB R2024b (278 files, default case + 24 function-level branch sweeps, SHA-256 manifest). M2 started. | implementation agent (Claude) |
+| 2026-07-10 | M2 completed: contracts v1.0.0 frozen (Pydantic → JSON Schema → TS with CI drift gates), paper defaults cross-checked against MATLAB snapshot, parameter manifest (47 specs), validity policy + error/warning catalog in wiki/interfaces/contracts.md. M3 started. | implementation agent (Claude) |
 

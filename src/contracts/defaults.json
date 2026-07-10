@@ -1,0 +1,160 @@
+{
+  "contract_version": "1.0.0",
+  "defaults_version": "1.0.0",
+  "request": {
+    "contract_version": "1.0.0",
+    "cooler_left": {
+      "air_side": {
+        "fluid": {
+          "density": 1.189,
+          "dynamic_viscosity": 1.821548e-05,
+          "kinematic_viscosity": 1.532e-05,
+          "name": "air_20C_1bar",
+          "prandtl": 0.70834,
+          "reference_temperature": 293.15,
+          "specific_heat_capacity": 1006.0,
+          "thermal_conductivity": 0.02587
+        },
+        "mode": "constant_velocity",
+        "value": 5.0
+      },
+      "boundary_conditions": {
+        "inner_boundary_condition": "constant_wall_temperature",
+        "screens": {
+          "capillary_acceleration_over_g": 10.0,
+          "max_capillary_rise": 0.002,
+          "max_cost_index": 5.0,
+          "max_tube_pressure_drop": 50000.0,
+          "min_burst_pressure": 600000.0,
+          "min_coolant_volume_flow": 0.00016666666666666666
+        },
+        "wall_tolerance": 2e-05
+      },
+      "coolant_side": {
+        "fluid": {
+          "density": 1041.5,
+          "dynamic_viscosity": 0.0012825,
+          "kinematic_viscosity": 1.23e-06,
+          "name": "EGL5050_70C",
+          "prandtl": 10.77846,
+          "reference_temperature": 343.15,
+          "specific_heat_capacity": 3555.0,
+          "thermal_conductivity": 0.423
+        },
+        "mode": "constant_velocity",
+        "value": 0.5
+      },
+      "design_point": {
+        "outer_diameter": 0.001,
+        "wall_thickness": 0.0001
+      },
+      "geometry": {
+        "arrangement": "inline",
+        "dimensions": {
+          "depth": 0.07200000000000001,
+          "tube_length": 0.16,
+          "width": 0.09839999999999999
+        },
+        "mode": "dimensions",
+        "pitch_longitudinal_ratio": 2.0,
+        "pitch_transverse_ratio": 3.28,
+        "use_finite_row_correction": false,
+        "volume_aspect": null
+      },
+      "label": "Aluminum",
+      "material": {
+        "capillary_constant": 6.2855541512827055e-06,
+        "cost_reference_index": 2.096225695575453,
+        "min_wall_thickness": 7e-05,
+        "name": "Aluminum",
+        "tensile_strength": 200000000.0,
+        "thermal_conductivity": 220.0
+      }
+    },
+    "cooler_right": {
+      "air_side": {
+        "fluid": {
+          "density": 1.189,
+          "dynamic_viscosity": 1.821548e-05,
+          "kinematic_viscosity": 1.532e-05,
+          "name": "air_20C_1bar",
+          "prandtl": 0.70834,
+          "reference_temperature": 293.15,
+          "specific_heat_capacity": 1006.0,
+          "thermal_conductivity": 0.02587
+        },
+        "mode": "constant_velocity",
+        "value": 5.0
+      },
+      "boundary_conditions": {
+        "inner_boundary_condition": "constant_wall_temperature",
+        "screens": {
+          "capillary_acceleration_over_g": 10.0,
+          "max_capillary_rise": 0.002,
+          "max_cost_index": 5.0,
+          "max_tube_pressure_drop": 50000.0,
+          "min_burst_pressure": 600000.0,
+          "min_coolant_volume_flow": 0.00016666666666666666
+        },
+        "wall_tolerance": 2e-05
+      },
+      "coolant_side": {
+        "fluid": {
+          "density": 1041.5,
+          "dynamic_viscosity": 0.0012825,
+          "kinematic_viscosity": 1.23e-06,
+          "name": "EGL5050_70C",
+          "prandtl": 10.77846,
+          "reference_temperature": 343.15,
+          "specific_heat_capacity": 3555.0,
+          "thermal_conductivity": 0.423
+        },
+        "mode": "constant_velocity",
+        "value": 0.5
+      },
+      "design_point": {
+        "outer_diameter": 0.001,
+        "wall_thickness": 0.0001
+      },
+      "geometry": {
+        "arrangement": "inline",
+        "dimensions": {
+          "depth": 0.07200000000000001,
+          "tube_length": 0.16,
+          "width": 0.09839999999999999
+        },
+        "mode": "dimensions",
+        "pitch_longitudinal_ratio": 2.0,
+        "pitch_transverse_ratio": 3.28,
+        "use_finite_row_correction": false,
+        "volume_aspect": null
+      },
+      "label": "Polyamide (PA)",
+      "material": {
+        "capillary_constant": 5.4e-06,
+        "cost_reference_index": 0.6269018203303992,
+        "min_wall_thickness": 2.5e-05,
+        "name": "Polyamide (PA)",
+        "tensile_strength": 10000000.0,
+        "thermal_conductivity": 0.25
+      }
+    },
+    "linked_groups": {
+      "air_side": true,
+      "boundary_conditions": true,
+      "coolant_side": true,
+      "geometry": true,
+      "materials": false
+    },
+    "sweep": {
+      "n_outer_diameter": 250,
+      "n_wall_thickness": 250,
+      "outer_diameter_max": 0.01,
+      "outer_diameter_min": 0.0001,
+      "wall_ratio_calc_max_pct": 45.0,
+      "wall_ratio_calc_min_pct": 0.0,
+      "wall_thickness_max": 0.0045,
+      "wall_thickness_min": 1e-06
+    }
+  }
+}

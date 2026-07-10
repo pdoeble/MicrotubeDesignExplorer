@@ -1,0 +1,609 @@
+{
+  "$defs": {
+    "AirOperatingMode": {
+      "description": "Air side: no pressure-drop physics in the approved model (ADR-0003).",
+      "enum": [
+        "constant_velocity",
+        "constant_volume_flow",
+        "constant_mass_flow"
+      ],
+      "title": "AirOperatingMode",
+      "type": "string"
+    },
+    "AirSide": {
+      "additionalProperties": false,
+      "description": "Air-side fluid and operating point.",
+      "properties": {
+        "fluid": {
+          "$ref": "#/$defs/FluidProperties"
+        },
+        "mode": {
+          "$ref": "#/$defs/AirOperatingMode",
+          "default": "constant_velocity"
+        },
+        "value": {
+          "description": "Meaning depends on mode: constant_velocity → face velocity [m/s]; constant_volume_flow → volume flow [m^3/s]; constant_mass_flow → mass flow [kg/s]",
+          "exclusiveMinimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fluid",
+        "value"
+      ],
+      "title": "AirSide",
+      "type": "object"
+    },
+    "BoundaryConditions": {
+      "additionalProperties": false,
+      "description": "Model boundary conditions and production tolerance settings.",
+      "properties": {
+        "inner_boundary_condition": {
+          "$ref": "#/$defs/InnerBoundaryCondition",
+          "default": "constant_wall_temperature"
+        },
+        "screens": {
+          "$ref": "#/$defs/ScreenThresholds"
+        },
+        "wall_tolerance": {
+          "description": "Δt for the tolerance-adjusted Lamé screen (t_loc,min = t_nom − Δt)",
+          "minimum": 0,
+          "title": "Wall Tolerance",
+          "type": "number",
+          "unit": "m"
+        }
+      },
+      "required": [
+        "wall_tolerance",
+        "screens"
+      ],
+      "title": "BoundaryConditions",
+      "type": "object"
+    },
+    "BundleGeometry": {
+      "additionalProperties": false,
+      "description": "Tube-bank geometry. Exactly one representation must match `mode`.",
+      "properties": {
+        "arrangement": {
+          "$ref": "#/$defs/TubeArrangement",
+          "default": "inline"
+        },
+        "dimensions": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GeometryDimensions"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mode": {
+          "$ref": "#/$defs/GeometryMode",
+          "default": "dimensions"
+        },
+        "pitch_longitudinal_ratio": {
+          "description": "b = S_L/d_o",
+          "exclusiveMinimum": 0,
+          "title": "Pitch Longitudinal Ratio",
+          "type": "number",
+          "unit": "-"
+        },
+        "pitch_transverse_ratio": {
+          "description": "a = S_T/d_o",
+          "exclusiveMinimum": 0,
+          "title": "Pitch Transverse Ratio",
+          "type": "number",
+          "unit": "-"
+        },
+        "use_finite_row_correction": {
+          "default": false,
+          "description": "VDI G7 finite-row factor (1+(n-1)·f_A)/n instead of many-row f_A",
+          "title": "Use Finite Row Correction",
+          "type": "boolean"
+        },
+        "volume_aspect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GeometryVolumeAspect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pitch_transverse_ratio",
+        "pitch_longitudinal_ratio"
+      ],
+      "title": "BundleGeometry",
+      "type": "object"
+    },
+    "CoolantOperatingMode": {
+      "description": "Coolant side supports all five modes (ADR-0003).",
+      "enum": [
+        "constant_velocity",
+        "constant_volume_flow",
+        "constant_mass_flow",
+        "constant_pressure_drop",
+        "constant_hydraulic_power"
+      ],
+      "title": "CoolantOperatingMode",
+      "type": "string"
+    },
+    "CoolantSide": {
+      "additionalProperties": false,
+      "description": "Coolant-side fluid and operating point (all five modes, ADR-0003).",
+      "properties": {
+        "fluid": {
+          "$ref": "#/$defs/FluidProperties"
+        },
+        "mode": {
+          "$ref": "#/$defs/CoolantOperatingMode",
+          "default": "constant_velocity"
+        },
+        "value": {
+          "description": "Meaning depends on mode: constant_velocity → mean tube velocity [m/s]; constant_volume_flow → total bundle volume flow [m^3/s]; constant_mass_flow → total mass flow [kg/s]; constant_pressure_drop → tube friction pressure drop [Pa]; constant_hydraulic_power → hydraulic power [W]",
+          "exclusiveMinimum": 0,
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fluid",
+        "value"
+      ],
+      "title": "CoolantSide",
+      "type": "object"
+    },
+    "CoolerConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "air_side": {
+          "$ref": "#/$defs/AirSide"
+        },
+        "boundary_conditions": {
+          "$ref": "#/$defs/BoundaryConditions"
+        },
+        "coolant_side": {
+          "$ref": "#/$defs/CoolantSide"
+        },
+        "design_point": {
+          "$ref": "#/$defs/DesignPoint"
+        },
+        "geometry": {
+          "$ref": "#/$defs/BundleGeometry"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "material": {
+          "$ref": "#/$defs/SolidMaterial"
+        }
+      },
+      "required": [
+        "label",
+        "geometry",
+        "material",
+        "air_side",
+        "coolant_side",
+        "boundary_conditions",
+        "design_point"
+      ],
+      "title": "CoolerConfiguration",
+      "type": "object"
+    },
+    "DesignPoint": {
+      "additionalProperties": false,
+      "description": "Point in the design space used for the scalar KPI summary.",
+      "properties": {
+        "outer_diameter": {
+          "exclusiveMinimum": 0,
+          "title": "Outer Diameter",
+          "type": "number",
+          "unit": "m"
+        },
+        "wall_thickness": {
+          "exclusiveMinimum": 0,
+          "title": "Wall Thickness",
+          "type": "number",
+          "unit": "m"
+        }
+      },
+      "required": [
+        "outer_diameter",
+        "wall_thickness"
+      ],
+      "title": "DesignPoint",
+      "type": "object"
+    },
+    "FluidProperties": {
+      "additionalProperties": false,
+      "description": "Static fluid property set (no temperature-dependent models).",
+      "properties": {
+        "density": {
+          "exclusiveMinimum": 0,
+          "title": "Density",
+          "type": "number",
+          "unit": "kg/m^3"
+        },
+        "dynamic_viscosity": {
+          "exclusiveMinimum": 0,
+          "title": "Dynamic Viscosity",
+          "type": "number",
+          "unit": "Pa s"
+        },
+        "kinematic_viscosity": {
+          "exclusiveMinimum": 0,
+          "title": "Kinematic Viscosity",
+          "type": "number",
+          "unit": "m^2/s"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "prandtl": {
+          "exclusiveMinimum": 0,
+          "title": "Prandtl",
+          "type": "number",
+          "unit": "-"
+        },
+        "reference_temperature": {
+          "description": "Reference temperature of the property set",
+          "title": "Reference Temperature",
+          "type": "number",
+          "unit": "K"
+        },
+        "specific_heat_capacity": {
+          "exclusiveMinimum": 0,
+          "title": "Specific Heat Capacity",
+          "type": "number",
+          "unit": "J/(kg K)"
+        },
+        "thermal_conductivity": {
+          "exclusiveMinimum": 0,
+          "title": "Thermal Conductivity",
+          "type": "number",
+          "unit": "W/(m K)"
+        }
+      },
+      "required": [
+        "name",
+        "reference_temperature",
+        "density",
+        "specific_heat_capacity",
+        "thermal_conductivity",
+        "kinematic_viscosity",
+        "dynamic_viscosity",
+        "prandtl"
+      ],
+      "title": "FluidProperties",
+      "type": "object"
+    },
+    "GeometryDimensions": {
+      "additionalProperties": false,
+      "description": "Canonical package representation: transverse × longitudinal × tube length.",
+      "properties": {
+        "depth": {
+          "description": "Package extent along the air flow (tube-bank depth)",
+          "exclusiveMinimum": 0,
+          "title": "Depth",
+          "type": "number",
+          "unit": "m"
+        },
+        "tube_length": {
+          "description": "Active tube length L",
+          "exclusiveMinimum": 0,
+          "title": "Tube Length",
+          "type": "number",
+          "unit": "m"
+        },
+        "width": {
+          "description": "Package extent transverse to the air flow",
+          "exclusiveMinimum": 0,
+          "title": "Width",
+          "type": "number",
+          "unit": "m"
+        }
+      },
+      "required": [
+        "width",
+        "depth",
+        "tube_length"
+      ],
+      "title": "GeometryDimensions",
+      "type": "object"
+    },
+    "GeometryMode": {
+      "description": "User-facing geometry input representation. Canonical form: dimensions.",
+      "enum": [
+        "dimensions",
+        "volume_aspect"
+      ],
+      "title": "GeometryMode",
+      "type": "string"
+    },
+    "GeometryVolumeAspect": {
+      "additionalProperties": false,
+      "description": "Alternative representation; converted exactly to dimensions.\n\nwidth = aspect_width_over_depth · depth,\ntube_length = aspect_length_over_depth · depth,\ndepth = (volume / (aspect_width_over_depth · aspect_length_over_depth))^(1/3).",
+      "properties": {
+        "aspect_length_over_depth": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Length Over Depth",
+          "type": "number",
+          "unit": "-"
+        },
+        "aspect_width_over_depth": {
+          "exclusiveMinimum": 0,
+          "title": "Aspect Width Over Depth",
+          "type": "number",
+          "unit": "-"
+        },
+        "volume": {
+          "exclusiveMinimum": 0,
+          "title": "Volume",
+          "type": "number",
+          "unit": "m^3"
+        }
+      },
+      "required": [
+        "volume",
+        "aspect_width_over_depth",
+        "aspect_length_over_depth"
+      ],
+      "title": "GeometryVolumeAspect",
+      "type": "object"
+    },
+    "InnerBoundaryCondition": {
+      "description": "VDI G1 thermal boundary condition of the inner tube wall.",
+      "enum": [
+        "constant_wall_temperature",
+        "constant_heat_flux"
+      ],
+      "title": "InnerBoundaryCondition",
+      "type": "string"
+    },
+    "LinkGroup": {
+      "description": "Input groups that can be linked between the two coolers.",
+      "enum": [
+        "geometry",
+        "materials",
+        "air_side",
+        "coolant_side",
+        "boundary_conditions"
+      ],
+      "title": "LinkGroup",
+      "type": "string"
+    },
+    "ScreenThresholds": {
+      "additionalProperties": false,
+      "description": "All-screen feasibility thresholds (paper design-boundary settings).",
+      "properties": {
+        "capillary_acceleration_over_g": {
+          "exclusiveMinimum": 0,
+          "title": "Capillary Acceleration Over G",
+          "type": "number",
+          "unit": "-"
+        },
+        "max_capillary_rise": {
+          "exclusiveMinimum": 0,
+          "title": "Max Capillary Rise",
+          "type": "number",
+          "unit": "m"
+        },
+        "max_cost_index": {
+          "exclusiveMinimum": 0,
+          "title": "Max Cost Index",
+          "type": "number",
+          "unit": "-"
+        },
+        "max_tube_pressure_drop": {
+          "exclusiveMinimum": 0,
+          "title": "Max Tube Pressure Drop",
+          "type": "number",
+          "unit": "Pa"
+        },
+        "min_burst_pressure": {
+          "minimum": 0,
+          "title": "Min Burst Pressure",
+          "type": "number",
+          "unit": "Pa"
+        },
+        "min_coolant_volume_flow": {
+          "minimum": 0,
+          "title": "Min Coolant Volume Flow",
+          "type": "number",
+          "unit": "m^3/s"
+        }
+      },
+      "required": [
+        "min_burst_pressure",
+        "min_coolant_volume_flow",
+        "max_tube_pressure_drop",
+        "max_cost_index",
+        "max_capillary_rise",
+        "capillary_acceleration_over_g"
+      ],
+      "title": "ScreenThresholds",
+      "type": "object"
+    },
+    "SolidMaterial": {
+      "additionalProperties": false,
+      "description": "Tube material incl. manufacturing/process screening properties.",
+      "properties": {
+        "capillary_constant": {
+          "description": "C_cap of the potting capillary-rise screen (full-gap slit convention)",
+          "exclusiveMinimum": 0,
+          "title": "Capillary Constant",
+          "type": "number",
+          "unit": "m^2"
+        },
+        "cost_reference_index": {
+          "description": "Material tube-supply cost index at the reference geometry",
+          "exclusiveMinimum": 0,
+          "title": "Cost Reference Index",
+          "type": "number",
+          "unit": "-"
+        },
+        "min_wall_thickness": {
+          "description": "Technology minimum wall thickness (screen boundary)",
+          "exclusiveMinimum": 0,
+          "title": "Min Wall Thickness",
+          "type": "number",
+          "unit": "m"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "tensile_strength": {
+          "description": "Rm used by the Lamé burst screen",
+          "exclusiveMinimum": 0,
+          "title": "Tensile Strength",
+          "type": "number",
+          "unit": "Pa"
+        },
+        "thermal_conductivity": {
+          "exclusiveMinimum": 0,
+          "title": "Thermal Conductivity",
+          "type": "number",
+          "unit": "W/(m K)"
+        }
+      },
+      "required": [
+        "name",
+        "thermal_conductivity",
+        "tensile_strength",
+        "min_wall_thickness",
+        "capillary_constant",
+        "cost_reference_index"
+      ],
+      "title": "SolidMaterial",
+      "type": "object"
+    },
+    "SweepSettings": {
+      "additionalProperties": false,
+      "description": "Design-space grid definition (log-spaced axes as in the reference).",
+      "properties": {
+        "n_outer_diameter": {
+          "maximum": 1000,
+          "minimum": 16,
+          "title": "N Outer Diameter",
+          "type": "integer"
+        },
+        "n_wall_thickness": {
+          "maximum": 1000,
+          "minimum": 16,
+          "title": "N Wall Thickness",
+          "type": "integer"
+        },
+        "outer_diameter_max": {
+          "exclusiveMinimum": 0,
+          "title": "Outer Diameter Max",
+          "type": "number",
+          "unit": "m"
+        },
+        "outer_diameter_min": {
+          "exclusiveMinimum": 0,
+          "title": "Outer Diameter Min",
+          "type": "number",
+          "unit": "m"
+        },
+        "wall_ratio_calc_max_pct": {
+          "description": "τ window upper bound (values outside are masked)",
+          "exclusiveMinimum": 0,
+          "title": "Wall Ratio Calc Max Pct",
+          "type": "number",
+          "unit": "%"
+        },
+        "wall_ratio_calc_min_pct": {
+          "default": 0.0,
+          "description": "τ window lower bound",
+          "minimum": 0,
+          "title": "Wall Ratio Calc Min Pct",
+          "type": "number",
+          "unit": "%"
+        },
+        "wall_thickness_max": {
+          "exclusiveMinimum": 0,
+          "title": "Wall Thickness Max",
+          "type": "number",
+          "unit": "m"
+        },
+        "wall_thickness_min": {
+          "exclusiveMinimum": 0,
+          "title": "Wall Thickness Min",
+          "type": "number",
+          "unit": "m"
+        }
+      },
+      "required": [
+        "outer_diameter_min",
+        "outer_diameter_max",
+        "wall_thickness_min",
+        "wall_thickness_max",
+        "n_outer_diameter",
+        "n_wall_thickness",
+        "wall_ratio_calc_max_pct"
+      ],
+      "title": "SweepSettings",
+      "type": "object"
+    },
+    "TubeArrangement": {
+      "enum": [
+        "inline",
+        "staggered"
+      ],
+      "title": "TubeArrangement",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Complete two-cooler design-space computation request.",
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "cooler_left": {
+      "$ref": "#/$defs/CoolerConfiguration"
+    },
+    "cooler_right": {
+      "$ref": "#/$defs/CoolerConfiguration"
+    },
+    "linked_groups": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "description": "Group-level linking left↔right; linked groups must be equal",
+      "propertyNames": {
+        "$ref": "#/$defs/LinkGroup"
+      },
+      "title": "Linked Groups",
+      "type": "object"
+    },
+    "sweep": {
+      "$ref": "#/$defs/SweepSettings"
+    }
+  },
+  "required": [
+    "sweep",
+    "cooler_left",
+    "cooler_right",
+    "linked_groups"
+  ],
+  "title": "SimulationRequest",
+  "type": "object"
+}

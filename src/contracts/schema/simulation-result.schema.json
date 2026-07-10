@@ -1,0 +1,338 @@
+{
+  "$defs": {
+    "ComparisonResultPayload": {
+      "additionalProperties": false,
+      "description": "Right-vs-left comparison fields (delta/ratio and tech-adjusted).",
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/GridFieldRef"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/WarningItem"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "fields",
+        "warnings"
+      ],
+      "title": "ComparisonResultPayload",
+      "type": "object"
+    },
+    "CoolerResultPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/GridFieldRef"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "masks": {
+          "items": {
+            "$ref": "#/$defs/GridFieldRef"
+          },
+          "title": "Masks",
+          "type": "array"
+        },
+        "summary": {
+          "$ref": "#/$defs/ScalarSummary"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/WarningItem"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "label",
+        "fields",
+        "masks",
+        "summary",
+        "warnings"
+      ],
+      "title": "CoolerResultPayload",
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "E_SCHEMA_INVALID",
+        "E_NON_FINITE_INPUT",
+        "E_GEOMETRY_IMPOSSIBLE",
+        "E_VALUE_OUT_OF_RANGE",
+        "E_MODE_UNSUPPORTED_AIR_SIDE",
+        "E_OPERATING_POINT_UNSOLVABLE",
+        "E_CONTRACT_VERSION_MISMATCH",
+        "E_INTERNAL"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "ErrorItem": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "field_path": {
+          "default": "",
+          "description": "JSON path of the offending input",
+          "title": "Field Path",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ErrorItem",
+      "type": "object"
+    },
+    "GridFieldRef": {
+      "additionalProperties": false,
+      "description": "Reference to a 2D float64 array shipped outside the JSON payload.\n\n``buffer_index`` addresses the transferable ArrayBuffer list of the\nworker message (row-major / C order, shape [n_wall_thickness,\nn_outer_diameter]).",
+      "properties": {
+        "buffer_index": {
+          "minimum": 0,
+          "title": "Buffer Index",
+          "type": "integer"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "shape": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "title": "Shape",
+          "type": "array"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "unit",
+        "shape",
+        "buffer_index"
+      ],
+      "title": "GridFieldRef",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "core_version": {
+          "title": "Core Version",
+          "type": "string"
+        },
+        "generated_utc": {
+          "title": "Generated Utc",
+          "type": "string"
+        },
+        "golden_reference": {
+          "default": "",
+          "description": "Manifest hash of the golden dataset the core was validated against",
+          "title": "Golden Reference",
+          "type": "string"
+        },
+        "request_hash": {
+          "description": "SHA-256 over the canonical request JSON",
+          "title": "Request Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "core_version",
+        "contract_version",
+        "request_hash",
+        "generated_utc"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ScalarSummary": {
+      "additionalProperties": false,
+      "description": "KPI values at the cooler's design point (roadmap §9). SI units.",
+      "properties": {
+        "is_feasible": {
+          "title": "Is Feasible",
+          "type": "boolean"
+        },
+        "screens_passed": {
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "title": "Screens Passed",
+          "type": "object"
+        },
+        "units": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Units",
+          "type": "object"
+        },
+        "values": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "KPI name → value (None where undefined/masked)",
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "values",
+        "units",
+        "screens_passed",
+        "is_feasible"
+      ],
+      "title": "ScalarSummary",
+      "type": "object"
+    },
+    "WarningCode": {
+      "enum": [
+        "W_OUTSIDE_VALIDITY",
+        "W_SCREENED_OUT",
+        "W_DISCRETE_TRANSITION",
+        "W_PHYSICALLY_UNUSUAL",
+        "W_NO_FEASIBLE_REFERENCE"
+      ],
+      "title": "WarningCode",
+      "type": "string"
+    },
+    "WarningItem": {
+      "additionalProperties": false,
+      "properties": {
+        "affected_quantity": {
+          "default": "",
+          "title": "Affected Quantity",
+          "type": "string"
+        },
+        "code": {
+          "$ref": "#/$defs/WarningCode"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "recommendation": {
+          "default": "",
+          "title": "Recommendation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "WarningItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "comparison": {
+      "$ref": "#/$defs/ComparisonResultPayload"
+    },
+    "contract_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "cooler_left": {
+      "$ref": "#/$defs/CoolerResultPayload"
+    },
+    "cooler_right": {
+      "$ref": "#/$defs/CoolerResultPayload"
+    },
+    "errors": {
+      "items": {
+        "$ref": "#/$defs/ErrorItem"
+      },
+      "title": "Errors",
+      "type": "array"
+    },
+    "outer_diameter_axis": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Outer Diameter Axis",
+      "type": "array",
+      "unit": "m"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "request_hash": {
+      "title": "Request Hash",
+      "type": "string"
+    },
+    "wall_thickness_axis": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Wall Thickness Axis",
+      "type": "array",
+      "unit": "m"
+    }
+  },
+  "required": [
+    "request_hash",
+    "outer_diameter_axis",
+    "wall_thickness_axis",
+    "cooler_left",
+    "cooler_right",
+    "comparison",
+    "errors",
+    "provenance"
+  ],
+  "title": "SimulationResultPayload",
+  "type": "object"
+}
