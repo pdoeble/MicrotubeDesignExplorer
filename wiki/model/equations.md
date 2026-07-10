@@ -93,6 +93,29 @@ Implemented in `models.cost.tube_supply_cost_index`, ported from MATLAB line
 The model is a relative tube-supply index normalized at the reference
 geometry. It is not a market price fit.
 
+## Operating modes
+
+Implemented in `models.operating`. Air-side modes follow ADR-0003 and do not
+include pressure-drop or hydraulic-power inversion:
+
+- constant velocity: `v_a = value`
+- constant volume flow: `v_a = Vdot / (width * tube_length)`
+- constant mass flow: `v_a = mdot / (rho * width * tube_length)`
+
+Coolant-side velocity modes:
+
+- constant velocity: `v_i = value`
+- constant volume flow: `v_i = Vdot / (N pi d_i^2 / 4)`
+- constant mass flow: `v_i = mdot / (rho N pi d_i^2 / 4)`
+- constant pressure drop: solve
+  `tube_friction_pressure_drop(v_i, d_i) = target`
+- constant hydraulic power: solve
+  `tube_friction_pressure_drop(v_i, d_i) * Vdot(v_i) = target`
+
+The inversion is deterministic bisection over `[1e-6, 100] m/s` for 80
+iterations. Cells outside the bracket or with invalid geometry return NaN
+velocity plus an explicit `unsolvable` flag for the sweep/API layer.
+
 ## Capillary rise
 
 Implemented in `models.capillary.capillary_rise`, ported from MATLAB lines

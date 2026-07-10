@@ -6,6 +6,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 type FloatArray = NDArray[np.float64]
+type BoolArray = NDArray[np.bool_]
 
 
 def as_float_array(value: ArrayLike) -> FloatArray:

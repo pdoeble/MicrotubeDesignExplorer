@@ -5,6 +5,7 @@ __all__ = [
     "correlations",
     "cost",
     "geometry",
+    "operating",
     "pressure",
     "resistances",
 ]
