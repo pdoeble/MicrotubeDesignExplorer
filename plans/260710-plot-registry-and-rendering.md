@@ -28,7 +28,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - [ ] Percent-delta family, boundary-lines family.
 - [x] KPI summary panel (roadmap §9 quantities).
 - [ ] Tandem/delta/ratio switching with common scales.
-- [ ] PNG + SVG export with provenance footer.
+- [x] PNG + SVG export with provenance footer.
 
 ## Risks
 
@@ -46,6 +46,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
   `python scripts/check_prohibited_files.py`.
 - 2026-07-10 field-name spot check: plot registry fields exist in the Python
   paper-default `SimulationResult` for cooler and comparison scopes.
+- 2026-07-10 figure-export slice: `pnpm typecheck`, `pnpm lint` (0 errors; 2
+  generated-contract warnings), `pnpm format:check`, `pnpm test` (26 passed),
+  `pnpm build`, and `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
@@ -53,6 +56,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 |---|---|
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-10 | M6 implementation started: added typed registry, Plotly heatmap renderer, simulation-run result workflow, cooler/comparison plot selection, and KPI summary; exports, boundary overlays, detailed alt views, and complete plot-family parity remain open. |
+| 2026-07-10 | Figure export slice completed: Plotly specs moved into a tested factory, every registered plot exposes PNG and SVG export buttons, and exports include request/version provenance in the figure footer. |
 
 ## Final commits
 

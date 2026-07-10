@@ -1,120 +1,116 @@
-import { useEffect, useMemo, useRef } from "react";
-import type {
-  GridFieldRef,
-  SimulationResultPayload,
-} from "../../contracts/generated/simulation-result";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
+import {
+  axisMillimeters,
+  createPlotSpec,
+  fieldForPlot,
+  imageExportOptions,
+  matrixFromArray,
+  supportedImageFormats,
+  titleScopeForPlot,
+  type CoolerKey,
+  type ImageFormat,
+} from "./plotSpec";
 
 type PlotFigureProps = {
   result: SimulationWorkerResult;
   plotId: PlotId;
-  cooler: "cooler_left" | "cooler_right";
+  cooler: CoolerKey;
 };
 
 export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
   const plot = plotById(plotId);
   const field = fieldForPlot(result.payload, plotId, cooler);
   const array = field ? result.arrays[field.buffer_index] : undefined;
   const zValues = useMemo(() => matrixFromArray(array, field), [array, field]);
   const xValues = useMemo(
-    () => result.payload.outer_diameter_axis.map((value) => value * 1000),
+    () => axisMillimeters(result.payload.outer_diameter_axis),
     [result.payload.outer_diameter_axis],
   );
   const yValues = useMemo(
-    () => result.payload.wall_thickness_axis.map((value) => value * 1000),
+    () => axisMillimeters(result.payload.wall_thickness_axis),
     [result.payload.wall_thickness_axis],
   );
-  const titleScope = plot.source === "comparison" ? "Comparison" : result.payload[cooler].label;
+  const titleScope = titleScopeForPlot(result.payload, plot, cooler);
+  const plotSpec = useMemo(
+    () =>
+      field && zValues
+        ? createPlotSpec({
+            cooler,
+            field,
+            plot,
+            provenance: result.payload.provenance,
+            titleScope,
+            xValues,
+            yValues,
+            zValues,
+          })
+        : undefined,
+    [cooler, field, plot, result.payload.provenance, titleScope, xValues, yValues, zValues],
+  );
 
   useEffect(() => {
     const element = elementRef.current;
-    if (!element || !field || !zValues) return undefined;
+    if (!element || !plotSpec) return undefined;
     let cancelled = false;
 
     void import("plotly.js-dist-min").then(({ default: Plotly }) => {
       if (cancelled) return;
-      void Plotly.newPlot(
-        element,
-        [
-          {
-            colorbar: { title: { text: field.unit } },
-            colorscale: plot.family === "percent-delta" ? "RdBu" : "Viridis",
-            hovertemplate:
-              "d_o=%{x:.4g} mm<br>t=%{y:.4g} mm<br>value=%{z:.4g} " +
-              field.unit +
-              "<extra></extra>",
-            type: "heatmap",
-            x: xValues,
-            y: yValues,
-            z: zValues,
-          },
-        ],
-        {
-          margin: { b: 58, l: 70, r: 24, t: 48 },
-          title: { text: `${plot.title} — ${titleScope}` },
-          xaxis: { title: { text: "Outer diameter d_o [mm]" }, type: "log" },
-          yaxis: { title: { text: "Wall thickness t [mm]" } },
-        },
-        {
-          displaylogo: false,
-          responsive: true,
-          toImageButtonOptions: {
-            filename: `${plot.id}-${cooler}`,
-            format: "png",
-            scale: 2,
-          },
-        },
-      );
+      void Plotly.newPlot(element, plotSpec.data, plotSpec.layout, plotSpec.config);
     });
 
     return () => {
       cancelled = true;
       void import("plotly.js-dist-min").then(({ default: Plotly }) => Plotly.purge(element));
     };
-  }, [field, plot.family, plot.id, plot.title, titleScope, xValues, yValues, zValues]);
+  }, [plotSpec]);
 
-  if (!field || !array || !zValues) {
+  async function exportImage(format: ImageFormat) {
+    const element = elementRef.current;
+    if (!element) return;
+    setExportStatus(null);
+    const { default: Plotly } = await import("plotly.js-dist-min");
+    await Plotly.downloadImage(element, imageExportOptions(plotId, cooler, format));
+    setExportStatus(`Exported ${format.toUpperCase()} figure.`);
+  }
+
+  if (!field || !array || !zValues || !plotSpec) {
     return <p className="placeholder-note">Selected plot field is not available in this result.</p>;
   }
 
   return (
     <figure className="plot-figure">
-      <div ref={elementRef} className="plot-figure__canvas" aria-label={plot.description} />
+      <div className="plot-figure__actions" aria-label="Figure export controls">
+        {supportedImageFormats.map((format) => (
+          <button
+            className="text-button"
+            key={format}
+            onClick={() => void exportImage(format)}
+            title={`Export ${format.toUpperCase()} figure`}
+            type="button"
+          >
+            {format.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <div
+        ref={elementRef}
+        className="plot-figure__canvas"
+        role="img"
+        aria-label={plot.description}
+      />
+      {exportStatus ? (
+        <p className="plot-figure__status" role="status">
+          {exportStatus}
+        </p>
+      ) : null}
       <figcaption>
         {plot.description} Values are read from `SimulationResult`; axes use SI-derived display
-        conversions.
+        conversions. The exported figure includes request and version provenance.
       </figcaption>
     </figure>
   );
-}
-
-export function fieldForPlot(
-  payload: SimulationResultPayload,
-  plotId: PlotId,
-  cooler: "cooler_left" | "cooler_right",
-): GridFieldRef | undefined {
-  const plot = plotById(plotId);
-  const fields = plot.source === "comparison" ? payload.comparison.fields : payload[cooler].fields;
-  return fields.find((field) => field.name === plot.field);
-}
-
-function matrixFromArray(
-  array: Float64Array | undefined,
-  field: GridFieldRef | undefined,
-): number[][] | undefined {
-  if (!array || !field) return undefined;
-  const [rowsRaw, columnsRaw] = field.shape;
-  const rows = Number(rowsRaw);
-  const columns = Number(columnsRaw);
-  if (!Number.isInteger(rows) || !Number.isInteger(columns) || rows * columns !== array.length) {
-    return undefined;
-  }
-  const matrix: number[][] = [];
-  for (let row = 0; row < rows; row += 1) {
-    const offset = row * columns;
-    matrix.push(Array.from(array.slice(offset, offset + columns)));
-  }
-  return matrix;
 }

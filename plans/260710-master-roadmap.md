@@ -417,7 +417,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 - [ ] Provide hover values with units and validity status.
 - [ ] Provide tabular access, alt text, and detailed descriptions.
 - [ ] Keep physics out of plotting code.
-- [ ] Export every figure as PNG and SVG.
+- [x] Export every registered figure as PNG and SVG with provenance footer.
 
 ### Exit gate
 
@@ -659,3 +659,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M5 completed: manifest-driven two-cooler input workflow, editable materials/fluids, geometry representation conversion, group linking/restoration, versioned URL state, complete reset, and responsive scientific form styling added and validated. | Codex |
 | 2026-07-10 | M6 started: typed Plotly heatmap registry, result-run workflow, KPI summary table, and initial thermal/flow/pressure/Reynolds/spacing/cost/delta plot selection render from `SimulationResult`; export, boundaries, tandem scaling, and full MATLAB plot coverage remain open. | Codex |
 | 2026-07-10 | Roadmap CI/CD operating model added: lean PR/main CI, deterministic Pages deployment, deployed smoke evidence, and manual release gates are now explicit W10/M9 requirements. | Codex |
+| 2026-07-10 | M6 figure-export slice completed: Plotly specs are tested outside React; registered plots now export PNG and SVG with compact contract/core/request/golden provenance in the figure footer. | Codex |

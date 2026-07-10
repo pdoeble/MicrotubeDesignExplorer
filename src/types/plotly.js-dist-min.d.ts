@@ -10,6 +10,10 @@ declare module "plotly.js-dist-min" {
     colorbar?: { title?: { text: string } };
     hovertemplate?: string;
     showscale?: boolean;
+    zauto?: boolean;
+    zmax?: number;
+    zmid?: number;
+    zmin?: number;
   };
 
   export type PlotlyLayout = {
@@ -31,6 +35,10 @@ declare module "plotly.js-dist-min" {
   };
 
   const Plotly: {
+    downloadImage: (
+      element: HTMLElement,
+      options: { filename: string; format: "png" | "svg"; scale?: number },
+    ) => Promise<string>;
     newPlot: (
       element: HTMLElement,
       data: PlotlyData[],
