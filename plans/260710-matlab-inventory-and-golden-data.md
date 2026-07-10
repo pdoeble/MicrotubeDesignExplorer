@@ -11,7 +11,7 @@
 ## Scope
 
 Inventory the complete approved behavior of
-`references/Waermedurchgang_V10_physical.m` (inputs, defaults, units,
+`source_materials/Waermedurchgang_V10_physical.m` (inputs, defaults, units,
 equation branches, masks, screens, plots) and generate immutable golden
 references with MATLAB R2024b per ADR-0002. Excludes any porting work (M3).
 
@@ -20,7 +20,7 @@ references with MATLAB R2024b per ADR-0002. Excludes any porting work (M3).
 - Produces: `wiki/model/matlab-inventory.md`, `wiki/model/symbol-glossary.md`,
   `wiki/model/plot-catalog.md`, `wiki/model/golden-data.md`,
   `/reference/**` (grids `.f64`, JSON scalars, `manifest.json`).
-- Consumes: `references/` (read-only), MATLAB R2024b.
+- Consumes: `source_materials/` (read-only), MATLAB R2024b.
 
 ## Tasks
 
@@ -41,7 +41,7 @@ references with MATLAB R2024b per ADR-0002. Excludes any porting work (M3).
 | Risk | Mitigation |
 |---|---|
 | Script plotting slows/blocks batch run | headless `-batch`, skip optional grids via env vars |
-| Accidental writes into `/references` | `WAERME_EXPORT_DIR` scratch + `WAERME_SKIP_EXPORT=1` |
+| Accidental writes into `/source_materials` | `WAERME_EXPORT_DIR` scratch + `WAERME_SKIP_EXPORT=1` |
 | Transcription errors in extracted functions | verbatim text slicing, no manual copying |
 
 ## Tests / evidence
@@ -53,7 +53,7 @@ references with MATLAB R2024b per ADR-0002. Excludes any porting work (M3).
 - In-script asserts (α_o, R_o, R_ii ranges; capillary convention) passed
   during the run (script errors on violation).
 - `reference/manifest.json`: SHA-256 for all 278 golden files.
-- `/references` verified untouched (`git status` clean).
+- `/source_materials` verified untouched (`git status` clean).
 
 ## Status log
 

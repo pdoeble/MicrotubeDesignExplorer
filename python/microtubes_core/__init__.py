@@ -1,7 +1,7 @@
 """Microtube heat-exchanger design-space scientific core.
 
 Pure Python port of the approved MATLAB reference
-``references/Waermedurchgang_V10_physical.m``. All public model functions
+``source_materials/Waermedurchgang_V10_physical.m``. All public model functions
 are deterministic, side-effect free, and UI independent.
 """
 

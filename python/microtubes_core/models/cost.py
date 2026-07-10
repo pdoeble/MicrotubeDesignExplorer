@@ -1,7 +1,7 @@
 """Tube supply cost index model.
 
 Port of ``calcTubeSupplyCostIndex`` in
-``references/Waermedurchgang_V10_physical.m`` line 3966. The model is a
+``source_materials/Waermedurchgang_V10_physical.m`` line 3966. The model is a
 relative tube-count and effective-length index; it is not a market price fit.
 """
 

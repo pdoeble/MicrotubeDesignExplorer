@@ -1,7 +1,7 @@
 # microtubes-core
 
 Pure, deterministic, side-effect-free Python port of the approved MATLAB
-screening model `references/Waermedurchgang_V10_physical.m`.
+screening model `source_materials/Waermedurchgang_V10_physical.m`.
 
 Public computation contract: `SimulationRequest` → `SimulationResult`
 (see `microtubes_core/contracts.py` and `wiki/interfaces/`).

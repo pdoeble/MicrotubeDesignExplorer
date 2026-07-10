@@ -1,7 +1,7 @@
 # MATLAB inventory — `Waermedurchgang_V10_physical.m`
 
 Complete inventory of the authoritative executable reference (M1).
-Line numbers refer to the read-only file `references/Waermedurchgang_V10_physical.m`.
+Line numbers refer to the read-only file `source_materials/Waermedurchgang_V10_physical.m`.
 
 ## 1. Fixed operating point and sweep definition
 

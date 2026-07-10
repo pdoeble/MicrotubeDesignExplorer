@@ -2,7 +2,7 @@
 
 Equations, assumptions, validity limits, and provenance of the scientific
 core. The authoritative executable reference is
-`references/Waermedurchgang_V10_physical.m` (read-only).
+`source_materials/Waermedurchgang_V10_physical.m` (read-only).
 
 | Document | Content | Milestone |
 |---|---|---|

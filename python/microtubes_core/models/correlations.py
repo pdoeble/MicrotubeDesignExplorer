@@ -1,7 +1,7 @@
 """VDI heat-transfer correlations used by the microtube model.
 
 The implemented equations are ported from
-``references/Waermedurchgang_V10_physical.m`` local functions
+``source_materials/Waermedurchgang_V10_physical.m`` local functions
 ``vdiG7InlineTubeBankAlpha`` (line 3691) and ``vdiG1InternalTubeAlpha``
 (line 3756). Source: VDI-Waermeatlas 2013, chapters G7 and G1.
 """

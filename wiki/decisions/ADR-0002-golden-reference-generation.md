@@ -10,8 +10,8 @@
 Golden parity tests (AGENTS §10) need immutable MATLAB-derived reference
 datasets. MATLAB R2024b is installed on the development machine
 (`C:\Program Files\MATLAB\R2024b`). The reference script keeps its physics in
-*local functions* of `references/Waermedurchgang_V10_physical.m`, which are
-not callable from outside the script, and `/references` is read-only.
+*local functions* of `source_materials/Waermedurchgang_V10_physical.m`, which are
+not callable from outside the script, and `/source_materials` is read-only.
 
 ## Decision
 
@@ -21,7 +21,7 @@ not callable from outside the script, and `/references` is read-only.
 2. `scripts/golden/generate_golden_references.m`:
    - runs the unmodified reference script (`run(...)`) with
      `WAERME_SKIP_EXPORT=1` and a scratch `WAERME_EXPORT_DIR` so nothing is
-     written into `/references`;
+     written into `/source_materials`;
    - harvests the raw workspace fields (grids, masks, screens, boundaries,
      scalars) after the run;
    - additionally extracts the physics local functions **verbatim by text

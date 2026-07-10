@@ -5,7 +5,7 @@
     "command": "matlab -batch \"run('scripts/golden/generate_golden_references.m')\"",
     "matlab_version": "24.2.0.2740171 (R2024b) Update 1",
     "matlab_release": "2024b",
-    "reference_script": "references/Waermedurchgang_V10_physical.m",
+    "reference_script": "source_materials/Waermedurchgang_V10_physical.m",
     "reference_script_sha256": "e521b0b7113a2ae34b904bd59cdeaba120a3d296e5d081a2a64445a2057527fc",
     "generated_utc": "2026-07-10T17:20:50Z",
     "data_layout": {
@@ -1124,8 +1124,8 @@
       "bytes": 95
     },
     "provenance.json": {
-      "sha256": "bc4e1c9a8b18ba26940d7f764a9ef72ff8f934a74926d80173897dd6f2305bd0",
-      "bytes": 620
+      "sha256": "4067c6f9a688ef87bb130c6563363256092efa738b8db38d5b5b6c5cffa4d90b",
+      "bytes": 627
     }
   }
 }

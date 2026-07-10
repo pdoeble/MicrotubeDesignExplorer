@@ -1,7 +1,7 @@
 """Design-screen masks for microtube sweeps.
 
 Port of ``makeDesignScreenData`` and ``maskDesignBoundaryKAMap`` from
-``references/Waermedurchgang_V10_physical.m`` lines 3070-3096, using SI units.
+``source_materials/Waermedurchgang_V10_physical.m`` lines 3070-3096, using SI units.
 """
 
 from __future__ import annotations

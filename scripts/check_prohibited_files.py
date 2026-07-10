@@ -1,7 +1,7 @@
 """Fail CI when prohibited files are tracked in git.
 
 Prohibited (AGENTS.md §16): secrets, proprietary PDFs outside the read-only
-references/ directory, local caches, environment files, and build output.
+source_materials/ directory, local caches, environment files, and build output.
 
 Usage: python scripts/check_prohibited_files.py
 """
@@ -12,7 +12,7 @@ import fnmatch
 import subprocess
 import sys
 
-# references/ is the user-provided read-only source area and is exempt for PDFs.
+# source_materials/ is the user-provided read-only source area and is exempt for PDFs.
 PROHIBITED_PATTERNS: list[str] = [
     "*.pem",
     "*.key",
@@ -29,7 +29,7 @@ PROHIBITED_PATTERNS: list[str] = [
     ".venv/*",
 ]
 
-PDF_ALLOWED_PREFIXES = ("references/", "reference/")
+PDF_ALLOWED_PREFIXES = ("source_materials/", "reference/")
 
 
 def tracked_files() -> list[str]:
@@ -48,7 +48,7 @@ def main() -> int:
                 break
         else:
             if lower.endswith(".pdf") and not normalized.startswith(PDF_ALLOWED_PREFIXES):
-                violations.append(f"{path}  (PDF outside references/)")
+                violations.append(f"{path}  (PDF outside source_materials/ or reference/)")
 
     if violations:
         print("Prohibited files tracked in git:")

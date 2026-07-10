@@ -43,7 +43,11 @@ def main() -> None:
         "file_count": len(entries),
         "files": entries,
     }
-    MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    MANIFEST_PATH.write_text(
+        json.dumps(manifest, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
     print(f"Wrote {MANIFEST_PATH} with {len(entries)} entries.")
 
 

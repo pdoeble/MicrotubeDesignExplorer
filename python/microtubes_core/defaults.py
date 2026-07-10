@@ -1,7 +1,7 @@
 """Versioned paper defaults — the single defaults source (AGENTS §7).
 
 Every value is traceable to the authoritative reference
-``references/Waermedurchgang_V10_physical.m`` (line numbers in comments) and
+``source_materials/Waermedurchgang_V10_physical.m`` (line numbers in comments) and
 is snapshotted in ``reference/default_case/scalars.json``. SI units.
 """
 

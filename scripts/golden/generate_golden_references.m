@@ -4,7 +4,7 @@
 % unmodified authoritative MATLAB script (ADR-0002).
 %
 % What it does:
-%   1. Runs references/Waermedurchgang_V10_physical.m verbatim (run()) with
+%   1. Runs source_materials/Waermedurchgang_V10_physical.m verbatim (run()) with
 %      all export/plot-grid side effects disabled via the script's own
 %      environment switches, then harvests the raw workspace fields.
 %   2. Extracts the physics local functions VERBATIM by text slicing into
@@ -17,13 +17,13 @@
 % Run from the repository root:
 %   matlab -batch "run('scripts/golden/generate_golden_references.m')"
 %
-% Never writes into /references. Output: /reference (git-tracked, immutable).
+% Never writes into /source_materials. Output: /reference (git-tracked, immutable).
 
 %#ok<*SAGROW,*AGROW,*NASGU>
 
 g_this_dir = fileparts(mfilename('fullpath'));
 g_repo_root = fileparts(fileparts(g_this_dir));
-g_ref_script = fullfile(g_repo_root, 'references', 'Waermedurchgang_V10_physical.m');
+g_ref_script = fullfile(g_repo_root, 'source_materials', 'Waermedurchgang_V10_physical.m');
 g_out_root = fullfile(g_repo_root, 'reference');
 g_scratch = fullfile(g_this_dir, '_scratch');
 g_extract_dir = fullfile(g_scratch, 'extracted');
@@ -309,7 +309,7 @@ g_prov.generator = 'scripts/golden/generate_golden_references.m';
 g_prov.command = 'matlab -batch "run(''scripts/golden/generate_golden_references.m'')"';
 g_prov.matlab_version = version;
 g_prov.matlab_release = version('-release');
-g_prov.reference_script = 'references/Waermedurchgang_V10_physical.m';
+g_prov.reference_script = 'source_materials/Waermedurchgang_V10_physical.m';
 g_prov.reference_script_sha256 = g_sha256(g_ref_script);
 g_prov.generated_utc = char(datetime('now', 'TimeZone', 'UTC', ...
     'Format', 'yyyy-MM-dd''T''HH:mm:ss''Z'''));

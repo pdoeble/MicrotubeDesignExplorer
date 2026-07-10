@@ -6,7 +6,7 @@ Compact Heat Exchangers"** (Döbler, Henzler, Auerbach et al., Esslingen
 University of Applied Sciences).
 
 The application ports the complete approved MATLAB screening model
-(`references/Waermedurchgang_V10_physical.m`) to Python, runs it in the
+(`source_materials/Waermedurchgang_V10_physical.m`) to Python, runs it in the
 browser through Pyodide inside a Web Worker, and renders the design-space
 maps with Plotly.js. It compares two heat-exchanger configurations
 (default: equal geometry, aluminum vs. polyamide as in the paper) and
@@ -18,7 +18,7 @@ exports figures and reproducible reports without any backend.
 - `plans/260710-master-roadmap.md` — master living roadmap (milestones M0–M10).
 - `wiki/` — durable knowledge: decisions (ADRs), model documentation,
   interfaces, UI conventions.
-- `references/` — **read-only** paper sources and the authoritative MATLAB
+- `source_materials/` — **read-only** paper sources and the authoritative MATLAB
   reference. Never write there.
 - `reference/` — immutable MATLAB-derived golden datasets with provenance.
 
@@ -31,6 +31,7 @@ exports figures and reproducible reports without any backend.
 | `src/contracts/` | TypeScript contracts (generated + handwritten) |
 | `python/microtubes_core/` | Pure typed Python scientific core |
 | `tests/` | Python, frontend, and integration tests |
+| `source_materials/` | Read-only paper, LaTeX, MATLAB source, and MATLAB exports |
 | `reference/` | Golden datasets generated from the MATLAB model |
 | `scripts/` | Deterministic maintenance scripts (golden generation, checks) |
 | `wiki/`, `plans/` | Documentation and living plans |

@@ -5,9 +5,9 @@
 - Numerical fidelity, traceability, and reproducibility outrank UI convenience.
 - Never introduce undocumented empirical fits or hidden calibration factors.
 ## 2. Source-of-truth order
-1. Accepted equations, assumptions, and values in the current paper `references\Paper.pdf`.
-2. `/references/Waermedurchgang_V10_physical.m` as the executable legacy reference.
-3. `/references` the Master Paper and master Code/Golden reference datasets generated from the MATLAB model, DO NOT WRITE
+1. Accepted equations, assumptions, and values in the current paper `source_materials\Paper.pdf`.
+2. `/source_materials/Waermedurchgang_V10_physical.m` as the executable legacy reference.
+3. `/source_materials` contains the Master Paper, LaTeX sources, MATLAB source, and MATLAB exports, DO NOT WRITE
 4. `/wiki` decisions, interfaces, terminology, and scientific explanations.
 5. `/plans` living implementation plans.
 6. Code comments and issue text.
@@ -33,6 +33,7 @@
 - `/python/microtubes_core/sweeps/`: grids, masks, and design-space evaluation.
 - `/python/microtubes_core/exports/`: data and report payload generation.
 - `/tests/`: Python, frontend, integration, and regression tests.
+- `/source_materials/`: read-only paper, LaTeX, MATLAB source, and MATLAB exports.
 - `/reference/`: immutable MATLAB-derived golden datasets and metadata.
 - `/wiki/`: durable project knowledge and current decisions.
 - `/plans/`: dated living plans named `YYMMDD-topic.md`.

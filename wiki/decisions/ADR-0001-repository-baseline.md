@@ -29,7 +29,7 @@ were still open.
    source of truth; JSON Schema and TypeScript types are generated from them
    (details frozen in M2, `wiki/interfaces/contracts.md`).
 4. **License (provisional).** MIT for the application source code. The paper
-   sources and MATLAB reference under `/references` and derived golden data
+   sources and MATLAB reference under `/source_materials` and derived golden data
    under `/reference` are explicitly excluded. **This default requires
    confirmation by the paper authors before M10**; tracked in the master
    roadmap risks.

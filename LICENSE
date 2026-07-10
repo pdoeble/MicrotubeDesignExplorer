@@ -24,7 +24,7 @@ SOFTWARE.
 
 Note: This license covers the application source code only. The paper
 sources, the MATLAB reference script, and derived golden datasets under
-`references/` and `reference/` remain under the copyright of their authors
+`source_materials/` and `reference/` remain under the copyright of their authors
 and are not licensed for reuse outside this project. The license choice
 (MIT) is a provisional M0 default and is tracked for confirmation in
 wiki/decisions/ADR-0001-repository-baseline.md before the scientific

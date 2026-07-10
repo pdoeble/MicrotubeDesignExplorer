@@ -185,8 +185,8 @@ A breaking change requires:
 - [x] A new agent can locate architecture, commands, plans, and interfaces
       (README §Governance, wiki/index.md).
 - [x] No secret, proprietary PDF, cache, or unlicensed artifact is tracked
-      outside the read-only `references/` area (`scripts/check_prohibited_files.py`;
-      the paper PDF lives in user-provided `references/` by design).
+      outside the read-only `source_materials/` area (`scripts/check_prohibited_files.py`;
+      the paper PDF lives in user-provided `source_materials/` by design).
 
 ---
 
