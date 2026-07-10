@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSimulationStore } from "../../state/simulationStore";
 import { SimulationWorkerClient, type SimulationProgressHandler } from "../simulation/client";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { PlotFigure } from "./PlotFigure";
 import { plotRegistry, type PlotFamily, type PlotId } from "./plotRegistry";
+import { colorDomainForPlot } from "./plotSpec";
 
 const plotFamilyLabels: Record<PlotFamily, string> = {
   "boundary-summary": "Boundaries",
@@ -33,7 +34,23 @@ export function ResultPlotsTab() {
   const [selectedCooler, setSelectedCooler] = useState<"cooler_left" | "cooler_right">(
     "cooler_left",
   );
+  const [displayMode, setDisplayMode] = useState<"single" | "tandem">("single");
   const clientRef = useRef<SimulationWorkerClient | null>(null);
+  const selectedDefinition = useMemo(
+    () => plotRegistry.find((plot) => plot.id === selectedPlot),
+    [selectedPlot],
+  );
+  const isComparisonPlot = selectedDefinition?.source === "comparison";
+  const tandemColorDomain = useMemo(
+    () =>
+      result && !isComparisonPlot && displayMode === "tandem"
+        ? colorDomainForPlot(result.payload, result.arrays, selectedPlot, [
+            "cooler_left",
+            "cooler_right",
+          ])
+        : undefined,
+    [displayMode, isComparisonPlot, result, selectedPlot],
+  );
 
   useEffect(
     () => () => {
@@ -42,6 +59,12 @@ export function ResultPlotsTab() {
     },
     [],
   );
+
+  useEffect(() => {
+    if (isComparisonPlot && displayMode !== "single") {
+      setDisplayMode("single");
+    }
+  }, [displayMode, isComparisonPlot]);
 
   const runSimulation = async () => {
     const client = clientRef.current ?? new SimulationWorkerClient();
@@ -108,6 +131,18 @@ export function ResultPlotsTab() {
                 })}
               </select>
             </label>
+            <label className="text-field" htmlFor="plot-display">
+              <span>Display</span>
+              <select
+                id="plot-display"
+                value={displayMode}
+                onChange={(event) => setDisplayMode(event.target.value as "single" | "tandem")}
+                disabled={isComparisonPlot}
+              >
+                <option value="single">Single cooler</option>
+                <option value="tandem">Tandem</option>
+              </select>
+            </label>
             <label className="text-field" htmlFor="plot-cooler">
               <span>Cooler</span>
               <select
@@ -116,16 +151,31 @@ export function ResultPlotsTab() {
                 onChange={(event) =>
                   setSelectedCooler(event.target.value as "cooler_left" | "cooler_right")
                 }
-                disabled={
-                  plotRegistry.find((plot) => plot.id === selectedPlot)?.source === "comparison"
-                }
+                disabled={isComparisonPlot || displayMode === "tandem"}
               >
                 <option value="cooler_left">{result.payload.cooler_left.label}</option>
                 <option value="cooler_right">{result.payload.cooler_right.label}</option>
               </select>
             </label>
           </fieldset>
-          <PlotFigure result={result} plotId={selectedPlot} cooler={selectedCooler} />
+          {!isComparisonPlot && displayMode === "tandem" ? (
+            <div className="plot-tandem-grid" aria-label={`${selectedDefinition?.title} tandem`}>
+              <PlotFigure
+                colorDomain={tandemColorDomain}
+                result={result}
+                plotId={selectedPlot}
+                cooler="cooler_left"
+              />
+              <PlotFigure
+                colorDomain={tandemColorDomain}
+                result={result}
+                plotId={selectedPlot}
+                cooler="cooler_right"
+              />
+            </div>
+          ) : (
+            <PlotFigure result={result} plotId={selectedPlot} cooler={selectedCooler} />
+          )}
         </>
       ) : null}
     </section>

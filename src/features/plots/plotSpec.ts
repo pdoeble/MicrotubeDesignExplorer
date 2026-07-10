@@ -15,6 +15,12 @@ export type PlotImageOptions = {
   scale: number;
 };
 
+export type ColorDomain = {
+  zmax: number;
+  zmid?: number;
+  zmin: number;
+};
+
 export type PlotSpec = {
   data: PlotlyData[];
   layout: PlotlyLayout;
@@ -22,6 +28,7 @@ export type PlotSpec = {
 };
 
 type PlotSpecInput = {
+  colorDomain?: ColorDomain | undefined;
   cooler: CoolerKey;
   field: GridFieldRef;
   overlays?: PlotlyData[];
@@ -77,6 +84,7 @@ export function titleScopeForPlot(
 }
 
 export function createPlotSpec({
+  colorDomain,
   cooler,
   field,
   overlays = [],
@@ -98,13 +106,12 @@ export function createPlotSpec({
     z: zValues,
   };
 
-  if (plot.family === "percent-delta") {
+  if (colorDomain) {
+    applyColorDomain(heatmap, colorDomain);
+  } else if (plot.family === "percent-delta") {
     const colorLimit = symmetricFiniteLimit(zValues);
     if (colorLimit !== undefined) {
-      heatmap.zauto = false;
-      heatmap.zmid = 0;
-      heatmap.zmin = -colorLimit;
-      heatmap.zmax = colorLimit;
+      applyColorDomain(heatmap, { zmax: colorLimit, zmid: 0, zmin: -colorLimit });
     }
   }
 
@@ -157,6 +164,41 @@ export function overlayTracesForPlot(
   return traces;
 }
 
+export function colorDomainForPlot(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  plotId: PlotId,
+  coolers: readonly CoolerKey[],
+): ColorDomain | undefined {
+  const plot = plotById(plotId);
+  const values: number[] = [];
+
+  if (plot.source === "comparison") {
+    const field = fieldForPlot(payload, plotId, "cooler_left");
+    collectFiniteValues(field ? arrays[field.buffer_index] : undefined, values);
+  } else {
+    for (const cooler of coolers) {
+      const field = fieldForPlot(payload, plotId, cooler);
+      collectFiniteValues(field ? arrays[field.buffer_index] : undefined, values);
+    }
+  }
+
+  if (values.length === 0) return undefined;
+
+  if (plot.family === "percent-delta") {
+    const limit = Math.max(...values.map((value) => Math.abs(value)));
+    return limit > 0 ? { zmax: limit, zmid: 0, zmin: -limit } : undefined;
+  }
+
+  const zmin = Math.min(...values);
+  const zmax = Math.max(...values);
+  if (zmin === zmax) {
+    const padding = Math.max(Math.abs(zmin) * 0.01, 1);
+    return { zmax: zmax + padding, zmin: zmin - padding };
+  }
+  return { zmax, zmin };
+}
+
 export function imageExportOptions(
   plotId: PlotId,
   cooler: CoolerKey,
@@ -192,6 +234,22 @@ function symmetricFiniteLimit(values: number[][]): number | undefined {
     }
   }
   return limit > 0 ? limit : undefined;
+}
+
+function applyColorDomain(trace: PlotlyData, domain: ColorDomain): void {
+  trace.zauto = false;
+  trace.zmin = domain.zmin;
+  trace.zmax = domain.zmax;
+  if (domain.zmid !== undefined) {
+    trace.zmid = domain.zmid;
+  }
+}
+
+function collectFiniteValues(array: Float64Array | undefined, values: number[]): void {
+  if (!array) return;
+  for (const value of array) {
+    if (Number.isFinite(value)) values.push(value);
+  }
 }
 
 function shortIdentifier(value: string): string {

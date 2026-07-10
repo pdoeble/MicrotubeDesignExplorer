@@ -310,6 +310,13 @@ code {
   margin-bottom: 0.45rem;
 }
 
+.plot-tandem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
 .plot-figure__canvas {
   min-height: 32rem;
   width: 100%;
@@ -331,6 +338,7 @@ code {
 
 @media (max-width: 760px) {
   .cooler-grid,
+  .plot-tandem-grid,
   .section-heading-row {
     grid-template-columns: 1fr;
     display: grid;

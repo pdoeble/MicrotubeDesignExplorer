@@ -409,7 +409,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 
 - [x] Create stable plot IDs and typed plot registry.
 - [x] Implement grouped plot selector.
-- [ ] Implement tandem mode with common comparison scales where required.
+- [x] Implement tandem mode with common comparison scales where required.
 - [ ] Implement approved delta and ratio plots.
 - [ ] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plots.
@@ -661,3 +661,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | Roadmap CI/CD operating model added: lean PR/main CI, deterministic Pages deployment, deployed smoke evidence, and manual release gates are now explicit W10/M9 requirements. | Codex |
 | 2026-07-10 | M6 figure-export slice completed: Plotly specs are tested outside React; registered plots now export PNG and SVG with compact contract/core/request/golden provenance in the figure footer. | Codex |
 | 2026-07-10 | M6 overlay slice completed: cooler summaries expose plot-marker geometry; registered plots draw composite feasible boundaries, minimum-wall lines, and design-point markers from `SimulationResult`; individual screen-boundary family remains open. | Codex |
+| 2026-07-10 | M6 tandem slice completed: cooler-scoped plots now support single/tandem display with shared finite color domains; percent-delta comparison maps use symmetric zero-centered domains. | Codex |

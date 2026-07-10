@@ -18,7 +18,8 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   PNG and SVG figure export buttons.
 - `src/features/plots/ResultPlotsTab.tsx` owns the user workflow for running the
   worker simulation, selecting a registered plot, selecting a cooler when the
-  plot is cooler-scoped, and showing scalar KPI summaries.
+  plot is cooler-scoped, switching cooler-scoped plots between single and
+  tandem display, and showing scalar KPI summaries.
 - No WebGL trace family is allowed in the registry because SVG export is an M7
   requirement.
 - Exported figures include a provenance footer with contract version, core
@@ -28,10 +29,13 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   vectors plus cooler summary geometry/minimum-wall fields. For comparison
   plots, both coolers' overlays are shown; for cooler-scoped plots, only the
   selected cooler's overlays are shown.
+- Tandem display renders the left and right cooler with a shared finite color
+  domain computed from the selected `SimulationResult` fields. Comparison
+  percent-delta plots use a symmetric diverging color domain around zero.
 
 ## Open M6 requirements
 
-- Individual screen-boundary line families, tandem scaling, and full MATLAB
-  plot-family coverage are still open.
+- Individual screen-boundary line families and full MATLAB plot-family coverage
+  are still open.
 - Detailed figure descriptions and tabular grid access remain part of the M6/M8
   accessibility work.

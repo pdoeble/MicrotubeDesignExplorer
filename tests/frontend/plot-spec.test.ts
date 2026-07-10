@@ -6,6 +6,7 @@ import type {
 } from "../../src/contracts/generated/simulation-result";
 import { plotById } from "../../src/features/plots/plotRegistry";
 import {
+  colorDomainForPlot,
   createPlotSpec,
   imageExportOptions,
   matrixFromArray,
@@ -39,7 +40,7 @@ const payload: SimulationResultPayload = {
   },
   contract_version: "1.0.0",
   cooler_left: {
-    fields: [],
+    fields: [{ buffer_index: 4, name: "overall_coefficient", shape: [2, 2], unit: "W/(m^2 K)" }],
     label: "Aluminum",
     masks: [],
     summary: {
@@ -59,7 +60,7 @@ const payload: SimulationResultPayload = {
     warnings: [],
   },
   cooler_right: {
-    fields: [],
+    fields: [{ buffer_index: 5, name: "overall_coefficient", shape: [2, 2], unit: "W/(m^2 K)" }],
     label: "Polyamide",
     masks: [],
     summary: {
@@ -90,6 +91,8 @@ const overlayArrays = [
   new Float64Array([10, 20, 30]),
   new Float64Array([0.001, 0.002, 0.003]),
   new Float64Array([0.0015, 0.0025, Number.NaN]),
+  new Float64Array([1, 2, Number.NaN, 4]),
+  new Float64Array([3, 6, 8, Number.NaN]),
 ] as const;
 
 describe("plot spec", () => {
@@ -155,6 +158,36 @@ describe("plot spec", () => {
       format: "svg",
       scale: 1,
     });
+  });
+
+  it("computes shared color domains across tandem cooler fields", () => {
+    expect(
+      colorDomainForPlot(payload, overlayArrays, "overall-coefficient-map", [
+        "cooler_left",
+        "cooler_right",
+      ]),
+    ).toEqual({ zmax: 8, zmin: 1 });
+  });
+
+  it("applies an explicit color domain to generated heatmaps", () => {
+    const spec = createPlotSpec({
+      colorDomain: { zmax: 8, zmin: 1 },
+      cooler: "cooler_left",
+      field,
+      plot: plotById("overall-coefficient-map"),
+      provenance,
+      titleScope: "Aluminum",
+      xValues: [1, 2, 3],
+      yValues: [0.1, 0.2],
+      zValues: [
+        [1, 2, 3],
+        [4, 5, 6],
+      ],
+    });
+
+    expect(spec.data[0]?.zauto).toBe(false);
+    expect(spec.data[0]?.zmin).toBe(1);
+    expect(spec.data[0]?.zmax).toBe(8);
   });
 
   it("creates boundary, minimum-wall, and design-point overlays from SimulationResult", () => {

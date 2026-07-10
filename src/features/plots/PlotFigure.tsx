@@ -3,6 +3,7 @@ import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
 import {
   axisMillimeters,
+  type ColorDomain,
   createPlotSpec,
   fieldForPlot,
   imageExportOptions,
@@ -15,12 +16,13 @@ import {
 } from "./plotSpec";
 
 type PlotFigureProps = {
+  colorDomain?: ColorDomain | undefined;
   result: SimulationWorkerResult;
   plotId: PlotId;
   cooler: CoolerKey;
 };
 
-export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
+export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigureProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
   const plot = plotById(plotId);
@@ -44,6 +46,7 @@ export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
     () =>
       field && zValues
         ? createPlotSpec({
+            colorDomain,
             cooler,
             field,
             overlays,
@@ -56,6 +59,7 @@ export function PlotFigure({ result, plotId, cooler }: PlotFigureProps) {
           })
         : undefined,
     [
+      colorDomain,
       cooler,
       field,
       overlays,
