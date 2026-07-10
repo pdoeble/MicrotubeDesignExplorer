@@ -170,6 +170,7 @@ export function overlayTracesForPlot(
     plot.source === "comparison" ? (["cooler_left", "cooler_right"] as const) : [cooler];
   const traces: PlotlyData[] = [];
   for (const current of coolers) {
+    traces.push(...screenBoundaryTraces(payload, arrays, current));
     traces.push(...boundaryTraces(payload, arrays, current));
     const minWallTrace = minimumWallTrace(payload, current);
     if (minWallTrace) traces.push(minWallTrace);
@@ -393,6 +394,64 @@ function boundaryTraces(
   ];
 }
 
+const screenBoundaryDefinitions = [
+  { color: "#8a1f11", dash: "solid", label: "Minimum wall screen", mask: "mask_screen_min_wall" },
+  {
+    color: "#5b3f8c",
+    dash: "dash",
+    label: "Burst pressure screen",
+    mask: "mask_screen_burst_pressure",
+  },
+  {
+    color: "#006d77",
+    dash: "dot",
+    label: "Coolant flow screen",
+    mask: "mask_screen_coolant_flow",
+  },
+  {
+    color: "#7a4a00",
+    dash: "dashdot",
+    label: "Pressure drop screen",
+    mask: "mask_screen_pressure_drop",
+  },
+  { color: "#4b6f1d", dash: "longdash", label: "Cost screen", mask: "mask_screen_cost" },
+  {
+    color: "#005a9c",
+    dash: "longdashdot",
+    label: "Capillary screen",
+    mask: "mask_screen_capillary",
+  },
+] as const;
+
+function screenBoundaryTraces(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  cooler: CoolerKey,
+): PlotlyData[] {
+  const x = axisMillimeters(payload.outer_diameter_axis);
+  const y = axisMillimeters(payload.wall_thickness_axis);
+  if (x.length === 0 || y.length === 0) return [];
+
+  const label = payload[cooler].label;
+  const traces: PlotlyData[] = [];
+  for (const boundary of screenBoundaryDefinitions) {
+    const matrix = matrixForField(payload[cooler].masks, arrays, boundary.mask);
+    if (!matrix || !hasBinaryTransition(matrix)) continue;
+    traces.push({
+      contours: { coloring: "none", end: 0.5, showlabels: false, size: 1, start: 0.5 },
+      hoverinfo: "skip",
+      line: { color: boundary.color, dash: boundary.dash, width: 1.4 },
+      name: `${boundary.label} - ${label}`,
+      showlegend: true,
+      type: "contour",
+      x,
+      y,
+      z: matrix,
+    });
+  }
+  return traces;
+}
+
 function minimumWallTrace(
   payload: SimulationResultPayload,
   cooler: CoolerKey,
@@ -464,6 +523,23 @@ function matrixForField(
 ): number[][] | undefined {
   const ref = refs.find((field) => field.name === name);
   return ref ? matrixFromArray(arrays[ref.buffer_index], ref) : undefined;
+}
+
+function hasBinaryTransition(matrix: number[][]): boolean {
+  let hasPass = false;
+  let hasFail = false;
+  for (const row of matrix) {
+    for (const value of row) {
+      if (!Number.isFinite(value)) continue;
+      if (value > 0.5) {
+        hasFail = true;
+      } else {
+        hasPass = true;
+      }
+      if (hasPass && hasFail) return true;
+    }
+  }
+  return false;
 }
 
 function statusAtCell(

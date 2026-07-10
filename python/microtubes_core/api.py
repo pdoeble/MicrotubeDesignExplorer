@@ -220,6 +220,42 @@ def _cooler_payload(
         registry.add("mask_invalid_geometry", "-", _mask_array(grid.mask_invalid_geometry)),
         registry.add("mask_wall_ratio_range", "-", _mask_array(grid.mask_wall_ratio_range)),
         registry.add("mask_below_min_wall", "-", _mask_array(result.mask_below_min_wall)),
+        registry.add("mask_screen_min_wall", "-", _mask_array(result.mask_below_min_wall)),
+        registry.add(
+            "mask_screen_burst_pressure",
+            "-",
+            _mask_array(
+                result.screen_inputs.burst_pressure < result.screen_thresholds.min_burst_pressure
+            ),
+        ),
+        registry.add(
+            "mask_screen_coolant_flow",
+            "-",
+            _mask_array(
+                result.screen_inputs.coolant_volume_flow
+                < result.screen_thresholds.min_coolant_volume_flow
+            ),
+        ),
+        registry.add(
+            "mask_screen_pressure_drop",
+            "-",
+            _mask_array(
+                result.screen_inputs.tube_pressure_drop
+                > result.screen_thresholds.max_tube_pressure_drop
+            ),
+        ),
+        registry.add(
+            "mask_screen_cost",
+            "-",
+            _mask_array(result.screen_inputs.cost_index >= result.screen_thresholds.max_cost_index),
+        ),
+        registry.add(
+            "mask_screen_capillary",
+            "-",
+            _mask_array(
+                result.screen_inputs.capillary_rise > result.screen_thresholds.max_capillary_rise
+            ),
+        ),
         registry.add(
             "mask_all_screens_feasible",
             "-",

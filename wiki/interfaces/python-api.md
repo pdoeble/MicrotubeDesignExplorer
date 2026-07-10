@@ -57,6 +57,12 @@ Each cooler summary includes design-point outer diameter, wall thickness,
 wall ratio, and material minimum wall thickness so frontend plots can draw
 markers and minimum-wall lines without reading the original request.
 
+Each cooler mask group exports invalid-geometry, wall-ratio, below-minimum-wall,
+operating-unsolved, all-screen-feasible, and per-screen failure masks for
+minimum wall, burst pressure, coolant flow, pressure drop, cost, and capillary
+rise. Frontend boundary overlays are drawn from these masks, not from UI-side
+screen recalculation.
+
 Each cooler exports heat-transfer coefficients, Reynolds numbers, coolant
 velocity, pressure drop, hydraulic power, volume and mass flow, tube count,
 bundle area, overall coefficient, bundle conductance, configured-screen burst

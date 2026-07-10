@@ -278,6 +278,16 @@ export const plotRegistry = [
     description: "Composite feasibility mask after all active design screens.",
   },
   {
+    id: "design-boundary-lines",
+    title: "Design boundary lines",
+    family: "boundary-summary",
+    field: "bundle_conductance",
+    unit: "W/K",
+    source: "cooler",
+    description:
+      "Bundle conductance with composite feasibility, individual screen boundaries, minimum-wall line, and design-point marker.",
+  },
+  {
     id: "tech-adjusted-delta-k",
     title: "Tech-adjusted coefficient delta",
     family: "percent-delta",

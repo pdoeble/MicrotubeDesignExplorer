@@ -9,6 +9,7 @@ describe("plot registry", () => {
     expect(ids).toContain("inner-heat-transfer-map");
     expect(ids).toContain("capillary-rise-10g-map");
     expect(ids).toContain("feasibility-mask-map");
+    expect(ids).toContain("design-boundary-lines");
     expect(ids).toContain("tech-adjusted-delta-k");
     expect(ids).toContain("tech-adjusted-ratio-k");
     expect(ids).toContain("same-geometry-ratio");

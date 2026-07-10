@@ -413,7 +413,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 - [x] Implement approved delta and ratio plots.
 - [x] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plots.
-- [ ] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
+- [x] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
 - [x] Provide hover values with units and validity status.
 - [x] Provide tabular access, alt text, and detailed descriptions.
 - [ ] Keep physics out of plotting code.
@@ -666,3 +666,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 hover-status slice completed: cooler heatmap hover now reports value, unit, and validity/screening state from exported masks; comparison plots remain direct exported fields. | Codex |
 | 2026-07-10 | M6 plot-family coverage slice completed: registry entries now cover the remaining thermal, resistance, flow, burst, capillary, hydraulic-power, geometry, and feasibility fields already exported by `SimulationResult`. | Codex |
 | 2026-07-10 | M6 plot data summary slice completed: figure canvases now reference tabular summaries with field, unit, finite-cell count, min/max, and status counts for non-visual inspection. | Codex |
+| 2026-07-10 | M6 screen-boundary slice completed: per-screen failure masks are exported from Python and rendered as SVG-compatible contour lines for minimum-wall, burst, flow, pressure-drop, cost, and capillary screens. | Codex |

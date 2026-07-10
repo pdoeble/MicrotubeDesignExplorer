@@ -31,6 +31,9 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   vectors plus cooler summary geometry/minimum-wall fields. For comparison
   plots, both coolers' overlays are shown; for cooler-scoped plots, only the
   selected cooler's overlays are shown.
+- Individual screen boundaries are Plotly contour traces at mask level 0.5
+  from exported per-screen failure masks. The legend names the screen and
+  cooler; hover is skipped for boundary contours to keep value hover stable.
 - Tandem display renders the left and right cooler with a shared finite color
   domain computed from the selected `SimulationResult` fields. Comparison
   percent-delta plots use a symmetric diverging color domain around zero.
@@ -46,7 +49,5 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 
 ## Open M6 requirements
 
-- Individual screen-boundary line families and full MATLAB plot-family coverage
-  are still open.
 - Full grid-value table export remains part of the later report/export work if
   needed; the M6 figure view provides plot-level tabular summaries.

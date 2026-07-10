@@ -1,6 +1,6 @@
 declare module "plotly.js-dist-min" {
   export type PlotlyData = {
-    type: "heatmap" | "scatter";
+    type: "contour" | "heatmap" | "scatter";
     x?: unknown;
     y?: unknown;
     z?: unknown;
@@ -8,7 +8,15 @@ declare module "plotly.js-dist-min" {
     name?: string;
     colorscale?: string;
     colorbar?: { title?: { text: string } };
+    contours?: {
+      coloring?: "none";
+      end?: number;
+      showlabels?: boolean;
+      size?: number;
+      start?: number;
+    };
     customdata?: unknown;
+    hoverinfo?: "skip";
     hovertemplate?: string;
     line?: { color?: string; dash?: string; width?: number };
     marker?: { color?: string; size?: number; symbol?: string };

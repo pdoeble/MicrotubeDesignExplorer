@@ -261,6 +261,35 @@ describe("plot spec", () => {
     expect(traces[3]?.x).toEqual([1.5, 2.5]);
   });
 
+  it("creates individual screen boundary contour traces from exported masks", () => {
+    const maskRef: GridFieldRef = {
+      buffer_index: 7,
+      name: "mask_screen_burst_pressure",
+      shape: [2, 2],
+      unit: "-",
+    };
+    const boundaryPayload: SimulationResultPayload = {
+      ...payload,
+      cooler_left: {
+        ...payload.cooler_left,
+        masks: [maskRef],
+      },
+    };
+    const arrays = [...overlayArrays, new Float64Array(), new Float64Array([0, 1, 0, 1])] as const;
+
+    const traces = overlayTracesForPlot(
+      boundaryPayload,
+      arrays,
+      plotById("design-boundary-lines"),
+      "cooler_left",
+    );
+
+    expect(traces[0]).toMatchObject({
+      name: "Burst pressure screen - Aluminum",
+      type: "contour",
+    });
+  });
+
   it("builds hover validity status from exported masks", () => {
     const maskRefs: GridFieldRef[] = [
       { buffer_index: 7, name: "mask_invalid_geometry", shape: [2, 2], unit: "-" },

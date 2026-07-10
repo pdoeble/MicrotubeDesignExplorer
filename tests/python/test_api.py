@@ -135,6 +135,21 @@ def test_api_default_masks_match_goldens() -> None:
         _field(result, result.payload.cooler_right.masks, "mask_all_screens_feasible"),
         read_u8(case_dir / "mask_design_feasible_pa").astype(np.float64),
     )
+    np.testing.assert_array_equal(
+        _field(result, result.payload.cooler_left.masks, "mask_screen_min_wall"),
+        _field(result, result.payload.cooler_left.masks, "mask_below_min_wall"),
+    )
+    for name in (
+        "mask_screen_burst_pressure",
+        "mask_screen_coolant_flow",
+        "mask_screen_pressure_drop",
+        "mask_screen_cost",
+        "mask_screen_capillary",
+    ):
+        assert (
+            _field(result, result.payload.cooler_left.masks, name).shape
+            == _field(result, result.payload.cooler_left.masks, "mask_all_screens_feasible").shape
+        )
 
 
 def test_api_summary_exposes_plot_marker_geometry() -> None:

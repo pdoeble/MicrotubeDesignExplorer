@@ -27,7 +27,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - [x] Log-color map family (contour/heatmap, no WebGL traces).
 - [x] Percent-delta family with symmetric diverging color scale.
 - [x] Composite feasible boundary, minimum-wall line, and design-point overlays.
-- [ ] Boundary-lines family with individual screen boundaries.
+- [x] Boundary-lines family with individual screen boundaries.
 - [x] KPI summary panel (roadmap §9 quantities).
 - [x] Tandem mode with shared finite color scales.
 - [x] Delta/ratio switching for comparison fields.
@@ -77,6 +77,11 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - 2026-07-10 plot data summary slice: `pnpm typecheck`, `pnpm test`
   (35 passed), `pnpm lint` (0 errors; 2 generated-contract warnings),
   `pnpm format:check`, and `pnpm build`.
+- 2026-07-10 screen-boundary slice: `uv run pytest` (52 passed),
+  `uv run mypy .`, `uv run ruff check ..`, `uv run ruff format --check ..`,
+  `pnpm typecheck`, `pnpm test` (36 passed), `pnpm lint` (0 errors; 2
+  generated-contract warnings), `pnpm format:check`, `pnpm build`, and
+  `python scripts/check_prohibited_files.py`.
 
 ## Status log
 
@@ -91,6 +96,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 | 2026-07-10 | Hover-status slice completed: cooler heatmaps attach exported mask status as Plotly customdata so hover text includes value, unit, and validity/screening state. |
 | 2026-07-10 | Plot-family coverage slice completed: the registry now exposes thermal coefficients, resistance components, hydraulic power, mass flow, tube count, bundle area, capillary sensitivity fields, medical burst tolerance, and feasibility mask plots from exported fields/masks. |
 | 2026-07-10 | Plot data summary slice completed: each figure now exposes a table with plot ID, field, unit, finite-cell count, min/max, and status counts, referenced from the plot canvas for assistive technology. |
+| 2026-07-10 | Screen-boundary slice completed: Python exports per-screen failure masks and Plotly renders SVG-compatible contour lines for minimum wall, burst, flow, pressure drop, cost, and capillary screens. |
 
 ## Final commits
 
