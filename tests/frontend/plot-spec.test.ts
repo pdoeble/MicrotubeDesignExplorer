@@ -14,6 +14,7 @@ import {
   overlayTracesForPlot,
   provenanceFooter,
   statusMatrixForPlot,
+  summarizePlotData,
 } from "../../src/features/plots/plotSpec";
 
 const field: GridFieldRef = {
@@ -296,6 +297,31 @@ describe("plot spec", () => {
       ["invalid geometry", "outside wall-ratio range"],
       ["below minimum wall", "screened out"],
     ]);
+  });
+
+  it("summarizes plotted data for tabular access", () => {
+    expect(
+      summarizePlotData(
+        [
+          [1, Number.NaN],
+          [3, 5],
+        ],
+        [
+          ["valid", "invalid geometry"],
+          ["valid", "screened out"],
+        ],
+      ),
+    ).toEqual({
+      finiteCells: 3,
+      maximum: 5,
+      minimum: 1,
+      statusCounts: {
+        "invalid geometry": 1,
+        "screened out": 1,
+        valid: 2,
+      },
+      totalCells: 4,
+    });
   });
 
   it("can resolve mask-backed plot fields", () => {

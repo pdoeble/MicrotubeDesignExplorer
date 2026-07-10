@@ -27,6 +27,14 @@ export type PlotSpec = {
   config: PlotlyConfig;
 };
 
+export type PlotDataSummary = {
+  finiteCells: number;
+  maximum: number | null;
+  minimum: number | null;
+  statusCounts: Record<string, number>;
+  totalCells: number;
+};
+
 type PlotSpecInput = {
   colorDomain?: ColorDomain | undefined;
   cooler: CoolerKey;
@@ -241,6 +249,44 @@ export function colorDomainForPlot(
     return { zmax: zmax + padding, zmin: zmin - padding };
   }
   return { zmax, zmin };
+}
+
+export function summarizePlotData(
+  zValues: number[][],
+  statusValues: string[][] | undefined,
+): PlotDataSummary {
+  let finiteCells = 0;
+  let totalCells = 0;
+  let minimum = Number.POSITIVE_INFINITY;
+  let maximum = Number.NEGATIVE_INFINITY;
+  const statusCounts: Record<string, number> = {};
+
+  for (let row = 0; row < zValues.length; row += 1) {
+    const rowValues = zValues[row];
+    if (!rowValues) continue;
+    for (let column = 0; column < rowValues.length; column += 1) {
+      totalCells += 1;
+      const value = rowValues[column];
+      if (value === undefined) continue;
+      if (Number.isFinite(value)) {
+        finiteCells += 1;
+        minimum = Math.min(minimum, value);
+        maximum = Math.max(maximum, value);
+      }
+      const status = statusValues?.[row]?.[column];
+      if (status) {
+        statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+      }
+    }
+  }
+
+  return {
+    finiteCells,
+    maximum: finiteCells > 0 ? maximum : null,
+    minimum: finiteCells > 0 ? minimum : null,
+    statusCounts,
+    totalCells,
+  };
 }
 
 export function imageExportOptions(

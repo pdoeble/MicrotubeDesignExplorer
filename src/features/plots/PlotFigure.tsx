@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
 import {
@@ -10,6 +10,7 @@ import {
   matrixFromArray,
   overlayTracesForPlot,
   statusMatrixForPlot,
+  summarizePlotData,
   supportedImageFormats,
   titleScopeForPlot,
   type CoolerKey,
@@ -25,6 +26,7 @@ type PlotFigureProps = {
 
 export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigureProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
+  const detailsId = useId();
   const [exportStatus, setExportStatus] = useState<string | null>(null);
   const plot = plotById(plotId);
   const field = fieldForPlot(result.payload, plotId, cooler);
@@ -46,6 +48,10 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   const statusValues = useMemo(
     () => statusMatrixForPlot(result.payload, result.arrays, plot, cooler),
     [cooler, plot, result.arrays, result.payload],
+  );
+  const dataSummary = useMemo(
+    () => (zValues ? summarizePlotData(zValues, statusValues) : undefined),
+    [statusValues, zValues],
   );
   const plotSpec = useMemo(
     () =>
@@ -128,6 +134,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
         className="plot-figure__canvas"
         role="img"
         aria-label={plot.description}
+        aria-describedby={detailsId}
       />
       {exportStatus ? (
         <p className="plot-figure__status" role="status">
@@ -138,6 +145,56 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
         {plot.description} Values are read from `SimulationResult`; axes use SI-derived display
         conversions. The exported figure includes request and version provenance.
       </figcaption>
+      {dataSummary ? (
+        <div className="plot-figure__details" id={detailsId}>
+          <table className="summary-table">
+            <caption>Current plot data summary</caption>
+            <tbody>
+              <tr>
+                <th scope="row">Plot ID</th>
+                <td>{plot.id}</td>
+              </tr>
+              <tr>
+                <th scope="row">Field</th>
+                <td>{field.name}</td>
+              </tr>
+              <tr>
+                <th scope="row">Unit</th>
+                <td>{field.unit}</td>
+              </tr>
+              <tr>
+                <th scope="row">Finite cells</th>
+                <td>
+                  {dataSummary.finiteCells} / {dataSummary.totalCells}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Minimum</th>
+                <td>{formatPlotValue(dataSummary.minimum)}</td>
+              </tr>
+              <tr>
+                <th scope="row">Maximum</th>
+                <td>{formatPlotValue(dataSummary.maximum)}</td>
+              </tr>
+              <tr>
+                <th scope="row">Status counts</th>
+                <td>{formatStatusCounts(dataSummary.statusCounts)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </figure>
   );
+}
+
+function formatPlotValue(value: number | null): string {
+  if (value === null || !Number.isFinite(value)) return "n/a";
+  return Number(value.toPrecision(6)).toString();
+}
+
+function formatStatusCounts(statusCounts: Record<string, number>): string {
+  const entries = Object.entries(statusCounts);
+  if (entries.length === 0) return "n/a";
+  return entries.map(([status, count]) => `${status}: ${count}`).join("; ");
 }

@@ -336,6 +336,16 @@ code {
   margin-top: 0.45rem;
 }
 
+.plot-figure__details {
+  margin-top: 0.75rem;
+}
+
+.plot-figure__details caption {
+  font-weight: 700;
+  padding-bottom: 0.35rem;
+  text-align: left;
+}
+
 @media (max-width: 760px) {
   .cooler-grid,
   .plot-tandem-grid,

@@ -415,7 +415,7 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
       spacing, capillary, cost, and feasibility plots.
 - [ ] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
 - [x] Provide hover values with units and validity status.
-- [ ] Provide tabular access, alt text, and detailed descriptions.
+- [x] Provide tabular access, alt text, and detailed descriptions.
 - [ ] Keep physics out of plotting code.
 - [x] Export every registered figure as PNG and SVG with provenance footer.
 
@@ -665,3 +665,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 delta/ratio slice completed: registry variants now expose exported ratio fields next to approved percent-delta maps, and the Result Plots tab switches comparison groups between delta and ratio. | Codex |
 | 2026-07-10 | M6 hover-status slice completed: cooler heatmap hover now reports value, unit, and validity/screening state from exported masks; comparison plots remain direct exported fields. | Codex |
 | 2026-07-10 | M6 plot-family coverage slice completed: registry entries now cover the remaining thermal, resistance, flow, burst, capillary, hydraulic-power, geometry, and feasibility fields already exported by `SimulationResult`. | Codex |
+| 2026-07-10 | M6 plot data summary slice completed: figure canvases now reference tabular summaries with field, unit, finite-cell count, min/max, and status counts for non-visual inspection. | Codex |

@@ -35,6 +35,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - [x] Thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plot coverage from exported
       fields/masks.
+- [x] Plot-level tabular data summary, alt text, and detailed description.
 - [x] PNG + SVG export with provenance footer.
 
 ## Risks
@@ -73,6 +74,9 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 - 2026-07-10 plot-family coverage slice: `pnpm typecheck`, `pnpm test`
   (34 passed), `pnpm lint` (0 errors; 2 generated-contract warnings),
   `pnpm format:check`, and `pnpm build`.
+- 2026-07-10 plot data summary slice: `pnpm typecheck`, `pnpm test`
+  (35 passed), `pnpm lint` (0 errors; 2 generated-contract warnings),
+  `pnpm format:check`, and `pnpm build`.
 
 ## Status log
 
@@ -86,6 +90,7 @@ Physics stays out of plotting code — values come only from `SimulationResult`.
 | 2026-07-10 | Delta/ratio slice completed: comparison plot variants are linked by registry group, ratio companions render exported ratio fields, and the Result Plots tab switches between delta and ratio without deriving values in the UI. |
 | 2026-07-10 | Hover-status slice completed: cooler heatmaps attach exported mask status as Plotly customdata so hover text includes value, unit, and validity/screening state. |
 | 2026-07-10 | Plot-family coverage slice completed: the registry now exposes thermal coefficients, resistance components, hydraulic power, mass flow, tube count, bundle area, capillary sensitivity fields, medical burst tolerance, and feasibility mask plots from exported fields/masks. |
+| 2026-07-10 | Plot data summary slice completed: each figure now exposes a table with plot ID, field, unit, finite-cell count, min/max, and status counts, referenced from the plot canvas for assistive technology. |
 
 ## Final commits
 

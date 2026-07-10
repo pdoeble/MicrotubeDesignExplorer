@@ -40,10 +40,13 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
 - Cooler-scoped heatmap hover text includes value, unit, and status derived
   from exported masks: invalid geometry, outside wall-ratio range, operating
   point unsolved, below minimum wall, screened out, or valid.
+- Each figure exposes a tabular data summary tied to the plot canvas through
+  `aria-describedby`: plot ID, field name, unit, finite-cell count, min/max,
+  and status counts where status masks are available.
 
 ## Open M6 requirements
 
 - Individual screen-boundary line families and full MATLAB plot-family coverage
   are still open.
-- Detailed figure descriptions and tabular grid access remain part of the M6/M8
-  accessibility work.
+- Full grid-value table export remains part of the later report/export work if
+  needed; the M6 figure view provides plot-level tabular summaries.
