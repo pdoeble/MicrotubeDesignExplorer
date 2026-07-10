@@ -86,6 +86,7 @@ class CoolerSweepResult:
     re_outer_simple: FloatArray
     re_outer_vdi: FloatArray
     tube_pressure_drop: FloatArray
+    hydraulic_power: FloatArray
     coolant_volume_flow: FloatArray
     coolant_mass_flow: FloatArray
     tube_count_continuous: FloatArray
@@ -285,6 +286,7 @@ def evaluate_cooler_sweep(
     masked_re_outer_vdi = _masked(re_outer_vdi, design_grid.mask_wall_ratio_range)
     masked_pressure_drop = _masked(pressure_drop, design_grid.mask_wall_ratio_range)
     masked_volume_flow = _masked(volume_flow, design_grid.mask_wall_ratio_range)
+    hydraulic_power = masked_pressure_drop * masked_volume_flow
     masked_mass_flow = _masked(mass_flow, design_grid.mask_wall_ratio_range)
     masked_spacing_t = _masked(spacing_t, design_grid.mask_wall_ratio_range)
     masked_spacing_l = _masked(spacing_l, design_grid.mask_wall_ratio_range)
@@ -350,6 +352,7 @@ def evaluate_cooler_sweep(
         re_outer_simple=masked_re_outer_simple,
         re_outer_vdi=masked_re_outer_vdi,
         tube_pressure_drop=masked_pressure_drop,
+        hydraulic_power=hydraulic_power,
         coolant_volume_flow=masked_volume_flow,
         coolant_mass_flow=masked_mass_flow,
         tube_count_continuous=masked_tube_count,

@@ -29,13 +29,14 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - [x] models: correlations (G1/G7), friction, burst, capillary, cost.
 - [x] geometry: tube, bundle, footprint counts.
 - [x] geometry: integrate canonical dimensions into sweep evaluation.
-- [ ] geometry: expose volume/aspect conversion through public API evaluation.
+- [x] geometry: expose volume/aspect conversion through public API evaluation.
 - [x] operating modes incl. deterministic Δp/P inversion.
 - [x] integrate operating modes into sweep field generation.
 - [x] sweeps: grids, masks (invalid d_i, τ-range, tech), screens.
 - [x] sweeps: composite feasible boundaries.
 - [x] comparison: same-geometry ratio, nearest-feasible-Al reference.
-- [ ] full golden regression tests for default-case sweep and comparison.
+- [ ] full golden regression tests for remaining tolerance/sensitivity fields.
+- [x] default-case sweep/comparison/API golden regression tests.
 - [x] function-level golden tests for ported isolated submodels.
 
 ## Risks
@@ -50,7 +51,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 - `tests/python/test_function_parity.py` covers all current function-level
   goldens for G1/G7, Darcy friction factor, tube pressure drop, Lamé burst,
   cost, default-grid geometry, capillary, and resistance fields.
-- 2026-07-10: `uv run pytest` (47), `uv run mypy .`, `uv run ruff check ..`.
+- 2026-07-10: `uv run pytest` (50), `uv run mypy .`, `uv run ruff check ..`.
 
 ## Status log
 
@@ -61,6 +62,7 @@ comparison (delta/ratio/tech-adjusted). Golden parity at `rtol=1e-8`,
 | 2026-07-10 | Operating-mode conversions implemented for air and coolant, including deterministic pressure-drop and hydraulic-power bisection with unbracketed/invalid masks. |
 | 2026-07-10 | Single-cooler sweep pipeline implemented for grids, invalid/Y/tech masks, operating-mode integration, raw fields, screen inputs, and all-screen feasibility masks. ADR-0005 records MATLAB-compatible axis generation for mask parity. |
 | 2026-07-10 | Comparison helpers implemented for interp2-style screen queries, nearest feasible left reference, same-geometry ratio, tech-adjusted ratios, and composite feasible boundaries. |
+| 2026-07-10 | Public Python `simulate(request)` API added with contract payload, C-order float64 array registry, request hash, provenance, scalar summaries, masks, comparison fields, and API-level golden checks. |
 
 ## Final commits
 

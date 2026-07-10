@@ -1,0 +1,102 @@
+"""Public API tests for SimulationRequest -> SimulationResultPayload."""
+
+from __future__ import annotations
+
+import numpy as np
+from golden_loader import assert_float_matches_golden, default_case, read_f64, read_u8
+
+from microtubes_core.api import SimulationResult, request_sha256, simulate
+from microtubes_core.contracts import GridFieldRef, SimulationResultPayload
+from microtubes_core.defaults import paper_default_request
+
+M_TO_MM = 1.0e3
+
+
+def test_simulate_returns_valid_payload_and_buffers() -> None:
+    request = paper_default_request()
+    result = simulate(request)
+    restored = SimulationResultPayload.model_validate(result.payload.model_dump(mode="json"))
+
+    assert restored == result.payload
+    assert result.payload.request_hash == request_sha256(request)
+    assert result.payload.provenance.request_hash == result.payload.request_hash
+    refs = _all_refs(result)
+    assert [ref.buffer_index for ref in refs] == list(range(len(refs)))
+    assert len(result.arrays) == len(refs)
+    for ref in refs:
+        array = result.arrays[ref.buffer_index]
+        assert array.dtype == np.float64
+        assert array.flags.c_contiguous
+        assert array.shape == ref.shape
+
+
+def test_api_default_axes_and_fields_match_goldens() -> None:
+    case_dir = default_case()
+    result = simulate(paper_default_request())
+
+    np.testing.assert_allclose(
+        np.array(result.payload.outer_diameter_axis) * M_TO_MM,
+        read_f64(case_dir / "da_mm")[0, :],
+        rtol=1.0e-12,
+        atol=1.0e-14,
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_left.fields, "overall_coefficient"),
+        read_f64(case_dir / "k_Al_raw"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.cooler_right.fields, "overall_coefficient"),
+        read_f64(case_dir / "k_Poly_raw"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.comparison.fields, "ratio_tech_adjusted"),
+        read_f64(case_dir / "ratio_tech_adjusted"),
+    )
+    assert_float_matches_golden(
+        _field(result, result.payload.comparison.fields, "nearest_left_reference_diameter")
+        * M_TO_MM,
+        read_f64(case_dir / "dAlNearest_mm"),
+    )
+    np.testing.assert_allclose(
+        _field(result, result.payload.cooler_left.fields, "hydraulic_power"),
+        _field(result, result.payload.cooler_left.fields, "tube_pressure_drop")
+        * _field(result, result.payload.cooler_left.fields, "coolant_volume_flow"),
+        rtol=1.0e-12,
+        atol=1.0e-14,
+        equal_nan=True,
+    )
+
+
+def test_api_default_masks_match_goldens() -> None:
+    case_dir = default_case()
+    result = simulate(paper_default_request())
+
+    np.testing.assert_array_equal(
+        _field(result, result.payload.cooler_left.masks, "mask_invalid_geometry"),
+        read_u8(case_dir / "mask_invalid_di").astype(np.float64),
+    )
+    np.testing.assert_array_equal(
+        _field(result, result.payload.cooler_left.masks, "mask_all_screens_feasible"),
+        read_u8(case_dir / "mask_design_feasible_al").astype(np.float64),
+    )
+    np.testing.assert_array_equal(
+        _field(result, result.payload.cooler_right.masks, "mask_all_screens_feasible"),
+        read_u8(case_dir / "mask_design_feasible_pa").astype(np.float64),
+    )
+
+
+def _all_refs(result: SimulationResult) -> list[GridFieldRef]:
+    return [
+        *result.payload.cooler_left.fields,
+        *result.payload.cooler_left.masks,
+        *result.payload.cooler_right.fields,
+        *result.payload.cooler_right.masks,
+        *result.payload.comparison.fields,
+    ]
+
+
+def _field(result: SimulationResult, refs: list[GridFieldRef], name: str) -> np.ndarray:
+    for ref in refs:
+        if ref.name == name:
+            return result.arrays[ref.buffer_index]
+    raise AssertionError(f"missing field {name}")

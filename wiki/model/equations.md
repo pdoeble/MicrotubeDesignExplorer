@@ -111,6 +111,7 @@ Coolant-side velocity modes:
   `tube_friction_pressure_drop(v_i, d_i) = target`
 - constant hydraulic power: solve
   `tube_friction_pressure_drop(v_i, d_i) * Vdot(v_i) = target`
+- exported hydraulic power diagnostic: `P_hyd = Delta p * Vdot`
 
 The inversion is deterministic bisection over `[1e-6, 100] m/s` for 80
 iterations. Cells outside the bracket or with invalid geometry return NaN

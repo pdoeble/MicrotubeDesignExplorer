@@ -283,10 +283,10 @@ A breaking change requires:
 ### Major tasks
 
 - [x] Implement geometry and discrete tube-count logic.
-- [ ] Implement static fluid and material inputs.
+- [x] Implement static fluid and material inputs.
 - [x] Implement all air- and coolant-side operating modes.
 - [x] Implement VDI G1, VDI G7, wall conduction, and resistance aggregation.
-- [ ] Implement flow, pressure loss, hydraulic power, and diagnostics.
+- [x] Implement flow, pressure loss, hydraulic power, and diagnostics.
 - [x] Implement tolerance-adjusted pressure integrity.
 - [x] Implement capillary-rise and cost models.
 - [ ] Implement all screens, masks, sweeps, warnings, and provenance.
@@ -606,3 +606,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M3 first core slice completed: pure model modules for G1/G7 correlations, Darcy pressure drop, Lamé burst, geometry/counts, operating modes, capillary, cost, and resistance aggregation; function-level MATLAB golden parity and operating inversion tests pass (41 pytest) with mypy and ruff green. ADR-0004 added for cost count floor/reference normalization. | Codex |
 | 2026-07-10 | M3 sweep slice added: single-cooler grid pipeline, invalid/Y/tech masks, operating-mode integration, raw field generation, screen inputs, and all-screen feasibility masks; default-case sweep parity passes (45 pytest). ADR-0005 added for MATLAB-compatible sweep-axis generation. | Codex |
 | 2026-07-10 | M3 comparison slice added: interp2-style screen queries, nearest feasible reference, same-geometry ratio, tech-adjusted ratios, and composite feasible boundaries; default comparison golden parity passes (47 pytest). | Codex |
+| 2026-07-10 | M3 API slice added: `simulate(request)` now returns contract payload plus C-order float64 array registry, request hash, provenance, scalar summaries, cooler fields/masks, and comparison fields; API golden checks pass (50 pytest). | Codex |
