@@ -163,6 +163,40 @@ A breaking change requires:
 
 ---
 
+## 7.1 Lean CI/CD operating model
+
+**Goal:** keep every pull request cheap to validate while making every deployed
+GitHub Pages build reproducible, traceable, and scientifically reviewable.
+
+### Required workflows
+
+| Workflow | Trigger | Required gates | Output |
+|---|---|---|---|
+| PR/main CI | `pull_request`, `push` to `main` | prohibited-file check; locked `uv` sync; `ruff`; `ruff format --check`; `mypy`; `pytest`; Python contract export drift check; frozen `pnpm` install; generated TypeScript contract drift check; `typecheck`; `lint`; `format:check`; Vitest; production build | merge/block signal |
+| Pages deployment | `push` to `main`, manual dispatch | prohibited-file check; frozen install; frontend type/unit test gate; deterministic Vite build with version and commit metadata; Pages artifact upload; GitHub Pages deployment | live static review candidate |
+| Deployed smoke | after Pages deployment, manual fallback | Playwright against the deployed URL: app loads, Pyodide worker starts, reduced paper-default request completes, at least one result plot renders, export/report smoke path is checked once M7 exists, no fatal console errors | deployment evidence |
+| Release gate | manual before tag/release | green CI; deployed smoke evidence; no contract/default drift; license and `CITATION.cff` reviewed; changelog/release notes prepared; prohibited-source check on source and `dist` artifact | releasable tag candidate |
+
+### Operating rules
+
+- Keep PR CI to deterministic quality and build checks; do not add broad OS,
+  browser, or dependency matrices unless a release-blocking defect proves the
+  need.
+- Cache package downloads only through lockfile-aware actions; never use cache
+  hits as evidence of correctness.
+- Deployment uses the built static `dist` artifact only; no backend, secret, or
+  runtime network dependency may be introduced.
+- Pages permissions stay minimal: read repository contents, write Pages, and
+  request the OIDC token required by GitHub Pages.
+- Contract, defaults, golden references, and generated artifacts are drift
+  gates. A drift failure must be fixed by updating the source of truth and
+  documenting the reason, not by editing generated files by hand.
+- Full scientific parity, accessibility, performance, report/export, and
+  deployed smoke suites are release-candidate gates under M8/M9, not mandatory
+  for every small PR unless that PR touches the affected surface.
+
+---
+
 # 8. Milestones
 
 ## M0 — Repository and governance baseline
@@ -449,9 +483,15 @@ A breaking change requires:
 ### Major tasks
 
 - [ ] Configure production base path and deterministic Vite build.
-- [ ] Add build, test, license, and deployment gates.
+- [ ] Keep PR/main CI aligned with the required lean CI gates in section 7.1.
+- [ ] Gate Pages deployment on prohibited-file checks, frozen installs,
+      type/unit tests, deterministic build metadata, and artifact upload.
+- [ ] Add release gates for license, citation, changelog, contract/default
+      freeze, and source/artifact prohibited-file checks.
 - [ ] Deploy through GitHub Actions.
-- [ ] Add deployed-site smoke tests.
+- [ ] Add deployed-site Playwright smoke tests for app load, worker startup,
+      reduced paper-default computation, plot rendering, and M7 export/report
+      smoke paths.
 - [ ] Verify direct navigation, reloads, assets, and exports.
 - [ ] Verify no prohibited source material ships.
 - [ ] Freeze release-candidate contracts and defaults.
@@ -537,6 +577,8 @@ Create before substantial work begins:
 | Outside-validity results appear authoritative | Explicit warnings and visual state |
 | Parallel contract drift | ADR and semantic contract versioning |
 | Wiki/plan drift | Mandatory pre-commit documentation review |
+| CI/CD becomes too slow for regular PRs | Keep PR CI to lean deterministic gates; reserve full deployed smoke, accessibility, performance, and release evidence for M8/M9 gates unless directly affected |
+| Deployed artifact differs from validated source | Build and deploy only from locked installs, deterministic Vite metadata, generated-contract drift checks, and the uploaded Pages artifact |
 | Provisional MIT license not confirmed by authors | Confirm before M10 (ADR-0001 §4) |
 
 ---
@@ -616,3 +658,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M4 completed: same-origin Pyodide runtime plus required package wheels are generated with SHA-256 verification; Playwright browser worker parity against direct Python passes for a reduced default request; structured worker errors, startup retry, cancellation, and client cache behavior are unit-tested. | Codex |
 | 2026-07-10 | M5 completed: manifest-driven two-cooler input workflow, editable materials/fluids, geometry representation conversion, group linking/restoration, versioned URL state, complete reset, and responsive scientific form styling added and validated. | Codex |
 | 2026-07-10 | M6 started: typed Plotly heatmap registry, result-run workflow, KPI summary table, and initial thermal/flow/pressure/Reynolds/spacing/cost/delta plot selection render from `SimulationResult`; export, boundaries, tandem scaling, and full MATLAB plot coverage remain open. | Codex |
+| 2026-07-10 | Roadmap CI/CD operating model added: lean PR/main CI, deterministic Pages deployment, deployed smoke evidence, and manual release gates are now explicit W10/M9 requirements. | Codex |
