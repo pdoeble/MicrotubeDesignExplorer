@@ -109,6 +109,17 @@ describe("SimulationWorkerClient", () => {
     client.dispose();
   });
 
+  it("rejects pending requests when the worker crashes", async () => {
+    const worker = new MockWorker();
+    const client = new SimulationWorkerClient(() => worker);
+
+    const initialized = client.initialize();
+    worker.onerror?.({ message: "worker crashed" } as ErrorEvent);
+
+    await expect(initialized).rejects.toThrow("worker crashed");
+    client.dispose();
+  });
+
   it("rejects superseded compute requests and resolves the latest request", async () => {
     const worker = new MockWorker();
     const client = new SimulationWorkerClient(() => worker);

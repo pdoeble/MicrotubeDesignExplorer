@@ -101,7 +101,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M5 | Application shell and input workflows | completed | M2, M4 |
 | M6 | Plot system and results experience | completed | M3–M5 |
 | M7 | Figure and report exports | completed | M4, M6 |
-| M8 | Validation, accessibility, performance | ready | M3–M7 |
+| M8 | Validation, accessibility, performance | in-progress | M3–M7 |
 | M9 | GitHub Pages release candidate | not-started | M8 |
 | M10 | Scientific release and handover | not-started | M9 |
 
@@ -671,3 +671,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M7 started: Python ReportPayload and canonical JSON sidecar basis added with request/result provenance, summaries, warnings, and SHA-256 array manifests. | Codex |
 | 2026-07-10 | M7 browser export slice completed: current `SimulationResult` can be exported as canonical JSON sidecar, standalone HTML report, and print/PDF report path; report figure embedding and PNG resolution selection remain open. | Codex |
 | 2026-07-11 | M7 completed: individual PNG export now supports selectable 1x/2x/3x resolution, registered Plotly specs are captured as SVG report figures for standalone HTML and print/PDF reports, JSON sidecars remain canonical and image-free, and report content is generated from one immutable `SimulationResult`. Validation: `pnpm test` (39 passed), `pnpm typecheck`, `pnpm lint` (generated-contract warnings only), `pnpm format:check`, `pnpm build`, prohibited-file check, and `git diff --check`. M8 is ready. | Codex |
+| 2026-07-11 | M8 automation slice started: Python API geometry-representation equivalence, worker-crash failure handling, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep worker performance budgets are now covered. Independent scientific/accessibility review remains open. | Codex |
