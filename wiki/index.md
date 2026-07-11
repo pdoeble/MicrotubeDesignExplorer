@@ -11,6 +11,7 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
 | [model/](model/index.md) | Equations, assumptions, validity limits, provenance of the scientific model |
 | [interfaces/](interfaces/index.md) | Contracts (`SimulationRequest`/`SimulationResult`), worker protocol, export payloads |
 | [ui/](ui/index.md) | Visual conventions, accessibility rules, tab/control patterns |
+| [release-and-maintenance.md](release-and-maintenance.md) | Release checklist, version metadata, maintenance policy, and handover notes |
 
 ## Key documents
 
@@ -24,6 +25,10 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
 - [interfaces/contracts.md](interfaces/contracts.md) — frozen data contracts (M2).
 - [interfaces/worker-protocol.md](interfaces/worker-protocol.md) — Pyodide worker
   messages, transferables, caching, and cancellation boundary (M4).
+- [model/scientific-validation.md](model/scientific-validation.md) — validation
+  evidence and remaining independent-approval gate (M8).
+- [release-and-maintenance.md](release-and-maintenance.md) — M10 release and
+  maintenance handover.
 
 ## Conventions for contributors
 

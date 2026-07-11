@@ -22,6 +22,10 @@ Target: WCAG 2.2 AA for the static scientific application.
 - visible controls on the Input page have accessible names;
 - the 390 px mobile viewport has no horizontal document overflow;
 - body text, active tabs, and primary buttons meet at least 4.5:1 contrast;
+- screen-reader landmarks/roles for banner, main, tablist, tabpanel, fieldset
+  groups, and cooler regions are present;
+- 200% text zoom reflows the Input workflow without horizontal document
+  overflow;
 - reduced paper-default compute completes and JSON/HTML report exports work.
 
 ## Open review gates

@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M9/M10
 > **Workstream:** W10 (CI and release)
-> **Status:** in-progress
+> **Status:** blocked
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-11
 
@@ -38,7 +38,8 @@ operating model.
 - [x] Release gates: green CI, deployed smoke evidence, license check,
       `CITATION.cff` review, changelog/release notes, contract/default freeze
       verification, prohibited-source check on source and `dist`.
-- [ ] Tagging + release notes + CITATION finalization (M10).
+- [x] `CITATION.cff` and `CHANGELOG.md` aligned with package version `0.1.0`.
+- [ ] Tagging + release notes publication (M10).
 
 ## Risks
 
@@ -56,7 +57,12 @@ operating model.
   ../scripts/check_release_gate.py`, `uv run ruff format --check
   ../scripts/check_release_gate.py`, `python scripts/check_release_gate.py
   --allow-provisional`.
+- 2026-07-11 Strict local release gate: `pnpm build`,
+  `python scripts/check_release_gate.py`, `python scripts/check_prohibited_files.py`,
+  and `git diff --check` passed with `CITATION.cff` version `0.1.0`.
 - Green CI on GitHub and a deployed URL smoke run remain M9 exit evidence.
+  Current local `origin` has no remote `main` ref, and `gh` is not authenticated
+  to `github.com`, so push/Actions/Pages evidence is blocked externally.
 
 ## Status log
 
@@ -66,6 +72,7 @@ operating model.
 | 2026-07-10 | Synchronized with master roadmap 7.1: lean PR/main CI, deterministic Pages deployment, deployed smoke tests, and manual release gates made explicit. |
 | 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development. |
 | 2026-07-11 | Manual release-gate workflow added: strict pre-release checks run Python/frontend quality gates, contract drift checks, production build, release metadata checks, and source/artifact prohibited-file scans. Current local run allows provisional CITATION version until M10 finalization. |
+| 2026-07-11 | Release metadata finalized locally for `0.1.0` and strict release gate passes. M9/M10 remain blocked on independent review, GitHub.com authentication/push, real Pages deployment, deployed smoke evidence, and release publication. |
 
 ## Final commits
 

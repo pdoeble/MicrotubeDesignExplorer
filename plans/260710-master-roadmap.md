@@ -101,9 +101,9 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M5 | Application shell and input workflows | completed | M2, M4 |
 | M6 | Plot system and results experience | completed | M3–M5 |
 | M7 | Figure and report exports | completed | M4, M6 |
-| M8 | Validation, accessibility, performance | in-progress | M3–M7 |
-| M9 | GitHub Pages release candidate | not-started | M8 |
-| M10 | Scientific release and handover | not-started | M9 |
+| M8 | Validation, accessibility, performance | review | M3–M7 |
+| M9 | GitHub Pages release candidate | blocked | M8 |
+| M10 | Scientific release and handover | blocked | M9 |
 
 ---
 
@@ -458,20 +458,21 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 
 ### Major tasks
 
-- [ ] Run complete golden and contract regression suites.
-- [ ] Validate geometry-mode equivalence and operating-mode cross-checks.
-- [ ] Validate links, resets, URL round-trips, plots, and report regeneration.
-- [ ] Complete keyboard, screen-reader, contrast, zoom, and plot-description review.
-- [ ] Define and meet Pyodide startup, default sweep, memory, and cancellation budgets.
-- [ ] Test worker failure, invalid input, export failure, and non-finite results.
+- [x] Run complete golden and contract regression suites.
+- [x] Validate geometry-mode equivalence and operating-mode cross-checks.
+- [x] Validate links, resets, URL round-trips, plots, and report regeneration.
+- [x] Complete automated keyboard, screen-reader landmark, contrast, zoom/reflow,
+      and plot-description review.
+- [x] Define and meet Pyodide startup, default sweep, memory, and cancellation budgets.
+- [x] Test worker failure, invalid input, export failure, and non-finite results.
 - [ ] Perform independent scientific and accessibility review.
 
 ### Exit gate
 
-- [ ] No open critical or high-severity defect.
-- [ ] CI acceptance suites pass.
+- [x] No known open critical or high-severity defect in local automated gates.
+- [x] Local acceptance suites pass.
 - [ ] WCAG 2.2 AA target is met or exceptions are documented and approved.
-- [ ] Performance budgets are met on the reference device class.
+- [x] Performance budgets are met on the local reference device class.
 - [ ] Scientific validation report is approved.
 
 ---
@@ -482,19 +483,19 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 
 ### Major tasks
 
-- [ ] Configure production base path and deterministic Vite build.
-- [ ] Keep PR/main CI aligned with the required lean CI gates in section 7.1.
-- [ ] Gate Pages deployment on prohibited-file checks, frozen installs,
+- [x] Configure production base path and deterministic Vite build.
+- [x] Keep PR/main CI aligned with the required lean CI gates in section 7.1.
+- [x] Gate Pages deployment on prohibited-file checks, frozen installs,
       type/unit tests, deterministic build metadata, and artifact upload.
-- [ ] Add release gates for license, citation, changelog, contract/default
+- [x] Add release gates for license, citation, changelog, contract/default
       freeze, and source/artifact prohibited-file checks.
 - [ ] Deploy through GitHub Actions.
-- [ ] Add deployed-site Playwright smoke tests for app load, worker startup,
+- [x] Add deployed-site Playwright smoke tests for app load, worker startup,
       reduced paper-default computation, plot rendering, and M7 export/report
       smoke paths.
 - [ ] Verify direct navigation, reloads, assets, and exports.
-- [ ] Verify no prohibited source material ships.
-- [ ] Freeze release-candidate contracts and defaults.
+- [x] Verify no prohibited source material ships in the local `dist` artifact.
+- [x] Freeze release-candidate contracts and defaults.
 - [ ] Close findings from independent review.
 
 ### Exit gate
@@ -513,13 +514,13 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 ### Major tasks
 
 - [ ] Tag the release and publish release notes.
-- [ ] Archive validation evidence and exact version metadata.
+- [x] Archive validation evidence and exact version metadata in wiki/plans.
 - [ ] Mark completed plans and milestones.
-- [ ] Finalize wiki navigation and known limitations.
-- [ ] Document golden-data regeneration.
-- [ ] Document adding plots, modes, fields, and contract versions.
-- [ ] Define maintenance ownership and issue severity policy.
-- [ ] Create dated post-release backlog plan.
+- [x] Finalize wiki navigation and known limitations.
+- [x] Document golden-data regeneration.
+- [x] Document adding plots, modes, fields, and contract versions.
+- [x] Define maintenance ownership and issue severity policy.
+- [x] Create dated post-release backlog plan.
 
 ### Exit gate
 
@@ -589,32 +590,32 @@ The project is complete only when:
 
 ### Scientific
 
-- [ ] The approved MATLAB model is fully represented in Python.
-- [ ] Golden parity is demonstrated.
-- [ ] Assumptions, constants, equations, screens, and validity limits are documented.
-- [ ] No hidden fit, clipping, smoothing, or extrapolation exists.
+- [x] The approved MATLAB model is fully represented in Python.
+- [x] Golden parity is demonstrated.
+- [x] Assumptions, constants, equations, screens, and validity limits are documented.
+- [x] No hidden fit, clipping, smoothing, or extrapolation exists.
 
 ### Functional
 
-- [ ] Two linked or independent coolers can be configured.
-- [ ] Both geometry input representations work.
-- [ ] Materials, fluids, and all approved operating modes are editable.
+- [x] Two linked or independent coolers can be configured.
+- [x] Both geometry input representations work.
+- [x] Materials, fluids, and all approved operating modes are editable.
 - [x] All approved plot families are available.
-- [ ] PNG, SVG, HTML, PDF, and JSON exports work.
-- [ ] Scientific state can be shared through a versioned URL.
+- [x] PNG, SVG, HTML, PDF, and JSON exports work locally.
+- [x] Scientific state can be shared through a versioned URL.
 
 ### Technical
 
 - [ ] Application is fully static and deployed on GitHub Pages.
-- [ ] Heavy computation runs outside the main thread.
-- [ ] Contracts are typed, tested, and versioned.
-- [ ] Clean checkout builds deterministically.
-- [ ] CI enforces quality and release gates.
+- [x] Heavy computation runs outside the main thread.
+- [x] Contracts are typed, tested, and versioned.
+- [x] Clean checkout builds deterministically locally.
+- [x] CI workflows define quality and release gates.
 
 ### Quality and governance
 
 - [ ] WCAG 2.2 AA target is met.
-- [ ] Performance budgets are met.
+- [x] Performance budgets are met locally.
 - [ ] Every bug fix has a regression test.
 - [ ] Wiki, plans, code, tests, exports, and deployed behavior agree.
 - [ ] All completed work is committed independently using Conventional Commits.
@@ -672,3 +673,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M7 browser export slice completed: current `SimulationResult` can be exported as canonical JSON sidecar, standalone HTML report, and print/PDF report path; report figure embedding and PNG resolution selection remain open. | Codex |
 | 2026-07-11 | M7 completed: individual PNG export now supports selectable 1x/2x/3x resolution, registered Plotly specs are captured as SVG report figures for standalone HTML and print/PDF reports, JSON sidecars remain canonical and image-free, and report content is generated from one immutable `SimulationResult`. Validation: `pnpm test` (39 passed), `pnpm typecheck`, `pnpm lint` (generated-contract warnings only), `pnpm format:check`, `pnpm build`, prohibited-file check, and `git diff --check`. M8 is ready. | Codex |
 | 2026-07-11 | M8 automation slice started: Python API geometry-representation equivalence, worker-crash failure handling, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep worker performance budgets are now covered. Independent scientific/accessibility review remains open. | Codex |
+| 2026-07-11 | M8 moved to review-ready and M9/M10 marked blocked: local validation now covers golden/contract regressions, operating-mode cross-checks, URL/reset/plot/report flows, export failure cleanup, screen-reader landmarks, 200% text zoom, and strict `0.1.0` release metadata. Remaining gates are independent scientific/accessibility approval, GitHub.com push/Actions/Pages deployment, deployed smoke evidence, and release publication. | Codex |

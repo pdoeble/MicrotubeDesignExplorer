@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import defaultsJson from "../../src/contracts/defaults.json";
 import type { SimulationRequest } from "../../src/contracts/generated/simulation-request";
 import type { SimulationResultPayload } from "../../src/contracts/generated/simulation-result";
@@ -9,14 +9,32 @@ import {
   reportFilename,
 } from "../../src/features/export/reportExport";
 import {
+  captureReportFigures,
   createReportFigureSpec,
   defaultReportFigureSelections,
 } from "../../src/features/export/reportFigures";
 import type { SimulationWorkerResult } from "../../src/workers/protocol";
 
+const plotlyMock = vi.hoisted(() => ({
+  newPlot: vi.fn(),
+  purge: vi.fn(),
+  toImage: vi.fn(),
+}));
+
+vi.mock("plotly.js-dist-min", () => ({
+  default: plotlyMock,
+}));
+
 const request = defaultsJson.request as SimulationRequest;
 
 describe("report export", () => {
+  afterEach(() => {
+    plotlyMock.newPlot.mockReset();
+    plotlyMock.purge.mockReset();
+    plotlyMock.toImage.mockReset();
+    document.getElementById("microtube-report-figure-capture")?.remove();
+  });
+
   it("builds deterministic sidecar payloads with array manifest statistics", async () => {
     const result = minimalResult();
     const payload = await buildBrowserReportPayload(request, result, {
@@ -118,6 +136,20 @@ describe("report export", () => {
     expect(spec?.spec.layout.title).toEqual({
       text: "Overall heat-transfer coefficient - Left <core>",
     });
+  });
+
+  it("cleans up hidden report figure capture nodes when Plotly export fails", async () => {
+    plotlyMock.newPlot.mockResolvedValue(undefined);
+    plotlyMock.toImage.mockRejectedValue(new Error("Plotly export failed"));
+
+    await expect(
+      captureReportFigures(minimalResult(), [
+        { cooler: "cooler_left", plotId: "overall-coefficient-map" },
+      ]),
+    ).rejects.toThrow("Plotly export failed");
+
+    expect(document.getElementById("microtube-report-figure-capture")).toBeNull();
+    expect(plotlyMock.purge).toHaveBeenCalled();
   });
 });
 

@@ -11,3 +11,4 @@ core. The authoritative executable reference is
 | [plot-catalog.md](plot-catalog.md) | Approved plot families, IDs, axes, availability | M1 |
 | [equations.md](equations.md) | Ported equations with sources (VDI G1/G7, Lamé, Darcy) and validity | M3 |
 | [golden-data.md](golden-data.md) | Golden dataset provenance and regeneration procedure | M1 |
+| [scientific-validation.md](scientific-validation.md) | Automated validation evidence and independent approval state | M8 |

@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M8
 > **Workstream:** W9 (Quality)
-> **Status:** in-progress
+> **Status:** review
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-11
 
@@ -25,8 +25,13 @@ sweep, memory, cancellation budgets; failure-path tests; independent review.
 
 - [x] Playwright setup (Chromium/Firefox/WebKit projects configured).
 - [x] E2E: reduced paper-default compute, tab keyboard flow, export smoke.
+- [x] Complete golden and contract regression suites.
+- [x] Geometry-mode equivalence and operating-mode cross-checks.
+- [x] URL/reset, plot-rendering, report-regeneration, and export smoke.
 - [x] Performance budgets defined and measured.
 - [x] Failure-path tests (worker crash, invalid input, non-finite results).
+- [x] Automated keyboard, contrast, zoom/reflow, landmark, and plot-description
+      coverage.
 - [ ] WCAG 2.2 AA review with documented exceptions.
 - [ ] Independent scientific and accessibility review.
 
@@ -62,6 +67,13 @@ Full-release budgets remain release-candidate gates.
   with pending `python_stdlib.zip`/`pyodide.asm.wasm` requests), but the
   production-preview app acceptance smoke passes in Firefox. Firefox dev-server
   Pyodide tests are skipped with this documented reason.
+- 2026-07-11 M8 review-ready slice: `uv run pytest` (58 passed),
+  `uv run mypy .`, `uv run ruff check ..`,
+  `uv run ruff format --check ..`, `pnpm test` (41 passed),
+  `pnpm typecheck`, `pnpm lint` (generated-contract warnings only),
+  `pnpm format:check`, `pnpm build`, `pnpm test:e2e` (14 passed,
+  4 documented skips), `python scripts/check_prohibited_files.py`,
+  and `git diff --check`.
 
 ## Status log
 
@@ -70,6 +82,7 @@ Full-release budgets remain release-candidate gates.
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-11 | M8 automation slice added: geometry-representation API equivalence, worker-crash client failure test, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep performance budget. Independent review remains open. |
 | 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox production-preview app acceptance passes. Firefox Vite-dev Pyodide startup remains a documented test-environment limitation. |
+| 2026-07-11 | M8 moved to review-ready: operating-mode cross-checks, non-finite rejection, unsolved operating target warnings, report export failure cleanup, screen-reader landmark assertions, and 200% text-zoom reflow coverage added. Independent scientific/accessibility approval remains open. |
 
 ## Final commits
 

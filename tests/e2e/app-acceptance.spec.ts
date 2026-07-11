@@ -177,6 +177,30 @@ test("keeps visible controls labelled, contrasted, and within a mobile viewport"
   expect(minimumContrast).toBeGreaterThanOrEqual(4.5);
 });
 
+test("exposes screen-reader landmarks and reflows under 200 percent text zoom", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/#/input", { waitUntil: "networkidle" });
+
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Main sections" })).toBeVisible();
+  await expect(page.getByRole("tabpanel", { name: "Input" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Left/right linking" })).toBeVisible();
+  await expect(
+    page.getByRole("group", { name: "Geometry and design point" }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Aluminum" })).toBeVisible();
+
+  await page.addStyleTag({ content: "html { font-size: 200%; }" });
+  await expect(page.getByLabel("Cooler label").first()).toBeVisible();
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+});
+
 test("meets the Chromium reference budget for worker startup and reduced sweep", async ({
   browserName,
   page,
