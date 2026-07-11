@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M7
 > **Workstream:** W8 (Reports)
-> **Status:** in-progress
+> **Status:** completed
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-11
 
@@ -66,4 +66,6 @@ and provenance.
 
 ## Final commits
 
-—
+- `a2c6fa1` — `feat(reports): add canonical report payload`
+- `6cfa3a2` — `feat(reports): add browser report exports`
+- `5d871df` — `feat(reports): embed report figures`

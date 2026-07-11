@@ -4,7 +4,7 @@
 > **Type:** Master living document  
 > **Status:** active  
 > **Created:** 2026-07-10  
-> **Last updated:** 2026-07-10  
+> **Last updated:** 2026-07-11
 > **Governing document:** `/AGENTS.md`  
 > **Authoritative executable reference:** `Waermedurchgang_V10_physical.m`  
 > **Deployment target:** static GitHub Pages
@@ -100,8 +100,8 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M4 | Pyodide worker and browser integration | completed | M2, M3 |
 | M5 | Application shell and input workflows | completed | M2, M4 |
 | M6 | Plot system and results experience | completed | M3–M5 |
-| M7 | Figure and report exports | in-progress | M4, M6 |
-| M8 | Validation, accessibility, performance | not-started | M3–M7 |
+| M7 | Figure and report exports | completed | M4, M6 |
+| M8 | Validation, accessibility, performance | ready | M3–M7 |
 | M9 | GitHub Pages release candidate | not-started | M8 |
 | M10 | Scientific release and handover | not-started | M9 |
 
@@ -434,21 +434,21 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 
 ### Major tasks
 
-- [ ] Export individual figures as PNG with selectable resolution.
+- [x] Export individual figures as PNG with selectable resolution.
 - [x] Export individual figures as SVG.
 - [x] Generate standalone HTML report.
 - [x] Generate client-side PDF report.
 - [x] Generate machine-readable JSON sidecar.
-- [ ] Include both coolers' inputs, materials, fluids, assumptions, warnings,
+- [x] Include both coolers' inputs, materials, fluids, assumptions, warnings,
       summaries, screens, figures, versions, timestamp, and provenance.
-- [ ] Generate reports from one immutable `SimulationResult`.
+- [x] Generate reports from one immutable `SimulationResult`.
 
 ### Exit gate
 
-- [ ] Same request and software version regenerate the same report content.
-- [ ] No server is required.
-- [ ] PDF remains readable in print and grayscale.
-- [ ] Warnings and provenance cannot be omitted accidentally.
+- [x] Same request and software version regenerate the same report content.
+- [x] No server is required.
+- [x] PDF remains readable in print and grayscale.
+- [x] Warnings and provenance cannot be omitted accidentally.
 
 ---
 
@@ -670,3 +670,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-10 | M6 completed: plot registry, grouped selection, tandem scales, delta/ratio variants, exported-value-only Plotly specs, screen/benchmark overlays, hover status, tabular summaries, PNG/SVG figure export, plot catalog coverage, and browser worker parity are verified. M7 is ready. | Codex |
 | 2026-07-10 | M7 started: Python ReportPayload and canonical JSON sidecar basis added with request/result provenance, summaries, warnings, and SHA-256 array manifests. | Codex |
 | 2026-07-10 | M7 browser export slice completed: current `SimulationResult` can be exported as canonical JSON sidecar, standalone HTML report, and print/PDF report path; report figure embedding and PNG resolution selection remain open. | Codex |
+| 2026-07-11 | M7 completed: individual PNG export now supports selectable 1x/2x/3x resolution, registered Plotly specs are captured as SVG report figures for standalone HTML and print/PDF reports, JSON sidecars remain canonical and image-free, and report content is generated from one immutable `SimulationResult`. Validation: `pnpm test` (39 passed), `pnpm typecheck`, `pnpm lint` (generated-contract warnings only), `pnpm format:check`, `pnpm build`, prohibited-file check, and `git diff --check`. M8 is ready. | Codex |
