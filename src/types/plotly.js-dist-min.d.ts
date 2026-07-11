@@ -59,6 +59,10 @@ declare module "plotly.js-dist-min" {
       config?: PlotlyConfig,
     ) => Promise<unknown>;
     purge: (element: HTMLElement) => void;
+    toImage: (
+      element: HTMLElement,
+      options: { format: "png" | "svg"; height?: number; scale?: number; width?: number },
+    ) => Promise<string>;
   };
 
   export default Plotly;

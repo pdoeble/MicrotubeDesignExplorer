@@ -8,6 +8,10 @@ import {
   canonicalReportJson,
   reportFilename,
 } from "../../src/features/export/reportExport";
+import {
+  createReportFigureSpec,
+  defaultReportFigureSelections,
+} from "../../src/features/export/reportFigures";
 import type { SimulationWorkerResult } from "../../src/workers/protocol";
 
 const request = defaultsJson.request as SimulationRequest;
@@ -66,13 +70,54 @@ describe("report export", () => {
     const payload = await buildBrowserReportPayload(request, minimalResult(), {
       digestBytes: async () => "abc123",
     });
-    const html = buildStandaloneHtmlReport(payload);
+    const figures = [
+      {
+        alt: "heat-transfer map",
+        data_uri: "data:image/svg+xml,%3Csvg%3E",
+        description: "Figure description",
+        format: "svg",
+        plot_id: "overall-coefficient-map",
+        scope: "Left <core>",
+        title: "Overall coefficient",
+      },
+    ] as const;
+    const html = buildStandaloneHtmlReport(payload, { figures });
 
     expect(html).toContain("Microtube design-space report");
     expect(html).toContain("Left &lt;core&gt;");
     expect(html).toContain("x &lt; y");
+    expect(html).toContain('<img src="data:image/svg+xml,%3Csvg%3E"');
+    expect(html).toContain("Figure description");
     expect(html).not.toContain("<script>");
     expect(html).toContain("Canonical sidecar JSON");
+    expect(buildStandaloneHtmlReport(payload, { figures })).toBe(
+      buildStandaloneHtmlReport(structuredClone(payload), { figures: structuredClone(figures) }),
+    );
+  });
+
+  it("builds report figure specs from registered plot definitions and SimulationResult fields", () => {
+    const spec = createReportFigureSpec(minimalResult(), {
+      cooler: "cooler_left",
+      plotId: "overall-coefficient-map",
+    });
+
+    expect(defaultReportFigureSelections).toContainEqual({
+      cooler: "cooler_left",
+      plotId: "overall-coefficient-map",
+    });
+    expect(spec?.figure).toMatchObject({
+      alt: "VDI G1/G7 plus wall-conduction resistance aggregation.",
+      plot_id: "overall-coefficient-map",
+      scope: "Left <core>",
+      title: "Overall heat-transfer coefficient - Left <core>",
+    });
+    expect(spec?.spec.data[0]).toMatchObject({
+      colorbar: { title: { text: "W/(m^2 K)" } },
+      type: "heatmap",
+    });
+    expect(spec?.spec.layout.title).toEqual({
+      text: "Overall heat-transfer coefficient - Left <core>",
+    });
   });
 });
 

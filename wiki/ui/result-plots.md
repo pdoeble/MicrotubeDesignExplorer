@@ -16,12 +16,19 @@ fields and transferred `Float64Array` buffers produced by the Python worker.
   markers, minimum-wall lines, and image export options.
 - `src/features/plots/PlotFigure.tsx` renders heatmap traces with Plotly from
   `SimulationResult` field metadata and buffer indices, then exposes explicit
-  PNG and SVG figure export buttons.
+  PNG and SVG figure export buttons. PNG export offers `1x`, `2x`, and `3x`
+  resolution scales; SVG export remains vector-scaled at `1x`.
 - `src/features/plots/ResultPlotsTab.tsx` owns the user workflow for running the
   worker simulation, selecting a registered plot, selecting a cooler when the
   plot is cooler-scoped, switching cooler-scoped plots between single and
   tandem display, switching comparison groups between delta and ratio variants,
-  and showing scalar KPI summaries.
+  showing scalar KPI summaries, and launching JSON/HTML/print-PDF report
+  exports from the current immutable `SimulationResult`.
+- `src/features/export/reportFigures.ts` owns the default report figure
+  selection and captures SVG images from the same tested Plotly specs used for
+  on-screen figures. The default set covers both coolers' overall coefficient,
+  design-boundary, and pressure-drop plots plus one same-geometry comparison
+  ratio.
 - No WebGL trace family is allowed in the registry because SVG export is an M7
   requirement.
 - Exported figures include a provenance footer with contract version, core

@@ -45,6 +45,16 @@ export type ReportPayload = {
   array_manifest: ArrayManifestEntry[];
 };
 
+export type EmbeddedReportFigure = {
+  plot_id: string;
+  title: string;
+  scope: string;
+  description: string;
+  alt: string;
+  format: "svg";
+  data_uri: string;
+};
+
 type FieldGroup = ArrayManifestEntry["source"];
 
 type FieldWithSource = {
@@ -54,6 +64,10 @@ type FieldWithSource = {
 
 type ReportPayloadOptions = {
   digestBytes?: (bytes: Uint8Array) => Promise<string>;
+};
+
+type StandaloneHtmlReportOptions = {
+  figures?: readonly EmbeddedReportFigure[];
 };
 
 export async function buildBrowserReportPayload(
@@ -90,9 +104,13 @@ export function reportFilename(payload: Pick<ReportPayload, "request_hash">, ext
   return `microtube-report-${safeHash}.${extension}`;
 }
 
-export function buildStandaloneHtmlReport(payload: ReportPayload): string {
+export function buildStandaloneHtmlReport(
+  payload: ReportPayload,
+  options: StandaloneHtmlReportOptions = {},
+): string {
   const generated = payload.provenance.generated_utc || "n/a";
   const title = `Microtube design report ${payload.request_hash.slice(0, 12)}`;
+  const figures = options.figures ?? [];
   const summaryRows = [
     ["Overall coefficient", "overall_coefficient"],
     ["Bundle conductance", "bundle_conductance"],
@@ -120,6 +138,9 @@ export function buildStandaloneHtmlReport(payload: ReportPayload): string {
     th { background: #f1f1ee; }
     code, pre { font-family: Consolas, "Courier New", monospace; }
     pre { white-space: pre-wrap; word-break: break-word; border: 1px solid #b8b8b8; padding: 0.6rem; background: #f7f7f4; }
+    figure { break-inside: avoid; margin: 0 0 1.2rem; }
+    figcaption { color: #444; font-size: 0.88rem; margin-top: 0.35rem; }
+    img { border: 1px solid #b8b8b8; height: auto; max-width: 100%; }
     .meta { color: #444; margin-top: 0; }
     .page-break { break-before: page; }
     @media print {
@@ -150,6 +171,9 @@ export function buildStandaloneHtmlReport(payload: ReportPayload): string {
 
   <h2>Warnings</h2>
   ${warningsTable(payload)}
+
+  <h2>Figures</h2>
+  ${figuresSection(figures)}
 
   <h2>Array manifest</h2>
   ${arrayManifestTable(payload.array_manifest)}
@@ -315,6 +339,20 @@ function warningsTable(payload: ReportPayload): string {
     )
     .join("");
   return `<table><thead><tr><th>Scope</th><th>Code</th><th>Affected quantity</th><th>Message</th><th>Recommendation</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function figuresSection(figures: readonly EmbeddedReportFigure[]): string {
+  if (figures.length === 0) {
+    return "<p>No figures were embedded in this report export.</p>";
+  }
+  return figures
+    .map(
+      (figure) => `<figure>
+  <img src="${escapeHtml(figure.data_uri)}" alt="${escapeHtml(figure.alt)}" />
+  <figcaption><strong>${escapeHtml(figure.title)}</strong> (${escapeHtml(figure.plot_id)}, ${escapeHtml(figure.scope)}). ${escapeHtml(figure.description)}</figcaption>
+</figure>`,
+    )
+    .join("");
 }
 
 function arrayManifestTable(entries: ArrayManifestEntry[]): string {

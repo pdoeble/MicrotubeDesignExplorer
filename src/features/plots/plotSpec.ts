@@ -294,11 +294,12 @@ export function imageExportOptions(
   plotId: PlotId,
   cooler: CoolerKey,
   format: ImageFormat,
+  pngScale = 2,
 ): PlotImageOptions {
   return {
     filename: `${plotId}-${cooler}`,
     format,
-    scale: format === "png" ? 2 : 1,
+    scale: format === "png" ? pngScale : 1,
   };
 }
 

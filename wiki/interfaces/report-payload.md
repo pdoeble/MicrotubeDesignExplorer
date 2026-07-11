@@ -35,10 +35,13 @@ completed:
 
 - JSON sidecar: canonical report JSON.
 - HTML: standalone report document with provenance, summaries, screen status,
-  warnings, array manifest, request JSON, and embedded canonical sidecar JSON.
+  warnings, embedded SVG figures, array manifest, request JSON, and embedded
+  canonical sidecar JSON.
 - Print / PDF: the same standalone HTML opened in a print-safe browser window
   for client-side print-to-PDF.
 
 Registered Plotly figures are still exported individually through the plot
-controls. Embedding SVG/PNG figure captures into the standalone report remains
-an open M7 task.
+controls. Report figures are captured as SVG from the same registered Plotly
+specs, using a fixed default selection rather than the complete plot registry
+to keep reports printable and deterministic. The JSON sidecar intentionally
+does not embed figure image data.

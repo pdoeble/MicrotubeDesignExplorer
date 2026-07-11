@@ -28,6 +28,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   const elementRef = useRef<HTMLDivElement | null>(null);
   const detailsId = useId();
   const [exportStatus, setExportStatus] = useState<string | null>(null);
+  const [pngScale, setPngScale] = useState(2);
   const plot = plotById(plotId);
   const field = fieldForPlot(result.payload, plotId, cooler);
   const array = field ? result.arrays[field.buffer_index] : undefined;
@@ -106,7 +107,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     if (!element) return;
     setExportStatus(null);
     const { default: Plotly } = await import("plotly.js-dist-min");
-    await Plotly.downloadImage(element, imageExportOptions(plotId, cooler, format));
+    await Plotly.downloadImage(element, imageExportOptions(plotId, cooler, format, pngScale));
     setExportStatus(`Exported ${format.toUpperCase()} figure.`);
   }
 
@@ -117,6 +118,18 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   return (
     <figure className="plot-figure">
       <div className="plot-figure__actions" aria-label="Figure export controls">
+        <label className="plot-figure__scale" htmlFor={`${detailsId}-png-scale`}>
+          <span>PNG scale</span>
+          <select
+            id={`${detailsId}-png-scale`}
+            value={pngScale}
+            onChange={(event) => setPngScale(Number(event.target.value))}
+          >
+            <option value={1}>1x</option>
+            <option value={2}>2x</option>
+            <option value={3}>3x</option>
+          </select>
+        </label>
         {supportedImageFormats.map((format) => (
           <button
             className="text-button"

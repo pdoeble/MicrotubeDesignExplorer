@@ -6,7 +6,7 @@
 > **Workstream:** W8 (Reports)
 > **Status:** in-progress
 > **Created:** 2026-07-10
-> **Last updated:** 2026-07-10
+> **Last updated:** 2026-07-11
 
 ## Scope
 
@@ -31,8 +31,8 @@ and provenance.
 - [x] Canonical JSON sidecar payload with versions, hashes, summaries, warnings,
       and array manifests.
 - [x] Browser JSON sidecar download.
-- [ ] Embed report figures from registered Plotly specs/SVG exports.
-- [ ] Determinism policy/test: same request + version + immutable result
+- [x] Embed report figures from registered Plotly specs/SVG exports.
+- [x] Determinism policy/test: same request + version + immutable result
       provenance => same report content.
 
 ## Risks
@@ -50,6 +50,10 @@ and provenance.
   `pnpm test` (38 passed), `pnpm typecheck`, `pnpm lint` (generated-contract
   warnings only), `pnpm format:check`, `pnpm build`,
   `python scripts/check_prohibited_files.py`, `git diff --check`.
+- 2026-07-11 Figure/report completion candidate: `pnpm test` (39 passed),
+  `pnpm typecheck`, `pnpm lint` (generated-contract warnings only),
+  `pnpm format:check`, `pnpm build`, `python scripts/check_prohibited_files.py`,
+  `git diff --check`.
 
 ## Status log
 
@@ -58,6 +62,7 @@ and provenance.
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-10 | M7 started: Python `microtubes_core.exports.report` builds canonical report payloads and JSON sidecars from one request/result pair with deterministic array manifests. |
 | 2026-07-10 | Browser export adapter added: JSON sidecar download, standalone HTML report, and browser print/PDF path all use the current worker `SimulationResult`; embedded report figures remain open. |
+| 2026-07-11 | Report figure embedding and selectable PNG scale implemented: HTML/PDF reports capture a fixed SVG figure set from registered Plotly specs, JSON sidecars remain image-free, and individual figure PNG export supports 1x/2x/3x resolution. |
 
 ## Final commits
 

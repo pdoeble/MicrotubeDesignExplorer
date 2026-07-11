@@ -156,6 +156,11 @@ describe("plot spec", () => {
       format: "png",
       scale: 2,
     });
+    expect(imageExportOptions("overall-coefficient-map", "cooler_right", "png", 3)).toEqual({
+      filename: "overall-coefficient-map-cooler_right",
+      format: "png",
+      scale: 3,
+    });
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "svg")).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "svg",

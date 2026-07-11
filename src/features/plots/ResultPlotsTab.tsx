@@ -10,6 +10,7 @@ import {
   openPrintableReport,
   reportFilename,
 } from "../export/reportExport";
+import { captureReportFigures } from "../export/reportFigures";
 import { PlotFigure } from "./PlotFigure";
 import {
   plotById,
@@ -117,7 +118,9 @@ export function ResultPlotsTab() {
         );
         setReportStatus("Exported JSON sidecar.");
       } else {
-        const html = buildStandaloneHtmlReport(payload);
+        setReportStatus("Capturing report figures.");
+        const figures = await captureReportFigures(result);
+        const html = buildStandaloneHtmlReport(payload, { figures });
         if (format === "html") {
           downloadTextFile(reportFilename(payload, "html"), html, "text/html;charset=utf-8");
           setReportStatus("Exported standalone HTML report.");
