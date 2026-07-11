@@ -60,9 +60,10 @@ operating model.
 - 2026-07-11 Strict local release gate: `pnpm build`,
   `python scripts/check_release_gate.py`, `python scripts/check_prohibited_files.py`,
   and `git diff --check` passed with `CITATION.cff` version `0.1.0`.
-- 2026-07-11 GitHub CI and Pages deployment evidence for `be91f1a`:
-  CI run `29140082451` passed; Pages run `29140082435` passed after enabling
-  Pages with `build_type=workflow`; deployed URL:
+- 2026-07-11 GitHub CI and Pages deployment evidence: first successful
+  release-candidate CI run `29140082451` passed; first successful Pages run
+  `29140082435` passed after enabling Pages with `build_type=workflow`;
+  subsequent documentation-only pushes must also keep CI/Pages green. Deployed URL:
   `https://pdoeble.github.io/MicrotubeDesignExplorer/`.
 - 2026-07-11 Deployed smoke evidence: GitHub deployed-smoke passed in Pages run
   `29140082435`; local live smoke passed for reduced compute/report export;

@@ -40,9 +40,9 @@ the static application.
 
 ## Current release-candidate evidence
 
-- Source commit: `be91f1a`.
-- CI run: `29140082451` passed on GitHub Actions.
-- Pages run: `29140082435` passed on GitHub Actions.
+- Source: latest `main` commit with passing CI and Pages workflows.
+- Initial CI evidence: run `29140082451` passed on GitHub Actions.
+- Initial Pages evidence: run `29140082435` passed on GitHub Actions.
 - Live URL: `https://pdoeble.github.io/MicrotubeDesignExplorer/`.
 - Deployed smoke: reduced compute, plot rendering, JSON/HTML report export,
   full paper-default compute, SVG/PNG figure export, and print/PDF report popup
