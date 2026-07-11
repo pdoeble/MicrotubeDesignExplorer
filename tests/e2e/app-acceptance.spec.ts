@@ -66,7 +66,7 @@ test("runs a reduced paper-default workflow and exports JSON plus HTML reports",
 test("supports keyboard tab navigation, URL round-trips, and reset to defaults", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("./", { waitUntil: "networkidle" });
 
   await page.getByRole("tab", { name: "Start" }).focus();
   await page.keyboard.press("ArrowRight");
@@ -100,7 +100,7 @@ test("keeps visible controls labelled, contrasted, and within a mobile viewport"
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 900 });
-  await page.goto("/#/input", { waitUntil: "networkidle" });
+  await page.goto("./#/input", { waitUntil: "networkidle" });
 
   const unlabeledControls = await page.evaluate(() => {
     const visible = (element: Element) => {
@@ -181,7 +181,7 @@ test("exposes screen-reader landmarks and reflows under 200 percent text zoom", 
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/#/input", { waitUntil: "networkidle" });
+  await page.goto("./#/input", { waitUntil: "networkidle" });
 
   await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("main")).toBeVisible();
@@ -206,7 +206,7 @@ test("meets the Chromium reference budget for worker startup and reduced sweep",
   page,
 }) => {
   test.skip(browserName !== "chromium", "Reference budget is measured on Chromium.");
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("./", { waitUntil: "networkidle" });
   const metrics = await page.evaluate(async (request) => {
     const { SimulationWorkerClient } = await import("/src/features/simulation/client.ts");
     const client = new SimulationWorkerClient();
@@ -240,5 +240,5 @@ function reducedDefaultRequest(): SimulationRequest {
 function stateUrl(tab: string, request: SimulationRequest): string {
   const payload = JSON.stringify({ request, version: "1.0.0" });
   const encoded = Buffer.from(payload, "utf8").toString("base64url");
-  return `/?state=${encoded}#/${tab}`;
+  return `?state=${encoded}#/${tab}`;
 }
