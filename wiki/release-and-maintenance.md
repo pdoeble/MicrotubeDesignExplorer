@@ -38,6 +38,16 @@ the static application.
 
 5. Tag the release only after the deployed site matches the source commit.
 
+## Current release-candidate evidence
+
+- Source commit: `be91f1a`.
+- CI run: `29140082451` passed on GitHub Actions.
+- Pages run: `29140082435` passed on GitHub Actions.
+- Live URL: `https://pdoeble.github.io/MicrotubeDesignExplorer/`.
+- Deployed smoke: reduced compute, plot rendering, JSON/HTML report export,
+  full paper-default compute, SVG/PNG figure export, and print/PDF report popup
+  have been verified on the live site.
+
 ## Version metadata
 
 - `package.json` is the JavaScript package version source.
@@ -94,6 +104,6 @@ review of the MATLAB reference script hash.
 ## Known limitations before release
 
 - Independent scientific and accessibility approval is still required.
-- GitHub Pages deployment evidence must come from the real deployed URL.
+- The first formal release tag and GitHub release have not been published.
 - Firefox-specific Pyodide tests are skipped only for the Vite dev-server path;
   production-preview smoke has passed locally.

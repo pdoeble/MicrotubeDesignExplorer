@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M9/M10
 > **Workstream:** W10 (CI and release)
-> **Status:** blocked
+> **Status:** review
 > **Created:** 2026-07-10
 > **Last updated:** 2026-07-11
 
@@ -60,9 +60,18 @@ operating model.
 - 2026-07-11 Strict local release gate: `pnpm build`,
   `python scripts/check_release_gate.py`, `python scripts/check_prohibited_files.py`,
   and `git diff --check` passed with `CITATION.cff` version `0.1.0`.
-- Green CI on GitHub and a deployed URL smoke run remain M9 exit evidence.
-  Current local `origin` has no remote `main` ref, and `gh` is not authenticated
-  to `github.com`, so push/Actions/Pages evidence is blocked externally.
+- 2026-07-11 GitHub CI and Pages deployment evidence for `be91f1a`:
+  CI run `29140082451` passed; Pages run `29140082435` passed after enabling
+  Pages with `build_type=workflow`; deployed URL:
+  `https://pdoeble.github.io/MicrotubeDesignExplorer/`.
+- 2026-07-11 Deployed smoke evidence: GitHub deployed-smoke passed in Pages run
+  `29140082435`; local live smoke passed for reduced compute/report export;
+  full paper-default UI compute on the deployed site returned
+  `Computed 90 numeric fields.` with plot and summary visible; live export smoke
+  downloaded SVG, PNG, JSON, HTML, and opened the print/PDF report window with
+  no console errors.
+- M10 release publication remains blocked on independent scientific and
+  accessibility approval.
 
 ## Status log
 
@@ -73,6 +82,7 @@ operating model.
 | 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development. |
 | 2026-07-11 | Manual release-gate workflow added: strict pre-release checks run Python/frontend quality gates, contract drift checks, production build, release metadata checks, and source/artifact prohibited-file scans. Current local run allows provisional CITATION version until M10 finalization. |
 | 2026-07-11 | Release metadata finalized locally for `0.1.0` and strict release gate passes. M9/M10 remain blocked on independent review, GitHub.com authentication/push, real Pages deployment, deployed smoke evidence, and release publication. |
+| 2026-07-11 | M9 deployment evidence completed: CI passed, Pages was enabled for GitHub Actions, production deploy succeeded, deployed smoke passed, full paper-default compute works on the live site, and all export paths were smoke-tested from the deployed URL. M10 release publication still awaits independent approval. |
 
 ## Final commits
 

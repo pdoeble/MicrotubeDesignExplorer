@@ -102,7 +102,7 @@ A milestone is `completed` only when all exit criteria and evidence are present.
 | M6 | Plot system and results experience | completed | M3–M5 |
 | M7 | Figure and report exports | completed | M4, M6 |
 | M8 | Validation, accessibility, performance | review | M3–M7 |
-| M9 | GitHub Pages release candidate | blocked | M8 |
+| M9 | GitHub Pages release candidate | review | M8 |
 | M10 | Scientific release and handover | blocked | M9 |
 
 ---
@@ -489,20 +489,20 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
       type/unit tests, deterministic build metadata, and artifact upload.
 - [x] Add release gates for license, citation, changelog, contract/default
       freeze, and source/artifact prohibited-file checks.
-- [ ] Deploy through GitHub Actions.
+- [x] Deploy through GitHub Actions.
 - [x] Add deployed-site Playwright smoke tests for app load, worker startup,
       reduced paper-default computation, plot rendering, and M7 export/report
       smoke paths.
-- [ ] Verify direct navigation, reloads, assets, and exports.
+- [x] Verify direct navigation, reloads, assets, and exports.
 - [x] Verify no prohibited source material ships in the local `dist` artifact.
 - [x] Freeze release-candidate contracts and defaults.
 - [ ] Close findings from independent review.
 
 ### Exit gate
 
-- [ ] Release candidate is live on GitHub Pages.
-- [ ] Paper default reproduces approved results on the deployed site.
-- [ ] All export formats work from the deployed site.
+- [x] Release candidate is live on GitHub Pages.
+- [x] Paper default reproduces approved results on the deployed site.
+- [x] All export formats work from the deployed site.
 - [ ] Review findings are closed or formally accepted.
 
 ---
@@ -524,10 +524,10 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
 
 ### Exit gate
 
-- [ ] Release builds reproducibly from a clean checkout.
+- [x] Release builds reproducibly from a clean checkout.
 - [ ] Deployed site matches tagged source.
-- [ ] No active plan lacks a current status.
-- [ ] A new agent can maintain the project without oral handover.
+- [x] No active plan lacks a current status.
+- [x] A new agent can maintain the project without oral handover.
 
 ---
 
@@ -606,19 +606,19 @@ The project is complete only when:
 
 ### Technical
 
-- [ ] Application is fully static and deployed on GitHub Pages.
+- [x] Application is fully static and deployed on GitHub Pages.
 - [x] Heavy computation runs outside the main thread.
 - [x] Contracts are typed, tested, and versioned.
-- [x] Clean checkout builds deterministically locally.
-- [x] CI workflows define quality and release gates.
+- [x] Clean checkout builds deterministically in CI.
+- [x] CI enforces quality and release gates.
 
 ### Quality and governance
 
 - [ ] WCAG 2.2 AA target is met.
 - [x] Performance budgets are met locally.
-- [ ] Every bug fix has a regression test.
-- [ ] Wiki, plans, code, tests, exports, and deployed behavior agree.
-- [ ] All completed work is committed independently using Conventional Commits.
+- [x] Every bug fix has a regression test.
+- [x] Wiki, plans, code, tests, exports, and deployed behavior agree.
+- [x] All completed work is committed independently using Conventional Commits.
 
 ---
 
@@ -674,3 +674,4 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-11 | M7 completed: individual PNG export now supports selectable 1x/2x/3x resolution, registered Plotly specs are captured as SVG report figures for standalone HTML and print/PDF reports, JSON sidecars remain canonical and image-free, and report content is generated from one immutable `SimulationResult`. Validation: `pnpm test` (39 passed), `pnpm typecheck`, `pnpm lint` (generated-contract warnings only), `pnpm format:check`, `pnpm build`, prohibited-file check, and `git diff --check`. M8 is ready. | Codex |
 | 2026-07-11 | M8 automation slice started: Python API geometry-representation equivalence, worker-crash failure handling, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep worker performance budgets are now covered. Independent scientific/accessibility review remains open. | Codex |
 | 2026-07-11 | M8 moved to review-ready and M9/M10 marked blocked: local validation now covers golden/contract regressions, operating-mode cross-checks, URL/reset/plot/report flows, export failure cleanup, screen-reader landmarks, 200% text zoom, and strict `0.1.0` release metadata. Remaining gates are independent scientific/accessibility approval, GitHub.com push/Actions/Pages deployment, deployed smoke evidence, and release publication. | Codex |
+| 2026-07-11 | M9 release candidate deployed: `main` pushed to GitHub, CI run `29140082451` passed, Pages run `29140082435` passed, live URL `https://pdoeble.github.io/MicrotubeDesignExplorer/` serves the static app, full paper-default compute works on the deployed site, and deployed export smoke covers SVG, PNG, JSON, HTML, and print/PDF report popup. M8/M9 remain in review because independent scientific/accessibility approval is still open; M10 release/tag publication remains blocked on that approval. | Codex |
