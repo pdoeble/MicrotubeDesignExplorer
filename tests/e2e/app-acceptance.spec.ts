@@ -13,6 +13,11 @@ const defaultsRequest = defaultsJson.request;
 test("runs a reduced paper-default workflow and exports JSON plus HTML reports", async ({
   page,
 }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+
   await page.goto(stateUrl("result-plots", reducedDefaultRequest()), { waitUntil: "networkidle" });
 
   await page.getByRole("button", { name: "Run simulation" }).click();
@@ -21,6 +26,12 @@ test("runs a reduced paper-default workflow and exports JSON plus HTML reports",
   });
   await expect(page.getByRole("heading", { name: "Design-point summary" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Report exports" })).toBeVisible();
+  await expect(page.locator(".plot-figure__canvas")).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: "VDI G1/G7 plus wall-conduction resistance aggregation.",
+    }),
+  ).toBeVisible();
 
   const [jsonDownload] = await Promise.all([
     page.waitForEvent("download"),
@@ -44,6 +55,7 @@ test("runs a reduced paper-default workflow and exports JSON plus HTML reports",
   expect(html).toContain("<h2>Figures</h2>");
   expect(html).toContain("data:image/svg+xml");
   expect(html).toContain("Canonical sidecar JSON");
+  expect(consoleErrors).toEqual([]);
 });
 
 test("supports keyboard tab navigation, URL round-trips, and reset to defaults", async ({

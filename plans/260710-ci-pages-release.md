@@ -6,7 +6,7 @@
 > **Workstream:** W10 (CI and release)
 > **Status:** in-progress
 > **Created:** 2026-07-10
-> **Last updated:** 2026-07-10
+> **Last updated:** 2026-07-11
 
 ## Scope
 
@@ -25,14 +25,14 @@ operating model.
 - [x] Baseline CI (ruff/format/mypy/pytest + tsc/eslint/prettier/vitest/build). (M0)
 - [x] Prohibited-file gate. (M0)
 - [x] Pages workflow scaffold (configure-pages → upload → deploy). (M0)
-- [ ] Keep PR/main CI aligned with roadmap 7.1:
+- [x] Keep PR/main CI aligned with roadmap 7.1:
       prohibited files, locked `uv`, ruff, format, mypy, pytest, Python
       contract drift, frozen `pnpm`, generated TypeScript contract drift,
       typecheck, lint, format, Vitest, and production build.
-- [ ] Gate Pages deployment with prohibited-file checks, frozen frontend
+- [x] Gate Pages deployment with prohibited-file checks, frozen frontend
       install, type/unit tests, deterministic build metadata, artifact upload,
       and minimal Pages permissions.
-- [ ] Deployed-site Playwright smoke tests: app load, Pyodide worker startup,
+- [x] Deployed-site Playwright smoke tests: app load, Pyodide worker startup,
       reduced paper-default computation, at least one rendered result plot,
       export/report smoke path after M7, and no fatal console errors.
 - [ ] Release gates: green CI, deployed smoke evidence, license check,
@@ -50,7 +50,9 @@ operating model.
 
 ## Tests / evidence
 
-- Green CI on GitHub; deployed URL smoke run (M9).
+- 2026-07-11 M9 CI/Pages smoke configuration slice: `pnpm typecheck`,
+  `pnpm format:check`, `pnpm test:e2e:chromium` (5 passed).
+- Green CI on GitHub and a deployed URL smoke run remain M9 exit evidence.
 
 ## Status log
 
@@ -58,6 +60,7 @@ operating model.
 |---|---|
 | 2026-07-10 | Plan created; CI + Pages scaffolds added in M0. |
 | 2026-07-10 | Synchronized with master roadmap 7.1: lean PR/main CI, deterministic Pages deployment, deployed smoke tests, and manual release gates made explicit. |
+| 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development. |
 
 ## Final commits
 
