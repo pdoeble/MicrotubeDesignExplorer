@@ -51,6 +51,10 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+      - name: Install uv for Pyodide wheel build
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
       - name: Generated contract types in sync
