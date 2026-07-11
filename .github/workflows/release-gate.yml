@@ -1,0 +1,50 @@
+name: Release gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prohibited-file gate
+        run: python scripts/check_prohibited_files.py
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Python release checks
+        working-directory: python
+        run: |
+          uv sync --locked
+          uv run ruff check ..
+          uv run ruff format --check ..
+          uv run mypy .
+          uv run pytest
+          uv run python ../scripts/export_contracts.py
+      - name: Python contract drift
+        run: git diff --exit-code src/contracts
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Frontend release checks
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm generate:contracts
+          git diff --exit-code src/contracts/generated
+          pnpm typecheck
+          pnpm lint
+          pnpm format:check
+          pnpm test
+          pnpm build
+      - name: Release metadata and artifact gate
+        run: python scripts/check_release_gate.py

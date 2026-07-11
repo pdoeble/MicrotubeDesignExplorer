@@ -35,7 +35,7 @@ operating model.
 - [x] Deployed-site Playwright smoke tests: app load, Pyodide worker startup,
       reduced paper-default computation, at least one rendered result plot,
       export/report smoke path after M7, and no fatal console errors.
-- [ ] Release gates: green CI, deployed smoke evidence, license check,
+- [x] Release gates: green CI, deployed smoke evidence, license check,
       `CITATION.cff` review, changelog/release notes, contract/default freeze
       verification, prohibited-source check on source and `dist`.
 - [ ] Tagging + release notes + CITATION finalization (M10).
@@ -52,6 +52,10 @@ operating model.
 
 - 2026-07-11 M9 CI/Pages smoke configuration slice: `pnpm typecheck`,
   `pnpm format:check`, `pnpm test:e2e:chromium` (5 passed).
+- 2026-07-11 Release-gate script slice: `uv run ruff check
+  ../scripts/check_release_gate.py`, `uv run ruff format --check
+  ../scripts/check_release_gate.py`, `python scripts/check_release_gate.py
+  --allow-provisional`.
 - Green CI on GitHub and a deployed URL smoke run remain M9 exit evidence.
 
 ## Status log
@@ -61,6 +65,7 @@ operating model.
 | 2026-07-10 | Plan created; CI + Pages scaffolds added in M0. |
 | 2026-07-10 | Synchronized with master roadmap 7.1: lean PR/main CI, deterministic Pages deployment, deployed smoke tests, and manual release gates made explicit. |
 | 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development. |
+| 2026-07-11 | Manual release-gate workflow added: strict pre-release checks run Python/frontend quality gates, contract drift checks, production build, release metadata checks, and source/artifact prohibited-file scans. Current local run allows provisional CITATION version until M10 finalization. |
 
 ## Final commits
 
