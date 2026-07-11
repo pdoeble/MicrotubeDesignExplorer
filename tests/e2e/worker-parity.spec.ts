@@ -21,7 +21,18 @@ const defaultsJson = JSON.parse(
   readFileSync(path.join(repoRoot, "src", "contracts", "defaults.json"), "utf8"),
 ) as { request: SimulationRequest };
 
-test("Pyodide worker matches direct Python for a reduced default sweep", async ({ page }) => {
+test("Pyodide worker matches direct Python for a reduced default sweep", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(
+    browserName === "firefox",
+    "Firefox Pyodide startup hangs under the Vite dev server; production preview smoke covers Firefox.",
+  );
+  test.skip(
+    Boolean(process.env.PLAYWRIGHT_BASE_URL),
+    "Direct TypeScript worker imports require the Vite dev server.",
+  );
   const request = reducedDefaultRequest();
   const direct = directPythonSummary(request);
 

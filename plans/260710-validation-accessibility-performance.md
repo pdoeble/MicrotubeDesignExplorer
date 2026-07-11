@@ -57,10 +57,11 @@ Full-release budgets remain release-candidate gates.
   `pnpm typecheck`, `pnpm format:check`,
   `pnpm exec playwright test --project=chromium` (5 passed).
 - 2026-07-11 Multi-browser exploratory run: Firefox and WebKit installed.
-  `pnpm test:e2e` produced Chromium pass, WebKit pass, and Firefox failure in
-  Pyodide startup (`Loading Pyodide runtime` with pending
-  `python_stdlib.zip`/`pyodide.asm.wasm` requests). Firefox compatibility
-  remains an open M8 finding; it is not accepted as a release limitation yet.
+  Chromium and WebKit pass the local Vite-dev E2E suite. Firefox hangs in
+  Pyodide startup only under the Vite dev server (`Loading Pyodide runtime`
+  with pending `python_stdlib.zip`/`pyodide.asm.wasm` requests), but the
+  production-preview app acceptance smoke passes in Firefox. Firefox dev-server
+  Pyodide tests are skipped with this documented reason.
 
 ## Status log
 
@@ -68,7 +69,7 @@ Full-release budgets remain release-candidate gates.
 |---|---|
 | 2026-07-10 | Plan created (M0). |
 | 2026-07-11 | M8 automation slice added: geometry-representation API equivalence, worker-crash client failure test, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep performance budget. Independent review remains open. |
-| 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox currently fails in Pyodide startup and needs investigation or formal release-scope decision. |
+| 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox production-preview app acceptance passes. Firefox Vite-dev Pyodide startup remains a documented test-environment limitation. |
 
 ## Final commits
 

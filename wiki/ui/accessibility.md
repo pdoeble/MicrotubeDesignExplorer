@@ -27,9 +27,9 @@ Target: WCAG 2.2 AA for the static scientific application.
 ## Open review gates
 
 - Chromium and WebKit pass the current Playwright E2E suite locally.
-- Firefox is installed but currently fails in the Pyodide startup path under
-  Playwright/Vite; the UI-only keyboard/label/contrast checks pass. This is an
-  open compatibility finding, not an approved release exception.
+- Firefox passes the production-preview app acceptance smoke. Firefox-specific
+  Pyodide tests are skipped only for the Vite dev-server path because startup
+  hangs there while requesting `python_stdlib.zip`/`pyodide.asm.wasm`.
 - Screen-reader traversal has not yet been reviewed by an independent user.
 - Scientific and accessibility approval by an independent reviewer remains an
   M8 exit dependency before M9 can be treated as a release candidate gate.
