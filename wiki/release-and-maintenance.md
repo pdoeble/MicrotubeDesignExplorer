@@ -6,7 +6,9 @@ the static application.
 ## Release candidate checklist
 
 1. Confirm independent scientific and accessibility review findings are closed
-   or formally accepted in `wiki/decisions/`.
+   or formally accepted in `wiki/decisions/`. Use
+   [review/index.md](review/index.md) and the GitHub issue templates under
+   `.github/ISSUE_TEMPLATE/` for the required approval records.
 2. Run the local release gates from a clean checkout:
 
    ```powershell
@@ -43,6 +45,8 @@ the static application.
 - Source: latest `main` commit with passing CI and Pages workflows.
 - Initial CI evidence: run `29140082451` passed on GitHub Actions.
 - Initial Pages evidence: run `29140082435` passed on GitHub Actions.
+- Remote release-gate evidence: run `29173624206` passed on GitHub Actions for
+  source commit `6130d58978daa4229a1777e2e7a1058844a05450`.
 - Live URL: `https://pdoeble.github.io/MicrotubeDesignExplorer/`.
 - Deployed smoke: reduced compute, plot rendering, JSON/HTML report export,
   full paper-default compute, SVG/PNG figure export, and print/PDF report popup
@@ -94,12 +98,12 @@ review of the MATLAB reference script hash.
 
 ## Severity policy
 
-| Severity | Criteria | Expected handling |
-|---|---|---|
-| Critical | Wrong scientific result, prohibited source leak, broken deployed app, or corrupt export | Stop release; fix with regression test |
-| High | Major accessibility blocker, missing warning/provenance, broken core workflow, or CI release-gate failure | Fix before release candidate |
-| Medium | Usability issue with workaround, non-blocking browser-specific problem, or incomplete documentation | Track in the next dated plan |
-| Low | Cosmetic issue, copy edit, or minor maintenance improvement | Batch in backlog |
+| Severity | Criteria                                                                                                  | Expected handling                      |
+| -------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Critical | Wrong scientific result, prohibited source leak, broken deployed app, or corrupt export                   | Stop release; fix with regression test |
+| High     | Major accessibility blocker, missing warning/provenance, broken core workflow, or CI release-gate failure | Fix before release candidate           |
+| Medium   | Usability issue with workaround, non-blocking browser-specific problem, or incomplete documentation       | Track in the next dated plan           |
+| Low      | Cosmetic issue, copy edit, or minor maintenance improvement                                               | Batch in backlog                       |
 
 ## Known limitations before release
 

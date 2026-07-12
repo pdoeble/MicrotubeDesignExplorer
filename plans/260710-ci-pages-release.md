@@ -43,10 +43,10 @@ operating model.
 
 ## Risks
 
-| Risk | Mitigation |
-|---|---|
-| Pages base path breaks assets | `base` derived from `GITHUB_REPOSITORY` in vite.config.ts |
-| PR validation becomes too slow | Keep PR CI lean; reserve full deployed smoke, accessibility, performance, and release evidence for M8/M9 unless directly affected |
+| Risk                                            | Mitigation                                                                                                                        |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Pages base path breaks assets                   | `base` derived from `GITHUB_REPOSITORY` in vite.config.ts                                                                         |
+| PR validation becomes too slow                  | Keep PR CI lean; reserve full deployed smoke, accessibility, performance, and release evidence for M8/M9 unless directly affected |
 | Deployed artifact differs from validated source | Build from frozen lockfiles, stamp version/commit metadata, upload the validated `dist` artifact, and smoke-test the deployed URL |
 
 ## Tests / evidence
@@ -54,9 +54,9 @@ operating model.
 - 2026-07-11 M9 CI/Pages smoke configuration slice: `pnpm typecheck`,
   `pnpm format:check`, `pnpm test:e2e:chromium` (5 passed).
 - 2026-07-11 Release-gate script slice: `uv run ruff check
-  ../scripts/check_release_gate.py`, `uv run ruff format --check
-  ../scripts/check_release_gate.py`, `python scripts/check_release_gate.py
-  --allow-provisional`.
+../scripts/check_release_gate.py`, `uv run ruff format --check
+../scripts/check_release_gate.py`, `python scripts/check_release_gate.py
+--allow-provisional`.
 - 2026-07-11 Strict local release gate: `pnpm build`,
   `python scripts/check_release_gate.py`, `python scripts/check_prohibited_files.py`,
   and `git diff --check` passed with `CITATION.cff` version `0.1.0`.
@@ -71,19 +71,22 @@ operating model.
   `Computed 90 numeric fields.` with plot and summary visible; live export smoke
   downloaded SVG, PNG, JSON, HTML, and opened the print/PDF report window with
   no console errors.
+- 2026-07-11 remote release-gate workflow run `29173624206` passed on
+  `6130d58978daa4229a1777e2e7a1058844a05450`.
 - M10 release publication remains blocked on independent scientific and
   accessibility approval.
 
 ## Status log
 
-| Date | Change |
-|---|---|
-| 2026-07-10 | Plan created; CI + Pages scaffolds added in M0. |
-| 2026-07-10 | Synchronized with master roadmap 7.1: lean PR/main CI, deterministic Pages deployment, deployed smoke tests, and manual release gates made explicit. |
-| 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development. |
-| 2026-07-11 | Manual release-gate workflow added: strict pre-release checks run Python/frontend quality gates, contract drift checks, production build, release metadata checks, and source/artifact prohibited-file scans. Current local run allows provisional CITATION version until M10 finalization. |
-| 2026-07-11 | Release metadata finalized locally for `0.1.0` and strict release gate passes. M9/M10 remain blocked on independent review, GitHub.com authentication/push, real Pages deployment, deployed smoke evidence, and release publication. |
+| Date       | Change                                                                                                                                                                                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-10 | Plan created; CI + Pages scaffolds added in M0.                                                                                                                                                                                                                                                                    |
+| 2026-07-10 | Synchronized with master roadmap 7.1: lean PR/main CI, deterministic Pages deployment, deployed smoke tests, and manual release gates made explicit.                                                                                                                                                               |
+| 2026-07-11 | Pages deployment now exposes the deployed URL and runs Chromium Playwright smoke against that URL. Playwright supports `PLAYWRIGHT_BASE_URL` for deployed smoke and keeps the local web server path for development.                                                                                               |
+| 2026-07-11 | Manual release-gate workflow added: strict pre-release checks run Python/frontend quality gates, contract drift checks, production build, release metadata checks, and source/artifact prohibited-file scans. Current local run allows provisional CITATION version until M10 finalization.                        |
+| 2026-07-11 | Release metadata finalized locally for `0.1.0` and strict release gate passes. M9/M10 remain blocked on independent review, GitHub.com authentication/push, real Pages deployment, deployed smoke evidence, and release publication.                                                                               |
 | 2026-07-11 | M9 deployment evidence completed: CI passed, Pages was enabled for GitHub Actions, production deploy succeeded, deployed smoke passed, full paper-default compute works on the live site, and all export paths were smoke-tested from the deployed URL. M10 release publication still awaits independent approval. |
+| 2026-07-11 | Manual remote release-gate workflow passed on the current release-candidate source. Tagging and release notes publication remain held for independent approval.                                                                                                                                                    |
 
 ## Final commits
 

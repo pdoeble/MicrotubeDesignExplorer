@@ -5,13 +5,14 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
 
 ## Sections
 
-| Section | Content |
-|---|---|
-| [decisions/](decisions/index.md) | Architecture Decision Records (ADRs) and resolved source conflicts |
-| [model/](model/index.md) | Equations, assumptions, validity limits, provenance of the scientific model |
-| [interfaces/](interfaces/index.md) | Contracts (`SimulationRequest`/`SimulationResult`), worker protocol, export payloads |
-| [ui/](ui/index.md) | Visual conventions, accessibility rules, tab/control patterns |
-| [release-and-maintenance.md](release-and-maintenance.md) | Release checklist, version metadata, maintenance policy, and handover notes |
+| Section                                                  | Content                                                                              |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [decisions/](decisions/index.md)                         | Architecture Decision Records (ADRs) and resolved source conflicts                   |
+| [model/](model/index.md)                                 | Equations, assumptions, validity limits, provenance of the scientific model          |
+| [interfaces/](interfaces/index.md)                       | Contracts (`SimulationRequest`/`SimulationResult`), worker protocol, export payloads |
+| [ui/](ui/index.md)                                       | Visual conventions, accessibility rules, tab/control patterns                        |
+| [review/](review/index.md)                               | Independent scientific and accessibility release-candidate review package            |
+| [release-and-maintenance.md](release-and-maintenance.md) | Release checklist, version metadata, maintenance policy, and handover notes          |
 
 ## Key documents
 
@@ -27,6 +28,8 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
   messages, transferables, caching, and cancellation boundary (M4).
 - [model/scientific-validation.md](model/scientific-validation.md) — validation
   evidence and remaining independent-approval gate (M8).
+- [review/index.md](review/index.md) — required external review checklists and
+  approval records for M8/M9/M10.
 - [release-and-maintenance.md](release-and-maintenance.md) — M10 release and
   maintenance handover.
 

@@ -34,6 +34,7 @@ sweep, memory, cancellation budgets; failure-path tests; independent review.
       coverage.
 - [ ] WCAG 2.2 AA review with documented exceptions.
 - [ ] Independent scientific and accessibility review.
+- [x] Independent review package and GitHub issue templates prepared.
 
 ## Performance budgets
 
@@ -41,17 +42,17 @@ Reference environment: local Windows workstation, Playwright Chromium
 (`chromium-1228`), reduced paper-default sweep (`16×16`) for browser smoke.
 Full-release budgets remain release-candidate gates.
 
-| Path | Budget | Evidence |
-|---|---:|---|
-| Pyodide worker startup | < 60 s | `tests/e2e/app-acceptance.spec.ts` Chromium budget smoke passed 2026-07-11 |
-| Reduced sweep compute after startup | < 30 s | same |
-| Reduced worker total startup + compute | < 90 s | same |
-| UI result/export smoke | < 120 s per test | Chromium E2E passed 2026-07-11 |
+| Path                                   |           Budget | Evidence                                                                   |
+| -------------------------------------- | ---------------: | -------------------------------------------------------------------------- |
+| Pyodide worker startup                 |           < 60 s | `tests/e2e/app-acceptance.spec.ts` Chromium budget smoke passed 2026-07-11 |
+| Reduced sweep compute after startup    |           < 30 s | same                                                                       |
+| Reduced worker total startup + compute |           < 90 s | same                                                                       |
+| UI result/export smoke                 | < 120 s per test | Chromium E2E passed 2026-07-11                                             |
 
 ## Risks
 
-| Risk | Mitigation |
-|---|---|
+| Risk                             | Mitigation                                |
+| -------------------------------- | ----------------------------------------- |
 | Pyodide download flakiness in CI | cached assets, retries, generous timeouts |
 
 ## Tests / evidence
@@ -74,15 +75,18 @@ Full-release budgets remain release-candidate gates.
   `pnpm format:check`, `pnpm build`, `pnpm test:e2e` (14 passed,
   4 documented skips), `python scripts/check_prohibited_files.py`,
   and `git diff --check`.
+- 2026-07-11 external review package prepared in `wiki/review/index.md` with
+  GitHub issue templates for scientific and accessibility approval.
 
 ## Status log
 
-| Date | Change |
-|---|---|
-| 2026-07-10 | Plan created (M0). |
-| 2026-07-11 | M8 automation slice added: geometry-representation API equivalence, worker-crash client failure test, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep performance budget. Independent review remains open. |
-| 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox production-preview app acceptance passes. Firefox Vite-dev Pyodide startup remains a documented test-environment limitation. |
+| Date       | Change                                                                                                                                                                                                                                                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-10 | Plan created (M0).                                                                                                                                                                                                                                                                       |
+| 2026-07-11 | M8 automation slice added: geometry-representation API equivalence, worker-crash client failure test, Chromium E2E compute/export/URL/reset/accessibility smoke, and reduced-sweep performance budget. Independent review remains open.                                                  |
+| 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox production-preview app acceptance passes. Firefox Vite-dev Pyodide startup remains a documented test-environment limitation.                                                                               |
 | 2026-07-11 | M8 moved to review-ready: operating-mode cross-checks, non-finite rejection, unsolved operating target warnings, report export failure cleanup, screen-reader landmark assertions, and 200% text-zoom reflow coverage added. Independent scientific/accessibility approval remains open. |
+| 2026-07-11 | Independent review package and GitHub issue templates prepared so external scientific and accessibility reviewers can record approval, accepted exceptions, or blocking findings.                                                                                                        |
 
 ## Final commits
 
