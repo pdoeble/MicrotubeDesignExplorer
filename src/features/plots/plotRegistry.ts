@@ -278,6 +278,36 @@ export const plotRegistry = [
     description: "Composite feasibility mask after all active design screens.",
   },
   {
+    id: "burst-tolerance-grid",
+    title: "Burst-pressure tolerance grid",
+    family: "log-map-grid",
+    field: "burst_pressure_tolerance_standard",
+    unit: "bar",
+    source: "cooler",
+    description:
+      "Standard and medical wall-tolerance burst pressure for both coolers in the approved 2×2 paper layout.",
+  },
+  {
+    id: "capillary-rise-grid",
+    title: "Capillary-rise acceleration grid",
+    family: "log-map-grid",
+    field: "capillary_rise_1g",
+    unit: "mm",
+    source: "cooler",
+    description:
+      "Capillary-rise sensitivity at 1g, 5g and 10g for both coolers in the approved 3×2 paper layout.",
+  },
+  {
+    id: "resistance-shares-grid",
+    title: "Thermal-resistance shares",
+    family: "share-grid",
+    field: "resistance_share_inner",
+    unit: "%",
+    source: "cooler",
+    description:
+      "Tube-side, wall and air-side resistance shares for both coolers in the approved 3×2 paper layout.",
+  },
+  {
     id: "design-boundary-lines",
     title: "Design boundary lines",
     family: "boundary-summary",

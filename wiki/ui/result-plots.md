@@ -1,61 +1,51 @@
 # Result plot conventions
 
-Milestone M6 implements result plots as a frontend adapter over
-`SimulationResult`. Plot code must not recompute physics, derive alternate
-screen masks, or apply hidden calibration. Values come from registered result
-fields and transferred `Float64Array` buffers produced by the Python worker.
+Result figures are presentation adapters over one immutable
+`SimulationResult`. No physical correlation, empirical fit, screen derivation,
+or calibration is implemented in TypeScript.
 
-## Current rendering slice
+## Rendering pipeline
 
-- `src/features/plots/plotRegistry.ts` owns stable plot IDs, display titles,
-  field names, field group (`fields` or `masks`), units, source (`cooler` or
-  `comparison`), and family metadata.
-- `src/features/plots/plotSpec.ts` owns testable Plotly trace/layout/config
-  generation, row-major `Float64Array` to matrix conversion, compact
-  provenance footer text, composite feasible-boundary overlays, design-point
-  markers, minimum-wall lines, and image export options.
-- `src/features/plots/PlotFigure.tsx` renders heatmap traces with Plotly from
-  `SimulationResult` field metadata and buffer indices, then exposes explicit
-  PNG and SVG figure export buttons. PNG export offers `1x`, `2x`, and `3x`
-  resolution scales; SVG export remains vector-scaled at `1x`.
-- `src/features/plots/ResultPlotsTab.tsx` owns the user workflow for running the
-  worker simulation, selecting a registered plot, selecting a cooler when the
-  plot is cooler-scoped, switching cooler-scoped plots between single and
-  tandem display, switching comparison groups between delta and ratio variants,
-  showing scalar KPI summaries, and launching JSON/HTML/print-PDF report
-  exports from the current immutable `SimulationResult`.
-- `src/features/export/reportFigures.ts` owns the default report figure
-  selection and captures SVG images from the same tested Plotly specs used for
-  on-screen figures. The default set covers both coolers' overall coefficient,
-  design-boundary, and pressure-drop plots plus one same-geometry comparison
-  ratio.
-- No WebGL trace family is allowed in the registry because SVG export is an M7
-  requirement.
-- Exported figures include a provenance footer with contract version, core
-  version, request hash, generation timestamp, and golden-reference identifier
-  when present.
-- Overlay traces are drawn only from `SimulationResult`: comparison boundary
-  vectors plus cooler summary geometry/minimum-wall fields. For comparison
-  plots, both coolers' overlays are shown; for cooler-scoped plots, only the
-  selected cooler's overlays are shown.
-- Individual screen boundaries are Plotly contour traces at mask level 0.5
-  from exported per-screen failure masks. The legend names the screen and
-  cooler; hover is skipped for boundary contours to keep value hover stable.
-- Tandem display renders the left and right cooler with a shared finite color
-  domain computed from the selected `SimulationResult` fields. Comparison
-  percent-delta plots use a symmetric diverging color domain around zero.
-- Comparison plot variants are linked in `plotRegistry.ts` by variant group
-  and variant kind (`delta` or `ratio`). The selector changes plot IDs; it does
-  not derive ratios or deltas in the UI.
-- Cooler-scoped heatmap hover text includes value, unit, and status derived
-  from exported masks: invalid geometry, outside wall-ratio range, operating
-  point unsolved, below minimum wall, screened out, or valid.
-- Each figure exposes a tabular data summary tied to the plot canvas through
-  `aria-describedby`: plot ID, field name, unit, finite-cell count, min/max,
-  and status counts where status masks are available.
+- `plotRegistry.ts` owns stable approved IDs and field bindings.
+- `plotPresentation.ts` owns display units, fixed limits, contour levels,
+  masking policies, line policies and reversed variants from the MATLAB
+  `params` block.
+- `colormap.ts` contains the provenance-documented project spectral colors
+  recovered from the approved MATLAB SVG.
+- `plotSpec.ts` converts SI values at the display boundary, applies exported
+  masks, performs the ADR-0007 τ display transform, and builds SVG-compatible
+  heatmap, contour and scatter traces.
+- `compositePlotSpec.ts` builds the shared-colorbar kA portrait, burst-
+  tolerance grid, capillary-rise grid, resistance-share grid and two-panel
+  design-boundary summary.
 
-## M6 completion note
+All design-space maps use `d_o` from 0.1 to 10 mm on a logarithmic x-axis and
+τ from 0 to 40 % on a linear y-axis. Only 0.1, 1 and 10 are labelled on x.
+Map values are interpolated only between adjacent finite native-grid samples;
+binary masks and statuses use nearest-neighbour display placement.
 
-M6 has no open rendering requirement. Full grid-value table export remains part
-of the later report/export work if needed; the M6 figure view provides
-plot-level tabular summaries.
+## Figure semantics
+
+- Log families plot `log10` of positive display-unit values and label the
+  colorbar in physical values. NaN and non-positive log cells remain white.
+- k, kA and burst domains are shared across both coolers using the MATLAB
+  1/99-percentile robust-limit policy. Fixed paper domains are registry data.
+- Ordinary maps show only their approved technology curves, a distinct request
+  design point, the validated aluminum X where applicable, labelled iso-lines
+  and the nine tube cross-section sketches. Screen contours are restricted to
+  the design-boundary summary.
+- Reynolds maps include a black dashed Re = 2300 transition.
+- Design-boundary fill is clipped to all-screen-feasible cells. Its six screen
+  contours use fixed colors and short hatch strokes on the violating side; its
+  legend is separated below the panels.
+- Figure canvases use Times-compatible serif typography and omit descriptive
+  in-figure titles. The accessible HTML heading/caption supplies the title and
+  detailed description.
+
+## Accessibility and export
+
+Every figure has an accessible image label, detailed caption, tabular numeric
+summary where applicable, and explicit PNG/SVG controls. Provenance is placed
+in a dedicated footer band. Report capture uses the same tested specs and a
+paper-like fixed geometry; standalone HTML keeps machine JSON available on
+screen but excludes it from print.

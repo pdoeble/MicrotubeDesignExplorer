@@ -12,6 +12,8 @@ import {
 } from "../export/reportExport";
 import { captureReportFigures } from "../export/reportFigures";
 import { PlotFigure } from "./PlotFigure";
+import { CompositePlotFigure } from "./CompositePlotFigure";
+import { isCompositePlot } from "./compositePlotSpec";
 import {
   plotById,
   plotRegistry,
@@ -57,16 +59,17 @@ export function ResultPlotsTab() {
   const clientRef = useRef<SimulationWorkerClient | null>(null);
   const selectedDefinition = useMemo(() => plotById(selectedPlot), [selectedPlot]);
   const isComparisonPlot = selectedDefinition.source === "comparison";
+  const isComposite = isCompositePlot(selectedPlot);
   const comparisonVariant = selectedDefinition.variantKind;
   const tandemColorDomain = useMemo(
     () =>
-      result && !isComparisonPlot && displayMode === "tandem"
+      result && !isComparisonPlot && !isComposite && displayMode === "tandem"
         ? colorDomainForPlot(result.payload, result.arrays, selectedPlot, [
             "cooler_left",
             "cooler_right",
           ])
         : undefined,
-    [displayMode, isComparisonPlot, result, selectedPlot],
+    [displayMode, isComparisonPlot, isComposite, result, selectedPlot],
   );
 
   useEffect(
@@ -78,10 +81,10 @@ export function ResultPlotsTab() {
   );
 
   useEffect(() => {
-    if (isComparisonPlot && displayMode !== "single") {
+    if ((isComparisonPlot || isComposite) && displayMode !== "single") {
       setDisplayMode("single");
     }
-  }, [displayMode, isComparisonPlot]);
+  }, [displayMode, isComparisonPlot, isComposite]);
 
   const runSimulation = async () => {
     const client = clientRef.current ?? new SimulationWorkerClient();
@@ -222,7 +225,7 @@ export function ResultPlotsTab() {
                 id="plot-display"
                 value={displayMode}
                 onChange={(event) => setDisplayMode(event.target.value as "single" | "tandem")}
-                disabled={isComparisonPlot}
+                disabled={isComparisonPlot || isComposite}
               >
                 <option value="single">Single cooler</option>
                 <option value="tandem">Tandem</option>
@@ -255,14 +258,17 @@ export function ResultPlotsTab() {
                 onChange={(event) =>
                   setSelectedCooler(event.target.value as "cooler_left" | "cooler_right")
                 }
-                disabled={isComparisonPlot || displayMode === "tandem"}
+                disabled={isComparisonPlot || isComposite || displayMode === "tandem"}
               >
                 <option value="cooler_left">{result.payload.cooler_left.label}</option>
                 <option value="cooler_right">{result.payload.cooler_right.label}</option>
               </select>
             </label>
           </fieldset>
-          {!isComparisonPlot && displayMode === "tandem" ? (
+          {isComposite ||
+          (selectedPlot === "bundle-conductance-map" && displayMode === "tandem") ? (
+            <CompositePlotFigure result={result} plotId={selectedPlot} />
+          ) : !isComparisonPlot && displayMode === "tandem" ? (
             <div className="plot-tandem-grid" aria-label={`${selectedDefinition.title} tandem`}>
               <PlotFigure
                 colorDomain={tandemColorDomain}
@@ -288,13 +294,13 @@ export function ResultPlotsTab() {
 
 function KpiSummary({ result }: { result: SimulationWorkerResult }) {
   const rows = [
-    ["Overall coefficient", "overall_coefficient"],
-    ["Bundle conductance", "bundle_conductance"],
-    ["Tube pressure drop", "tube_pressure_drop"],
-    ["Coolant volume flow", "coolant_volume_flow"],
-    ["Burst pressure", "burst_pressure"],
-    ["Capillary rise", "capillary_rise"],
-    ["Cost index", "cost_index"],
+    ["Overall coefficient", "overall_coefficient", 1, "W/(m² K)"],
+    ["Bundle conductance", "bundle_conductance", 1, "W K⁻¹"],
+    ["Tube pressure drop", "tube_pressure_drop", 1e-5, "bar"],
+    ["Coolant volume flow", "coolant_volume_flow", 6e4, "L min⁻¹"],
+    ["Burst pressure", "burst_pressure", 1e-5, "bar"],
+    ["Capillary rise", "capillary_rise", 1e3, "mm"],
+    ["Cost index", "cost_index", 1, "-"],
   ] as const;
 
   return (
@@ -311,12 +317,12 @@ function KpiSummary({ result }: { result: SimulationWorkerResult }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map(([label, key]) => (
+            {rows.map(([label, key, factor, unit]) => (
               <tr key={key}>
                 <th scope="row">{label}</th>
-                <td>{formatScalar(result.payload.cooler_left.summary.values[key])}</td>
-                <td>{formatScalar(result.payload.cooler_right.summary.values[key])}</td>
-                <td>{result.payload.cooler_left.summary.units[key] ?? "-"}</td>
+                <td>{formatScalar(result.payload.cooler_left.summary.values[key], factor)}</td>
+                <td>{formatScalar(result.payload.cooler_right.summary.values[key], factor)}</td>
+                <td>{unit}</td>
               </tr>
             ))}
           </tbody>
@@ -326,7 +332,7 @@ function KpiSummary({ result }: { result: SimulationWorkerResult }) {
   );
 }
 
-function formatScalar(value: number | null | undefined): string {
+function formatScalar(value: number | null | undefined, factor = 1): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return "n/a";
-  return Number(value.toPrecision(6)).toString();
+  return Number((value * factor).toPrecision(4)).toString();
 }

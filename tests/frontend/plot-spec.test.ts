@@ -11,7 +11,9 @@ import {
   fieldForPlot,
   imageExportOptions,
   matrixFromArray,
+  maskMatrixForPlot,
   overlayTracesForPlot,
+  preparePlotData,
   provenanceFooter,
   statusMatrixForPlot,
   summarizePlotData,
@@ -146,7 +148,9 @@ describe("plot spec", () => {
     expect(spec.config.toImageButtonOptions).toEqual({
       filename: "same-geometry-ratio-cooler_right",
       format: "png",
+      height: 660,
       scale: 2,
+      width: 825,
     });
   });
 
@@ -154,27 +158,33 @@ describe("plot spec", () => {
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "png")).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "png",
+      height: 660,
       scale: 2,
+      width: 825,
     });
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "png", 3)).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "png",
+      height: 660,
       scale: 3,
+      width: 825,
     });
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "svg")).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "svg",
+      height: 660,
       scale: 1,
+      width: 825,
     });
   });
 
   it("computes shared color domains across tandem cooler fields", () => {
-    expect(
-      colorDomainForPlot(payload, overlayArrays, "overall-coefficient-map", [
-        "cooler_left",
-        "cooler_right",
-      ]),
-    ).toEqual({ zmax: 8, zmin: 1 });
+    const domain = colorDomainForPlot(payload, overlayArrays, "overall-coefficient-map", [
+      "cooler_left",
+      "cooler_right",
+    ]);
+    expect(domain?.zmin).toBeCloseTo(Math.log10(1.05));
+    expect(domain?.zmax).toBeCloseTo(Math.log10(7.9));
   });
 
   it("computes non-symmetric domains for comparison ratio maps", () => {
@@ -230,21 +240,17 @@ describe("plot spec", () => {
       "cooler_left",
     );
 
-    expect(traces.map((trace) => trace.name)).toEqual([
-      "Feasible boundary - Aluminum",
-      "Minimum wall - Aluminum",
-      "Design point - Aluminum",
+    expect(traces.map((trace) => trace.name).filter(Boolean)).toEqual([
+      "Technology limit - Aluminum",
+      "Validated aluminum reference",
+      "Request design point - Aluminum",
     ]);
-    expect(traces[0]?.x).toEqual([1, 2, 3]);
-    const boundaryY = traces[0]?.y as number[] | undefined;
-    expect(boundaryY?.[0]).toBeCloseTo(0.1);
-    expect(boundaryY?.[1]).toBeCloseTo(0.4);
-    expect(boundaryY?.[2]).toBeCloseTo(0.9);
+    expect(traces).toHaveLength(22);
     const minimumWallY = traces[1]?.y as number[] | undefined;
-    expect(minimumWallY?.[0]).toBeCloseTo(0.07);
-    expect(minimumWallY?.[1]).toBeCloseTo(0.07);
+    expect(minimumWallY?.[0]).toBeCloseTo(70);
+    expect(minimumWallY?.[1]).toBeCloseTo(0.7);
     expect(traces[2]?.x).toEqual([1]);
-    expect(traces[2]?.y).toEqual([0.1]);
+    expect(traces[2]?.y).toEqual([10]);
   });
 
   it("shows both coolers' overlays on comparison plots", () => {
@@ -255,15 +261,16 @@ describe("plot spec", () => {
       "cooler_left",
     );
 
-    expect(traces.map((trace) => trace.name)).toEqual([
+    expect(traces.map((trace) => trace.name).filter(Boolean)).toEqual([
       "Feasible boundary - Aluminum",
-      "Minimum wall - Aluminum",
-      "Design point - Aluminum",
       "Feasible boundary - Polyamide",
-      "Minimum wall - Polyamide",
-      "Design point - Polyamide",
+      "Technology limit - Aluminum",
+      "Technology limit - Polyamide",
+      "Validated aluminum reference",
+      "Request design point - Aluminum",
     ]);
-    expect(traces[3]?.x).toEqual([1.5, 2.5]);
+    expect(traces[1]?.x).toEqual([1.5, 2.5]);
+    expect(traces[0]?.y).toEqual([10, 20, 30]);
   });
 
   it("creates individual screen boundary contour traces from exported masks", () => {
@@ -290,9 +297,65 @@ describe("plot spec", () => {
     );
 
     expect(traces[0]).toMatchObject({
-      name: "Burst pressure screen - Aluminum",
+      name: "Burst pressure",
       type: "contour",
     });
+  });
+
+  it("resamples native wall thickness onto a regular tau display axis", () => {
+    const prepared = preparePlotData(
+      [1, 2],
+      [0.1, 0.2, 0.4],
+      [
+        [10, 20],
+        [20, 40],
+        [40, 80],
+      ],
+      plotById("coolant-throughput-map"),
+    );
+    expect(prepared.tauValues[0]).toBe(0);
+    expect(prepared.tauValues.at(-1)).toBe(40);
+    expect(prepared.displayValues[40]?.[0]).toBeCloseTo(10 * 6e4);
+    expect(prepared.displayValues[40]?.[1]).toBeCloseTo(40 * 6e4);
+  });
+
+  it("never interpolates display values across a non-finite source interval", () => {
+    const prepared = preparePlotData(
+      [1],
+      [0.1, 0.2],
+      [[100], [Number.NaN]],
+      plotById("overall-coefficient-map"),
+    );
+    expect(prepared.displayValues[40]?.[0]).toBe(100);
+    expect(prepared.displayValues[60]?.[0]).toBeNaN();
+  });
+
+  it("clips ordinary map data below the own-material technology limit", () => {
+    const maskRef: GridFieldRef = {
+      buffer_index: 6,
+      name: "mask_below_min_wall",
+      shape: [2, 2],
+      unit: "-",
+    };
+    const maskedPayload: SimulationResultPayload = {
+      ...payload,
+      cooler_left: { ...payload.cooler_left, masks: [maskRef] },
+    };
+    const arrays = [...overlayArrays, new Float64Array([1, 0, 0, 1])] as const;
+    const masked = maskMatrixForPlot(
+      maskedPayload,
+      arrays,
+      plotById("overall-coefficient-map"),
+      "cooler_left",
+      [
+        [1, 2],
+        [3, 4],
+      ],
+    );
+    expect(masked).toEqual([
+      [Number.NaN, 2],
+      [3, Number.NaN],
+    ]);
   });
 
   it("builds hover validity status from exported masks", () => {

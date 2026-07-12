@@ -61,6 +61,12 @@ n_outer_diameter]`). Per cooler: `fields`, `masks`, `ScalarSummary`
 `Provenance` records core/contract versions, request hash (SHA-256 over the
 canonical request JSON), timestamp, and the golden-manifest reference.
 
+Contract 1.0.0 permits additive named field entries. Each cooler now also
+exports `resistance_share_inner`, `resistance_share_wall`, and
+`resistance_share_outer` in percent. The Python core derives them from the
+three absolute resistance fields. Consumers resolve fields by name and must
+not depend on field order or a fixed total buffer count.
+
 ## Binding validity policy
 
 | Condition | Behavior | Code |

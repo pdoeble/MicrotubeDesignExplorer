@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import type Plotly from "plotly.js-dist-min";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
 import {
@@ -7,15 +8,18 @@ import {
   createPlotSpec,
   fieldForPlot,
   imageExportOptions,
+  maskMatrixForPlot,
   matrixFromArray,
   overlayTracesForPlot,
   statusMatrixForPlot,
+  preparePlotData,
   summarizePlotData,
   supportedImageFormats,
   titleScopeForPlot,
   type CoolerKey,
   type ImageFormat,
 } from "./plotSpec";
+import { presentationForPlot } from "./plotPresentation";
 
 type PlotFigureProps = {
   colorDomain?: ColorDomain | undefined;
@@ -32,7 +36,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   const plot = plotById(plotId);
   const field = fieldForPlot(result.payload, plotId, cooler);
   const array = field ? result.arrays[field.buffer_index] : undefined;
-  const zValues = useMemo(() => matrixFromArray(array, field), [array, field]);
+  const rawValues = useMemo(() => matrixFromArray(array, field), [array, field]);
   const xValues = useMemo(
     () => axisMillimeters(result.payload.outer_diameter_axis),
     [result.payload.outer_diameter_axis],
@@ -42,6 +46,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     [result.payload.wall_thickness_axis],
   );
   const titleScope = titleScopeForPlot(result.payload, plot, cooler);
+  const presentation = presentationForPlot(plot);
   const overlays = useMemo(
     () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
     [cooler, plot, result.arrays, result.payload],
@@ -50,9 +55,23 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     () => statusMatrixForPlot(result.payload, result.arrays, plot, cooler),
     [cooler, plot, result.arrays, result.payload],
   );
+  const zValues = useMemo(
+    () =>
+      rawValues
+        ? maskMatrixForPlot(result.payload, result.arrays, plot, cooler, rawValues)
+        : undefined,
+    [cooler, plot, rawValues, result.arrays, result.payload],
+  );
+  const preparedData = useMemo(
+    () => (zValues ? preparePlotData(xValues, yValues, zValues, plot, statusValues) : undefined),
+    [plot, statusValues, xValues, yValues, zValues],
+  );
   const dataSummary = useMemo(
-    () => (zValues ? summarizePlotData(zValues, statusValues) : undefined),
-    [statusValues, zValues],
+    () =>
+      preparedData
+        ? summarizePlotData(preparedData.displayValues, preparedData.statusValues)
+        : undefined,
+    [preparedData],
   );
   const plotSpec = useMemo(
     () =>
@@ -90,15 +109,17 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     const element = elementRef.current;
     if (!element || !plotSpec) return undefined;
     let cancelled = false;
+    let plotly: typeof Plotly | undefined;
 
     void import("plotly.js-dist-min").then(({ default: Plotly }) => {
+      plotly = Plotly;
       if (cancelled) return;
       void Plotly.newPlot(element, plotSpec.data, plotSpec.layout, plotSpec.config);
     });
 
     return () => {
       cancelled = true;
-      void import("plotly.js-dist-min").then(({ default: Plotly }) => Plotly.purge(element));
+      if (plotly) plotly.purge(element);
     };
   }, [plotSpec]);
 
@@ -117,6 +138,9 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
 
   return (
     <figure className="plot-figure">
+      <h3 className="plot-figure__title">
+        {plot.title} — {titleScope}
+      </h3>
       <div className="plot-figure__actions" aria-label="Figure export controls">
         <label className="plot-figure__scale" htmlFor={`${detailsId}-png-scale`}>
           <span>PNG scale</span>
@@ -173,7 +197,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
               </tr>
               <tr>
                 <th scope="row">Unit</th>
-                <td>{field.unit}</td>
+                <td>{presentation.displayUnit}</td>
               </tr>
               <tr>
                 <th scope="row">Finite cells</th>

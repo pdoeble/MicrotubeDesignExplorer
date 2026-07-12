@@ -129,8 +129,8 @@ export function buildStandaloneHtmlReport(
   <title>${escapeHtml(title)}</title>
   <style>
     :root { color-scheme: light; }
-    body { font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; margin: 2rem; line-height: 1.45; }
-    h1, h2 { font-family: Georgia, "Times New Roman", serif; }
+    body { font-family: "Times New Roman", Times, serif; color: #1a1a1a; margin: 2rem; line-height: 1.42; }
+    h1, h2 { font-family: "Times New Roman", Times, serif; }
     h1 { font-size: 1.55rem; margin-bottom: 0.2rem; }
     h2 { font-size: 1.15rem; border-bottom: 1px solid #b8b8b8; padding-bottom: 0.25rem; margin-top: 1.5rem; }
     table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1rem; font-size: 0.9rem; }
@@ -143,22 +143,28 @@ export function buildStandaloneHtmlReport(
     img { border: 1px solid #b8b8b8; height: auto; max-width: 100%; }
     .meta { color: #444; margin-top: 0; }
     .page-break { break-before: page; }
+    details > summary { cursor: pointer; font-weight: bold; }
+    .hash-short { display: none; }
     @media print {
       body { margin: 1.2cm; color: #000; }
       a { color: #000; }
       th { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .machine-details { display: none; }
+      .manifest { break-before: page; font-size: 7.5pt; }
+      .hash-full { display: none; }
+      .hash-short { display: inline; }
     }
   </style>
 </head>
 <body>
   <h1>Microtube design-space report</h1>
-  <p class="meta">Request ${escapeHtml(payload.request_hash)} | generated ${escapeHtml(generated)} | report payload ${REPORT_PAYLOAD_VERSION}</p>
+  <p class="meta">Core ${escapeHtml(payload.provenance.core_version)} | request ${escapeHtml(payload.request_hash.slice(0, 12))} | generated ${escapeHtml(generated)} | report ${REPORT_PAYLOAD_VERSION}</p>
 
   <h2>Provenance</h2>
   ${keyValueTable({
     "Contract version": payload.provenance.contract_version,
     "Core version": payload.provenance.core_version,
-    "Golden reference": payload.provenance.golden_reference ?? "n/a",
+    "Golden reference": payload.provenance.golden_reference || "n/a",
     "Request hash": payload.request_hash,
     "Result generated UTC": payload.provenance.generated_utc,
   })}
@@ -175,14 +181,18 @@ export function buildStandaloneHtmlReport(
   <h2>Figures</h2>
   ${figuresSection(figures)}
 
-  <h2>Array manifest</h2>
+  <h2 class="manifest">Array manifest</h2>
   ${arrayManifestTable(payload.array_manifest)}
 
-  <h2 class="page-break">Validated request JSON</h2>
-  <pre>${escapeHtml(JSON.stringify(payload.request, null, 2))}</pre>
+  <details class="machine-details">
+    <summary>Validated request JSON</summary>
+    <pre>${escapeHtml(JSON.stringify(payload.request, null, 2))}</pre>
+  </details>
 
-  <h2>Canonical sidecar JSON</h2>
-  <pre>${escapeHtml(canonicalReportJson(payload))}</pre>
+  <details class="machine-details">
+    <summary>Canonical sidecar JSON</summary>
+    <pre>${escapeHtml(canonicalReportJson(payload))}</pre>
+  </details>
 </body>
 </html>`;
 }
@@ -300,10 +310,10 @@ function summaryTable(
 ): string {
   const body = rows
     .map(([label, key]) => {
-      const leftUnit = payload.summaries.cooler_left.units[key] ?? "-";
+      const display = summaryDisplay(String(key), payload.summaries.cooler_left.units[key] ?? "-");
       const left = payload.summaries.cooler_left.values[key];
       const right = payload.summaries.cooler_right.values[key];
-      return `<tr><th scope="row">${escapeHtml(label)}</th><td>${formatReportNumber(left)}</td><td>${formatReportNumber(right)}</td><td>${escapeHtml(leftUnit)}</td></tr>`;
+      return `<tr><th scope="row">${escapeHtml(label)}</th><td>${formatReportNumber(convertSummaryValue(left, display.factor))}</td><td>${formatReportNumber(convertSummaryValue(right, display.factor))}</td><td>${escapeHtml(display.unit)}</td></tr>`;
     })
     .join("");
   return `<table><thead><tr><th>Quantity</th><th>${escapeHtml(payload.result_payload.cooler_left.label)}</th><th>${escapeHtml(payload.result_payload.cooler_right.label)}</th><th>Unit</th></tr></thead><tbody>${body}</tbody></table>`;
@@ -359,7 +369,7 @@ function arrayManifestTable(entries: ArrayManifestEntry[]): string {
   const rows = entries
     .map(
       (entry) =>
-        `<tr><td>${entry.buffer_index}</td><td>${escapeHtml(entry.source)}</td><td>${escapeHtml(entry.name)}</td><td>${escapeHtml(entry.unit)}</td><td>${escapeHtml(JSON.stringify(entry.shape))}</td><td>${entry.finite_count}</td><td>${entry.nan_count}</td><td>${formatReportNumber(entry.minimum)}</td><td>${formatReportNumber(entry.maximum)}</td><td><code>${escapeHtml(entry.sha256)}</code></td></tr>`,
+        `<tr><td>${entry.buffer_index}</td><td>${escapeHtml(entry.source)}</td><td>${escapeHtml(entry.name)}</td><td>${escapeHtml(entry.unit)}</td><td>${escapeHtml(JSON.stringify(entry.shape))}</td><td>${entry.finite_count}</td><td>${entry.nan_count}</td><td>${formatReportNumber(entry.minimum)}</td><td>${formatReportNumber(entry.maximum)}</td><td><code class="hash-full">${escapeHtml(entry.sha256)}</code><code class="hash-short">${escapeHtml(entry.sha256.slice(0, 12))}</code></td></tr>`,
     )
     .join("");
   return `<table><thead><tr><th>Buffer</th><th>Source</th><th>Name</th><th>Unit</th><th>Shape</th><th>Finite</th><th>NaN</th><th>Min</th><th>Max</th><th>SHA-256</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -367,7 +377,25 @@ function arrayManifestTable(entries: ArrayManifestEntry[]): string {
 
 function formatReportNumber(value: number | null | undefined): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return "n/a";
-  return escapeHtml(Number(value.toPrecision(8)).toString());
+  return escapeHtml(Number(value.toPrecision(4)).toString());
+}
+
+function summaryDisplay(key: string, sourceUnit: string): { factor: number; unit: string } {
+  if (key === "tube_pressure_drop" || key === "burst_pressure")
+    return { factor: 1e-5, unit: "bar" };
+  if (key === "coolant_volume_flow") return { factor: 6e4, unit: "L min⁻¹" };
+  if (key === "capillary_rise") return { factor: 1e3, unit: "mm" };
+  return {
+    factor: 1,
+    unit: sourceUnit.replaceAll("m^2", "m²").replaceAll("m^3", "m³"),
+  };
+}
+
+function convertSummaryValue(
+  value: number | null | undefined,
+  factor: number,
+): number | null | undefined {
+  return typeof value === "number" ? value * factor : value;
 }
 
 function formatBoolean(value: boolean | undefined): string {

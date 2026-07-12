@@ -117,6 +117,25 @@ def test_api_default_axes_and_fields_match_goldens() -> None:
         atol=1.0e-14,
         equal_nan=True,
     )
+    for refs, suffix in (
+        (result.payload.cooler_left.fields, "Al"),
+        (result.payload.cooler_right.fields, "Poly"),
+    ):
+        resistance_parts = [
+            read_f64(case_dir / f"Ri_{suffix}_raw"),
+            read_f64(case_dir / f"Rw_{suffix}_raw"),
+            read_f64(case_dir / f"Ro_{suffix}_raw"),
+        ]
+        total = sum(resistance_parts)
+        for field_name, resistance in zip(
+            ("resistance_share_inner", "resistance_share_wall", "resistance_share_outer"),
+            resistance_parts,
+            strict=True,
+        ):
+            assert_float_matches_golden(
+                _field(result, refs, field_name),
+                100.0 * resistance / total,
+            )
 
 
 def test_api_default_masks_match_goldens() -> None:

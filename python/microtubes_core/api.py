@@ -30,6 +30,7 @@ from microtubes_core.contracts import (
     ensure_finite_request,
 )
 from microtubes_core.models._array import BoolArray, FloatArray
+from microtubes_core.models.resistances import resistance_shares
 from microtubes_core.sweeps.comparison import (
     bilinear_interp2_native,
     compare_sweeps,
@@ -176,6 +177,11 @@ def _cooler_payload(
 ) -> CoolerResultPayload:
     design_diameter = cooler.design_point.outer_diameter
     design_wall = cooler.design_point.wall_thickness
+    share_inner, share_wall, share_outer = resistance_shares(
+        result.resistance_inner,
+        result.resistance_wall,
+        result.resistance_outer,
+    )
     field_specs = [
         ("alpha_outer", "W/(m^2 K)", result.alpha_outer),
         ("alpha_inner", "W/(m^2 K)", result.alpha_inner),
@@ -214,6 +220,9 @@ def _cooler_payload(
         ("resistance_inner", "m^2 K/W", result.resistance_inner),
         ("resistance_wall", "m^2 K/W", result.resistance_wall),
         ("resistance_outer", "m^2 K/W", result.resistance_outer),
+        ("resistance_share_inner", "%", 100.0 * share_inner),
+        ("resistance_share_wall", "%", 100.0 * share_wall),
+        ("resistance_share_outer", "%", 100.0 * share_outer),
     ]
     fields = [registry.add(name, unit, values) for name, unit, values in field_specs]
     masks = [

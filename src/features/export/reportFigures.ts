@@ -1,12 +1,14 @@
 import type { PlotlyConfig, PlotlyData, PlotlyLayout } from "plotly.js-dist-min";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import type { EmbeddedReportFigure } from "./reportExport";
+import { createCompositePlotSpec, isCompositePlot } from "../plots/compositePlotSpec";
 import { plotById, type PlotId } from "../plots/plotRegistry";
 import {
   axisMillimeters,
   colorDomainForPlot,
   createPlotSpec,
   fieldForPlot,
+  maskMatrixForPlot,
   matrixFromArray,
   overlayTracesForPlot,
   statusMatrixForPlot,
@@ -31,11 +33,12 @@ export type ReportFigureSpec = {
 export const defaultReportFigureSelections = [
   { cooler: "cooler_left", plotId: "overall-coefficient-map" },
   { cooler: "cooler_right", plotId: "overall-coefficient-map" },
+  { cooler: "cooler_left", plotId: "bundle-conductance-map" },
   { cooler: "cooler_left", plotId: "design-boundary-lines" },
-  { cooler: "cooler_right", plotId: "design-boundary-lines" },
-  { cooler: "cooler_left", plotId: "friction-pressure-drop-map" },
-  { cooler: "cooler_right", plotId: "friction-pressure-drop-map" },
-  { cooler: "cooler_right", plotId: "same-geometry-ratio-value" },
+  { cooler: "cooler_right", plotId: "tech-adjusted-delta-ka" },
+  { cooler: "cooler_left", plotId: "resistance-shares-grid" },
+  { cooler: "cooler_left", plotId: "burst-tolerance-grid" },
+  { cooler: "cooler_left", plotId: "capillary-rise-grid" },
 ] as const satisfies readonly ReportFigureSelection[];
 
 export async function captureReportFigures(
@@ -59,7 +62,7 @@ export async function captureReportFigures(
       });
       const dataUri = await Plotly.toImage(element, {
         format: "svg",
-        height: 650,
+        height: reportSpec.spec.layout.height ?? 720,
         scale: 1,
         width: 900,
       });
@@ -83,10 +86,33 @@ export function createReportFigureSpec(
   selection: ReportFigureSelection,
 ): ReportFigureSpec | undefined {
   const plot = plotById(selection.plotId);
+  const composite = createCompositePlotSpec(result, selection.plotId);
+  if (
+    composite &&
+    (isCompositePlot(selection.plotId) || selection.plotId === "bundle-conductance-map")
+  ) {
+    return {
+      figure: {
+        alt: plot.description,
+        description: `${plot.description} Values are read from SimulationResult and exported as SVG.`,
+        plot_id: plot.id,
+        scope: "Both coolers",
+        title: plot.title,
+      },
+      spec: composite,
+    };
+  }
   const field = fieldForPlot(result.payload, selection.plotId, selection.cooler);
   const array = field ? result.arrays[field.buffer_index] : undefined;
-  const zValues = matrixFromArray(array, field);
-  if (!field || !array || !zValues) return undefined;
+  const rawValues = matrixFromArray(array, field);
+  if (!field || !array || !rawValues) return undefined;
+  const zValues = maskMatrixForPlot(
+    result.payload,
+    result.arrays,
+    plot,
+    selection.cooler,
+    rawValues,
+  );
 
   const titleScope = titleScopeForPlot(result.payload, plot, selection.cooler);
   const sharedColorDomain =

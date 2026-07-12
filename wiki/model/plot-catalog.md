@@ -43,9 +43,9 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `capillary-rise-grid` | log-map-grid | 14 | h_cap (mm) | log color | rows = acceleration {1g, 5g, 10g} |
 | `tube-supply-cost-map` | log-map | 16, 17 | C_tube/C_fin (–) | log color, reversed | footprint cost orientation |
 | `feasibility-mask-map` | linear-map | 20_design data companion | feasible (-) | binary linear | composite all-screen mask from `SimulationResult.masks` |
-| `tech-adjusted-delta-k` | percent-delta | 09 | Δk_o,feas (%) | diverging linear | PA vs nearest feasible Al reference; needs both coolers feasible |
+| `tech-adjusted-delta-k` | percent-delta | 09 | Δk_o,feas (%) | fixed spectral linear | PA vs nearest feasible Al reference; needs both coolers feasible |
 | `tech-adjusted-ratio-k` | ratio-map | 09 data companion | k_o,B/k_o,A,feas (-) | linear color | ratio companion for `tech-adjusted-delta-k` |
-| `tech-adjusted-delta-ka` | percent-delta | 22 | Δ(k_o·A_o)_feas (%) | diverging linear | as above, bundle scale |
+| `tech-adjusted-delta-ka` | percent-delta | 22 | Δ(k_o·A_o)_feas (%) | fixed spectral linear | as above, bundle scale |
 | `tech-adjusted-ratio-ka` | ratio-map | 22 data companion | (k_o·A_o)_B/(k_o·A_o)_A,feas (-) | linear color | ratio companion for `tech-adjusted-delta-ka` |
 | `design-boundary-lines` | boundary-summary | 20_design | kA + 6 screen boundaries | log color + lines | one panel per cooler; legend explains all screens |
 | `same-geometry-ratio` | percent-delta | (computed, not exported) | k_B/k_A − 1 (%) | diverging linear | approved diagnostic; masked below max(t_min) |
@@ -59,7 +59,10 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `same geometry change` map export | same data as `same-geometry-ratio`; kept as web plot, MATLAB export was disabled |
 | k_o slices (`plotSlices2D_from3D`) | disabled in reference; presentation variant of `overall-coefficient-map` |
 | 3D ratio plot | `make_3d_plot=false`; not used by the manuscript |
-| cross-section sketches, contour-label placement, hatching | presentation decoration, replaced by web hover/legend |
+
+Cross-section sketches, labelled iso-contours, technology-limit lines,
+validated-reference markers and design-boundary hatching are required figure
+semantics and are implemented by the shared SVG-compatible plot adapters.
 
 ## Non-negotiable rendering rules (from AGENTS §8)
 
@@ -68,3 +71,6 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
   (d_o=1 mm, τ=10 %) use fixed symbols/colors across all plots.
 - Every figure: units, validity limits, alt text, PNG + SVG export,
   provenance footer.
+- Native `(t, d_o)` results are transformed for display only to a regular τ
+  grid under ADR-0007. The adapter never interpolates across non-finite cells;
+  masks use nearest-neighbour display resampling.

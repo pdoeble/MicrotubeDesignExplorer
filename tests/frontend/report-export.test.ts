@@ -108,6 +108,9 @@ describe("report export", () => {
     expect(html).toContain("Figure description");
     expect(html).not.toContain("<script>");
     expect(html).toContain("Canonical sidecar JSON");
+    expect(html).toContain('class="machine-details"');
+    expect(html).toContain("L min⁻¹");
+    expect(html).toContain(".machine-details { display: none; }");
     expect(buildStandaloneHtmlReport(payload, { figures })).toBe(
       buildStandaloneHtmlReport(structuredClone(payload), { figures: structuredClone(figures) }),
     );
@@ -130,12 +133,11 @@ describe("report export", () => {
       title: "Overall heat-transfer coefficient - Left <core>",
     });
     expect(spec?.spec.data[0]).toMatchObject({
-      colorbar: { title: { text: "W/(m^2 K)" } },
+      colorbar: { title: { text: "<i>k</i><sub>o</sub> [W/(m² K)]" } },
       type: "heatmap",
     });
-    expect(spec?.spec.layout.title).toEqual({
-      text: "Overall heat-transfer coefficient - Left <core>",
-    });
+    expect(spec?.spec.layout.title).toBeUndefined();
+    expect(spec?.spec.layout.yaxis).toMatchObject({ range: [0, 40] });
   });
 
   it("cleans up hidden report figure capture nodes when Plotly export fails", async () => {

@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { SimulationRequest } from "../../src/contracts/generated/simulation-request";
+import { plotRegistry } from "../../src/features/plots/plotRegistry";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const defaultsJson = JSON.parse(
@@ -60,6 +61,42 @@ test("runs a reduced paper-default workflow and exports JSON plus HTML reports",
   expect(html).toContain("<h2>Figures</h2>");
   expect(html).toContain("data:image/svg+xml");
   expect(html).toContain("Canonical sidecar JSON");
+  expect(consoleErrors).toEqual([]);
+});
+
+test("renders every registered plot without Plotly runtime errors", async ({ page }, testInfo) => {
+  test.setTimeout(180_000);
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  await page.goto(stateUrl("result-plots", reducedDefaultRequest()), { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Run simulation" }).click();
+  await expect(page.getByText(/^Computed \d+ numeric fields\.$/)).toBeVisible({ timeout: 120_000 });
+
+  for (const plot of plotRegistry) {
+    await page.locator("#plot-id").selectOption(plot.id);
+    await expect(page.locator(".plot-figure__title")).toContainText(plot.title);
+    await expect(
+      page.locator(".plot-figure__canvas .main-svg").first(),
+      `Plotly SVG for ${plot.id}`,
+    ).toBeVisible({ timeout: 15_000 });
+    if (
+      [
+        "overall-coefficient-map",
+        "tech-adjusted-delta-ka",
+        "design-boundary-lines",
+        "resistance-shares-grid",
+      ].includes(plot.id)
+    ) {
+      await page
+        .locator(".plot-figure")
+        .first()
+        .screenshot({
+          path: testInfo.outputPath(`${plot.id}.png`),
+        });
+    }
+  }
   expect(consoleErrors).toEqual([]);
 });
 
