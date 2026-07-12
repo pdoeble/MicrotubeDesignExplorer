@@ -6,7 +6,7 @@
 > **Workstream:** W10 (CI and release)
 > **Status:** review
 > **Created:** 2026-07-10
-> **Last updated:** 2026-07-11
+> **Last updated:** 2026-07-12
 
 ## Scope
 
@@ -73,6 +73,8 @@ operating model.
   no console errors.
 - 2026-07-11 remote release-gate workflow run `29173624206` passed on
   `6130d58978daa4229a1777e2e7a1058844a05450`.
+- 2026-07-12 UTC review tracking issues are open for the final pre-tag
+  approvals: scientific review #1 and accessibility review #2.
 - M10 release publication remains blocked on independent scientific and
   accessibility approval.
 
@@ -87,6 +89,7 @@ operating model.
 | 2026-07-11 | Release metadata finalized locally for `0.1.0` and strict release gate passes. M9/M10 remain blocked on independent review, GitHub.com authentication/push, real Pages deployment, deployed smoke evidence, and release publication.                                                                               |
 | 2026-07-11 | M9 deployment evidence completed: CI passed, Pages was enabled for GitHub Actions, production deploy succeeded, deployed smoke passed, full paper-default compute works on the live site, and all export paths were smoke-tested from the deployed URL. M10 release publication still awaits independent approval. |
 | 2026-07-11 | Manual remote release-gate workflow passed on the current release-candidate source. Tagging and release notes publication remain held for independent approval.                                                                                                                                                    |
+| 2026-07-12 UTC | Final pre-tag review tracking issues opened: scientific review #1 and accessibility review #2. |
 
 ## Final commits
 

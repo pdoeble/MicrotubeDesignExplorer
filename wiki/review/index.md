@@ -90,3 +90,9 @@ Use `.github/ISSUE_TEMPLATE/scientific-review.md` for scientific approval and
 `.github/ISSUE_TEMPLATE/accessibility-review.md` for accessibility approval.
 The master roadmap can close M8/M9 review items only after those issue records
 show approval or accepted exceptions.
+
+Active review records:
+
+- Scientific review: <https://github.com/pdoeble/MicrotubeDesignExplorer/issues/1>
+- Accessibility review:
+  <https://github.com/pdoeble/MicrotubeDesignExplorer/issues/2>

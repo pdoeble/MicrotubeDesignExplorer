@@ -6,7 +6,7 @@
 > **Workstream:** W9 (Quality)
 > **Status:** review
 > **Created:** 2026-07-10
-> **Last updated:** 2026-07-11
+> **Last updated:** 2026-07-12
 
 ## Scope
 
@@ -77,6 +77,10 @@ Full-release budgets remain release-candidate gates.
   and `git diff --check`.
 - 2026-07-11 external review package prepared in `wiki/review/index.md` with
   GitHub issue templates for scientific and accessibility approval.
+- 2026-07-12 UTC GitHub review records opened:
+  `https://github.com/pdoeble/MicrotubeDesignExplorer/issues/1` for scientific
+  approval and `https://github.com/pdoeble/MicrotubeDesignExplorer/issues/2`
+  for accessibility approval.
 
 ## Status log
 
@@ -87,6 +91,7 @@ Full-release budgets remain release-candidate gates.
 | 2026-07-11 | Multi-browser Playwright check expanded: WebKit passes the E2E suite; Firefox production-preview app acceptance passes. Firefox Vite-dev Pyodide startup remains a documented test-environment limitation.                                                                               |
 | 2026-07-11 | M8 moved to review-ready: operating-mode cross-checks, non-finite rejection, unsolved operating target warnings, report export failure cleanup, screen-reader landmark assertions, and 200% text-zoom reflow coverage added. Independent scientific/accessibility approval remains open. |
 | 2026-07-11 | Independent review package and GitHub issue templates prepared so external scientific and accessibility reviewers can record approval, accepted exceptions, or blocking findings.                                                                                                        |
+| 2026-07-12 UTC | GitHub review tracking issues opened for scientific approval (#1) and accessibility approval (#2). |
 
 ## Final commits
 

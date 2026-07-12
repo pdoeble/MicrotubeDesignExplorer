@@ -8,7 +8,12 @@ the static application.
 1. Confirm independent scientific and accessibility review findings are closed
    or formally accepted in `wiki/decisions/`. Use
    [review/index.md](review/index.md) and the GitHub issue templates under
-   `.github/ISSUE_TEMPLATE/` for the required approval records.
+   `.github/ISSUE_TEMPLATE/` for the required approval records. Active review
+   records are issue
+   [#1](https://github.com/pdoeble/MicrotubeDesignExplorer/issues/1) for
+   scientific approval and issue
+   [#2](https://github.com/pdoeble/MicrotubeDesignExplorer/issues/2) for
+   accessibility approval.
 2. Run the local release gates from a clean checkout:
 
    ```powershell
