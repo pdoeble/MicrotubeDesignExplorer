@@ -18,6 +18,7 @@ type IndependentRightSnapshots = Partial<Record<LinkGroup, unknown>>;
 
 export type SimulationStore = {
   request: SimulationRequest;
+  setCoolerLabel: (cooler: CoolerKey, label: string) => void;
   setCoolerValue: (cooler: CoolerKey, group: LinkGroup, path: string, value: unknown) => void;
   setSweepValue: (path: string, value: unknown) => void;
   setLinkedGroup: (group: LinkGroup, linked: boolean) => void;
@@ -31,6 +32,12 @@ const defaultRequest = defaultsJson.request as SimulationRequest;
 
 export const useSimulationStore = create<SimulationStore>((set, get) => ({
   request: initialRequest(),
+
+  setCoolerLabel: (cooler, label) => {
+    const next = cloneRequest(get().request);
+    next[cooler].label = label;
+    commit(set, next);
+  },
 
   setCoolerValue: (cooler, group, path, value) => {
     const next = cloneRequest(get().request);

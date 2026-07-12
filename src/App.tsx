@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Tabs, type TabDefinition } from "./components/Tabs";
 import { StartTab } from "./features/start/StartTab";
-import { InputTab } from "./features/input/InputTab";
-import { MaterialsTab } from "./features/materials/MaterialsTab";
+import { ModelSetupTab } from "./features/input/ModelSetupTab";
 import { ResultPlotsTab } from "./features/plots/ResultPlotsTab";
 import { SettingsTab } from "./features/settings/SettingsTab";
 
-const TAB_IDS = ["start", "input", "materials", "result-plots", "settings"] as const;
+const TAB_IDS = ["start", "input", "result-plots", "settings"] as const;
 type TabId = (typeof TAB_IDS)[number];
 
 function isTabId(value: string): value is TabId {
@@ -15,6 +14,7 @@ function isTabId(value: string): value is TabId {
 
 function tabIdFromHash(): TabId {
   const hash = window.location.hash.replace(/^#\/?/, "");
+  if (hash === "materials") return "input";
   return isTabId(hash) ? hash : "start";
 }
 
@@ -22,7 +22,16 @@ export function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => tabIdFromHash());
 
   useEffect(() => {
-    const onHashChange = () => setActiveTab(tabIdFromHash());
+    const normalizeLegacyHash = () => {
+      if (window.location.hash.replace(/^#\/?/, "") === "materials") {
+        window.history.replaceState(null, "", "#/input");
+      }
+    };
+    const onHashChange = () => {
+      setActiveTab(tabIdFromHash());
+      normalizeLegacyHash();
+    };
+    normalizeLegacyHash();
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
@@ -36,9 +45,12 @@ export function App() {
 
   const tabs: TabDefinition[] = [
     { id: "start", label: "Start", panel: <StartTab /> },
-    { id: "input", label: "Input", panel: <InputTab /> },
-    { id: "materials", label: "Materials", panel: <MaterialsTab /> },
-    { id: "result-plots", label: "Result Plots", panel: <ResultPlotsTab /> },
+    {
+      id: "input",
+      label: "Model Setup",
+      panel: <ModelSetupTab onContinue={() => activate("result-plots")} />,
+    },
+    { id: "result-plots", label: "Results", panel: <ResultPlotsTab /> },
     { id: "settings", label: "Settings", panel: <SettingsTab /> },
   ];
 

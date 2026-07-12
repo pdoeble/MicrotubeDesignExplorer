@@ -141,8 +141,10 @@ export function ResultPlotsTab() {
     <section aria-labelledby="plots-heading" className="workflow-section">
       <div className="section-heading-row">
         <div>
-          <h2 id="plots-heading">Result Plots</h2>
-          <p className="section-kicker">Plots read only from the current `SimulationResult`.</p>
+          <h2 id="plots-heading">Results</h2>
+          <p className="section-kicker">
+            Compute, compare and export figures from the current `SimulationResult`.
+          </p>
         </div>
         <button type="button" className="primary-button" onClick={runSimulation} disabled={running}>
           {running ? "Computing..." : "Run simulation"}

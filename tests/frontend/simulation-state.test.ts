@@ -56,4 +56,15 @@ describe("simulation state", () => {
     expect(encoded).toBeTruthy();
     expect(decodeUrlState(encoded ?? "")?.sweep.n_outer_diameter).toBe(64);
   });
+
+  it("keeps design labels independent from material linking", () => {
+    const store = useSimulationStore.getState();
+    store.setLinkedGroup("materials", true);
+    useSimulationStore.getState().setCoolerLabel("cooler_right", "Independent comparison name");
+
+    expect(useSimulationStore.getState().request.cooler_left.label).toBe("Aluminum");
+    expect(useSimulationStore.getState().request.cooler_right.label).toBe(
+      "Independent comparison name",
+    );
+  });
 });

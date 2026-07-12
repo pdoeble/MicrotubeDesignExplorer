@@ -66,8 +66,8 @@ Reviewer output:
 Required checks:
 
 - Review `wiki/ui/accessibility.md` and the M8 Playwright evidence.
-- Use keyboard-only navigation across Start, Input, Materials, Result Plots,
-  and Settings.
+- Use keyboard-only navigation across Start, Model Setup, Results, and
+  Settings, plus both Model Setup workflow steps.
 - Review at least one complete compute and export flow using a screen reader
   such as NVDA, JAWS, VoiceOver, or Narrator.
 - Verify focus visibility, tab order, form labels, field errors, warnings,

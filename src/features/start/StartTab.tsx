@@ -18,15 +18,17 @@ export function StartTab() {
       <h3>How to use it</h3>
       <ol>
         <li>
-          Configure both heat exchangers under <strong>Input</strong>. The default reproduces the
-          paper case: identical geometry, aluminum versus polyamide (PA).
+          Open <strong>Model Setup</strong>, name the reference and comparison designs, and choose
+          which scientific groups should remain linked.
         </li>
         <li>
-          Adjust static material and fluid properties under <strong>Materials</strong>.
+          Complete the two guided setup steps: <strong>Design &amp; operation</strong>, then
+          <strong> Materials &amp; fluids</strong>. Linked comparison fields are shown once instead
+          of duplicated.
         </li>
         <li>
-          Explore the design-space maps under <strong>Result Plots</strong> and export figures or a
-          full report.
+          Continue to <strong>Results</strong> to compute design-space maps and export figures or a
+          complete report.
         </li>
       </ol>
       <h3>Scientific basis</h3>

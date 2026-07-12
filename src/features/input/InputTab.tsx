@@ -1,4 +1,5 @@
 import { ParameterControl } from "../../components/ParameterControl";
+import { LinkedGroupNotice } from "../../components/LinkedGroupNotice";
 import type {
   AirOperatingMode,
   CoolantOperatingMode,
@@ -6,12 +7,7 @@ import type {
   InnerBoundaryCondition,
   TubeArrangement,
 } from "../../contracts/generated/simulation-request";
-import {
-  getByPath,
-  type CoolerKey,
-  type LinkGroup,
-  useSimulationStore,
-} from "../../state/simulationStore";
+import { getByPath, type CoolerKey, useSimulationStore } from "../../state/simulationStore";
 import { specsForGroup, type ParameterSpec } from "./parameterManifest";
 
 const COOLERS: CoolerKey[] = ["cooler_left", "cooler_right"];
@@ -41,18 +37,12 @@ export function InputTab() {
     <section aria-labelledby="input-heading" className="workflow-section">
       <div className="section-heading-row">
         <div>
-          <h2 id="input-heading">Input</h2>
+          <h3 id="input-heading">Design & operation</h3>
           <p className="section-kicker">
-            Paper defaults load as linked geometry, air, coolant, and screens.
+            Set geometry, operating targets, thermal boundaries and design screens.
           </p>
         </div>
       </div>
-
-      <LinkControls
-        groups={["geometry", "air_side", "coolant_side", "boundary_conditions"]}
-        linkedGroups={request.linked_groups}
-        onChange={setLinkedGroup}
-      />
 
       <div className="cooler-grid">
         {COOLERS.map((cooler) => (
@@ -61,125 +51,178 @@ export function InputTab() {
             aria-labelledby={`${cooler}-input-heading`}
             key={cooler}
           >
-            <h3 id={`${cooler}-input-heading`}>{request[cooler].label}</h3>
-            <TextField
-              id={`${cooler}-label`}
-              label="Cooler label"
-              value={request[cooler].label}
-              onChange={(value) => setCoolerValue(cooler, "materials", "label", value)}
-            />
-            <SelectField
-              id={`${cooler}-geometry-mode`}
-              label="Geometry representation"
-              value={request[cooler].geometry.mode ?? "dimensions"}
-              options={["dimensions", "volume_aspect"]}
-              onChange={(value) => setGeometryMode(cooler, value as GeometryMode)}
-            />
-            <SelectField
-              id={`${cooler}-arrangement`}
-              label="Tube arrangement"
-              value={request[cooler].geometry.arrangement ?? "inline"}
-              options={["inline", "staggered"]}
-              onChange={(value) =>
-                setCoolerValue(cooler, "geometry", "geometry.arrangement", value as TubeArrangement)
-              }
-            />
-            <CheckboxField
-              id={`${cooler}-finite-row`}
-              label="Finite-row VDI G7 correction"
-              checked={request[cooler].geometry.use_finite_row_correction ?? false}
-              onChange={(checked) =>
-                setCoolerValue(cooler, "geometry", "geometry.use_finite_row_correction", checked)
-              }
-            />
-            <ParameterGroup
-              title="Geometry and design point"
-              cooler={cooler}
-              group="geometry"
-              specs={geometrySpecs(request[cooler].geometry.mode ?? "dimensions")}
-              getValue={(path) => Number(getByPath(request[cooler], path))}
-              onChange={(path, value) => setCoolerValue(cooler, "geometry", path, value)}
-              onReset={(path) => resetCoolerField(cooler, "geometry", path)}
-            />
-            <SelectField
-              id={`${cooler}-air-mode`}
-              label="Air operating mode"
-              value={request[cooler].air_side.mode ?? "constant_velocity"}
-              options={AIR_MODES}
-              onChange={(value) =>
-                setCoolerValue(cooler, "air_side", "air_side.mode", value as AirOperatingMode)
-              }
-            />
-            <ParameterGroup
-              title="Air operating target"
-              cooler={cooler}
-              group="air_side"
-              specs={modeValueSpecs(
-                "air_side",
-                request[cooler].air_side.mode ?? "constant_velocity",
-              )}
-              getValue={(path) => Number(getByPath(request[cooler], path))}
-              onChange={(path, value) => setCoolerValue(cooler, "air_side", path, value)}
-              onReset={(path) => resetCoolerField(cooler, "air_side", path)}
-            />
-            <SelectField
-              id={`${cooler}-coolant-mode`}
-              label="Coolant operating mode"
-              value={request[cooler].coolant_side.mode ?? "constant_velocity"}
-              options={COOLANT_MODES}
-              onChange={(value) =>
-                setCoolerValue(
-                  cooler,
-                  "coolant_side",
-                  "coolant_side.mode",
-                  value as CoolantOperatingMode,
-                )
-              }
-            />
-            <ParameterGroup
-              title="Coolant operating target"
-              cooler={cooler}
-              group="coolant_side"
-              specs={modeValueSpecs(
-                "coolant_side",
-                request[cooler].coolant_side.mode ?? "constant_velocity",
-              )}
-              getValue={(path) => Number(getByPath(request[cooler], path))}
-              onChange={(path, value) => setCoolerValue(cooler, "coolant_side", path, value)}
-              onReset={(path) => resetCoolerField(cooler, "coolant_side", path)}
-            />
-            <SelectField
-              id={`${cooler}-inner-boundary`}
-              label="Inner thermal boundary"
-              value={
-                request[cooler].boundary_conditions.inner_boundary_condition ??
-                "constant_wall_temperature"
-              }
-              options={["constant_wall_temperature", "constant_heat_flux"]}
-              onChange={(value) =>
-                setCoolerValue(
-                  cooler,
-                  "boundary_conditions",
-                  "boundary_conditions.inner_boundary_condition",
-                  value as InnerBoundaryCondition,
-                )
-              }
-            />
-            <ParameterGroup
-              title="Screens and tolerances"
-              cooler={cooler}
-              group="boundary_conditions"
-              specs={specsForGroup("boundary_conditions")}
-              getValue={(path) => Number(getByPath(request[cooler], path))}
-              onChange={(path, value) => setCoolerValue(cooler, "boundary_conditions", path, value)}
-              onReset={(path) => resetCoolerField(cooler, "boundary_conditions", path)}
-            />
+            <p className="cooler-panel__role">
+              {cooler === "cooler_left" ? "Reference design" : "Comparison design"}
+            </p>
+            <h4 id={`${cooler}-input-heading`}>{request[cooler].label}</h4>
+            {cooler === "cooler_left" || !request.linked_groups.geometry ? (
+              <>
+                <SelectField
+                  id={`${cooler}-geometry-mode`}
+                  label="Geometry representation"
+                  value={request[cooler].geometry.mode ?? "dimensions"}
+                  options={["dimensions", "volume_aspect"]}
+                  onChange={(value) => setGeometryMode(cooler, value as GeometryMode)}
+                />
+                <SelectField
+                  id={`${cooler}-arrangement`}
+                  label="Tube arrangement"
+                  value={request[cooler].geometry.arrangement ?? "inline"}
+                  options={["inline", "staggered"]}
+                  onChange={(value) =>
+                    setCoolerValue(
+                      cooler,
+                      "geometry",
+                      "geometry.arrangement",
+                      value as TubeArrangement,
+                    )
+                  }
+                />
+                <CheckboxField
+                  id={`${cooler}-finite-row`}
+                  label="Finite-row VDI G7 correction"
+                  checked={request[cooler].geometry.use_finite_row_correction ?? false}
+                  onChange={(checked) =>
+                    setCoolerValue(
+                      cooler,
+                      "geometry",
+                      "geometry.use_finite_row_correction",
+                      checked,
+                    )
+                  }
+                />
+                <ParameterGroup
+                  title="Geometry and design point"
+                  cooler={cooler}
+                  group="geometry"
+                  specs={geometrySpecs(request[cooler].geometry.mode ?? "dimensions")}
+                  getValue={(path) => Number(getByPath(request[cooler], path))}
+                  onChange={(path, value) => setCoolerValue(cooler, "geometry", path, value)}
+                  onReset={(path) => resetCoolerField(cooler, "geometry", path)}
+                />
+              </>
+            ) : (
+              <LinkedGroupNotice
+                group="geometry"
+                sourceLabel={request.cooler_left.label}
+                title="Geometry & design point"
+                onUnlink={(group) => setLinkedGroup(group, false)}
+              />
+            )}
+            {cooler === "cooler_left" || !request.linked_groups.air_side ? (
+              <>
+                <SelectField
+                  id={`${cooler}-air-mode`}
+                  label="Air operating mode"
+                  value={request[cooler].air_side.mode ?? "constant_velocity"}
+                  options={AIR_MODES}
+                  onChange={(value) =>
+                    setCoolerValue(cooler, "air_side", "air_side.mode", value as AirOperatingMode)
+                  }
+                />
+                <ParameterGroup
+                  title="Air operating target"
+                  cooler={cooler}
+                  group="air_side"
+                  specs={modeValueSpecs(
+                    "air_side",
+                    request[cooler].air_side.mode ?? "constant_velocity",
+                  )}
+                  getValue={(path) => Number(getByPath(request[cooler], path))}
+                  onChange={(path, value) => setCoolerValue(cooler, "air_side", path, value)}
+                  onReset={(path) => resetCoolerField(cooler, "air_side", path)}
+                />
+              </>
+            ) : (
+              <LinkedGroupNotice
+                group="air_side"
+                sourceLabel={request.cooler_left.label}
+                title="Air circuit"
+                onUnlink={(group) => setLinkedGroup(group, false)}
+              />
+            )}
+            {cooler === "cooler_left" || !request.linked_groups.coolant_side ? (
+              <>
+                <SelectField
+                  id={`${cooler}-coolant-mode`}
+                  label="Coolant operating mode"
+                  value={request[cooler].coolant_side.mode ?? "constant_velocity"}
+                  options={COOLANT_MODES}
+                  onChange={(value) =>
+                    setCoolerValue(
+                      cooler,
+                      "coolant_side",
+                      "coolant_side.mode",
+                      value as CoolantOperatingMode,
+                    )
+                  }
+                />
+                <ParameterGroup
+                  title="Coolant operating target"
+                  cooler={cooler}
+                  group="coolant_side"
+                  specs={modeValueSpecs(
+                    "coolant_side",
+                    request[cooler].coolant_side.mode ?? "constant_velocity",
+                  )}
+                  getValue={(path) => Number(getByPath(request[cooler], path))}
+                  onChange={(path, value) => setCoolerValue(cooler, "coolant_side", path, value)}
+                  onReset={(path) => resetCoolerField(cooler, "coolant_side", path)}
+                />
+              </>
+            ) : (
+              <LinkedGroupNotice
+                group="coolant_side"
+                sourceLabel={request.cooler_left.label}
+                title="Coolant circuit"
+                onUnlink={(group) => setLinkedGroup(group, false)}
+              />
+            )}
+            {cooler === "cooler_left" || !request.linked_groups.boundary_conditions ? (
+              <>
+                <SelectField
+                  id={`${cooler}-inner-boundary`}
+                  label="Inner thermal boundary"
+                  value={
+                    request[cooler].boundary_conditions.inner_boundary_condition ??
+                    "constant_wall_temperature"
+                  }
+                  options={["constant_wall_temperature", "constant_heat_flux"]}
+                  onChange={(value) =>
+                    setCoolerValue(
+                      cooler,
+                      "boundary_conditions",
+                      "boundary_conditions.inner_boundary_condition",
+                      value as InnerBoundaryCondition,
+                    )
+                  }
+                />
+                <ParameterGroup
+                  title="Screens and tolerances"
+                  cooler={cooler}
+                  group="boundary_conditions"
+                  specs={specsForGroup("boundary_conditions")}
+                  getValue={(path) => Number(getByPath(request[cooler], path))}
+                  onChange={(path, value) =>
+                    setCoolerValue(cooler, "boundary_conditions", path, value)
+                  }
+                  onReset={(path) => resetCoolerField(cooler, "boundary_conditions", path)}
+                />
+              </>
+            ) : (
+              <LinkedGroupNotice
+                group="boundary_conditions"
+                sourceLabel={request.cooler_left.label}
+                title="Screens & boundaries"
+                onUnlink={(group) => setLinkedGroup(group, false)}
+              />
+            )}
           </section>
         ))}
       </div>
 
       <section className="full-width-panel" aria-labelledby="sweep-heading">
-        <h3 id="sweep-heading">Sweep grid</h3>
+        <h4 id="sweep-heading">Sweep grid</h4>
         <div className="parameter-grid">
           {specsForGroup("sweep").map((spec) => (
             <ParameterControl
@@ -194,31 +237,6 @@ export function InputTab() {
         </div>
       </section>
     </section>
-  );
-}
-
-function LinkControls({
-  groups,
-  linkedGroups,
-  onChange,
-}: {
-  groups: LinkGroup[];
-  linkedGroups: Record<string, boolean>;
-  onChange: (group: LinkGroup, linked: boolean) => void;
-}) {
-  return (
-    <fieldset className="link-controls">
-      <legend>Left/right linking</legend>
-      {groups.map((group) => (
-        <CheckboxField
-          key={group}
-          id={`link-${group}`}
-          label={linkLabel(group)}
-          checked={Boolean(linkedGroups[group])}
-          onChange={(checked) => onChange(group, checked)}
-        />
-      ))}
-    </fieldset>
   );
 }
 
@@ -267,35 +285,6 @@ function geometrySpecs(mode: GeometryMode): ParameterSpec[] {
 
 function modeValueSpecs(group: "air_side" | "coolant_side", mode: string): ParameterSpec[] {
   return specsForGroup(group).filter((spec) => spec.path.endsWith(".value") && spec.mode === mode);
-}
-
-function linkLabel(group: LinkGroup): string {
-  return {
-    air_side: "Air side",
-    boundary_conditions: "Screens",
-    coolant_side: "Coolant side",
-    geometry: "Geometry",
-    materials: "Materials",
-  }[group];
-}
-
-function TextField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="text-field" htmlFor={id}>
-      <span>{label}</span>
-      <input id={id} value={value} onChange={(event) => onChange(event.target.value)} />
-    </label>
-  );
 }
 
 function SelectField({

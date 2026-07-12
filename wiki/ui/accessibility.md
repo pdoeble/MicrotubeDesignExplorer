@@ -6,6 +6,9 @@ Target: WCAG 2.2 AA for the static scientific application.
 
 - Main navigation follows the WAI-ARIA Tabs pattern with roving tabindex,
   arrow-key navigation, Home/End support, and visible focus states.
+- Model Setup uses labelled step-navigation buttons with `aria-current`, one
+  accessible link checkbox per scientific group, and contextual linked-group
+  regions whose `Edit separately` action reveals the independent controls.
 - Numeric controls expose native labels, number inputs, sliders, visible units,
   per-field reset buttons, and validation text through `aria-describedby`.
 - Plot figures expose captions and a tabular data summary tied to the canvas by
@@ -19,12 +22,12 @@ Target: WCAG 2.2 AA for the static scientific application.
 
 - keyboard tab navigation and activation;
 - versioned URL state round-trip and reset-to-default workflow;
-- visible controls on the Input page have accessible names;
+- visible controls in Model Setup have accessible names;
 - the 390 px mobile viewport has no horizontal document overflow;
 - body text, active tabs, and primary buttons meet at least 4.5:1 contrast;
 - screen-reader landmarks/roles for banner, main, tablist, tabpanel, fieldset
   groups, and cooler regions are present;
-- 200% text zoom reflows the Input workflow without horizontal document
+- 200% text zoom reflows the Model Setup workflow without horizontal document
   overflow;
 - reduced paper-default compute completes and JSON/HTML report exports work.
 
