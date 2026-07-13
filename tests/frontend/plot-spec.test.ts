@@ -148,33 +148,33 @@ describe("plot spec", () => {
     expect(spec.config.toImageButtonOptions).toEqual({
       filename: "same-geometry-ratio-cooler_right",
       format: "png",
-      height: 660,
+      height: 499,
       scale: 2,
-      width: 825,
+      width: 624,
     });
   });
 
-  it("creates explicit PNG and SVG export options", () => {
+  it("creates explicit PNG and SVG export options at the MATLAB figure size", () => {
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "png")).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "png",
-      height: 660,
+      height: 499,
       scale: 2,
-      width: 825,
+      width: 624,
     });
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "png", 3)).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "png",
-      height: 660,
+      height: 499,
       scale: 3,
-      width: 825,
+      width: 624,
     });
     expect(imageExportOptions("overall-coefficient-map", "cooler_right", "svg")).toEqual({
       filename: "overall-coefficient-map-cooler_right",
       format: "svg",
-      height: 660,
+      height: 499,
       scale: 1,
-      width: 825,
+      width: 624,
     });
   });
 
@@ -253,7 +253,7 @@ describe("plot spec", () => {
     expect(traces[2]?.y).toEqual([10]);
   });
 
-  it("shows both coolers' overlays on comparison plots", () => {
+  it("shows only composite boundaries on comparison plots (MATLAB Fig. 9)", () => {
     const traces = overlayTracesForPlot(
       payload,
       overlayArrays,
@@ -264,13 +264,11 @@ describe("plot spec", () => {
     expect(traces.map((trace) => trace.name).filter(Boolean)).toEqual([
       "Feasible boundary - Aluminum",
       "Feasible boundary - Polyamide",
-      "Technology limit - Aluminum",
-      "Technology limit - Polyamide",
-      "Validated aluminum reference",
       "Request design point - Aluminum",
     ]);
-    expect(traces[1]?.x).toEqual([1.5, 2.5]);
-    expect(traces[0]?.y).toEqual([10, 20, 30]);
+    // Each boundary has a white underlay followed by the styled line.
+    expect(traces[3]?.x).toEqual([1.5, 2.5]);
+    expect(traces[1]?.y).toEqual([10, 20, 30]);
   });
 
   it("creates individual screen boundary contour traces from exported masks", () => {

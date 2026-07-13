@@ -29,10 +29,12 @@ native wall-thickness axis and therefore matched numerically but not visually.
 3. Scientific map exports omit in-figure descriptive titles. The application
    and report captions carry the descriptive title; approved multi-panel
    figures retain short panel labels.
-4. The frontend project colormap is a typed snapshot of the ordered RGB fill
-   sequence recovered from the approved MATLAB SVG generated with
-   `slanCM('spectral')`. This makes the static build independent of a MATLAB or
-   third-party runtime colormap package and avoids an undocumented fit.
+4. The frontend project colormap is a typed snapshot of the exact 256-entry
+   `slanCM('spectral')` table dumped from the same MATLAB R2024b installation
+   that produced the approved paper exports (2026-07-13; the earlier snapshot
+   recovered from the exported SVG covered only part of the table). This keeps
+   the static build independent of a MATLAB or third-party runtime colormap
+   package and avoids an undocumented fit.
 
 ## Consequences
 

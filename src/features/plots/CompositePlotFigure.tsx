@@ -1,9 +1,15 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type Plotly from "plotly.js-dist-min";
 import type { SimulationWorkerResult } from "../../workers/protocol";
-import { createCompositePlotSpec } from "./compositePlotSpec";
+import {
+  compositeGeometry,
+  createCompositePlotSpec,
+  designBoundaryLegendEntries,
+} from "./compositePlotSpec";
 import { plotById, type PlotId } from "./plotRegistry";
 import { imageExportOptions, supportedImageFormats, type ImageFormat } from "./plotSpec";
+import { referenceWidthPx } from "./paperLayout";
+import { useContainerWidth } from "./PlotFigure";
 
 export function CompositePlotFigure({
   result,
@@ -13,11 +19,18 @@ export function CompositePlotFigure({
   plotId: PlotId;
 }) {
   const elementRef = useRef<HTMLDivElement | null>(null);
+  const [containerRef, containerWidth] = useContainerWidth();
   const controlId = useId();
   const [pngScale, setPngScale] = useState(2);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
   const plot = plotById(plotId);
-  const spec = useMemo(() => createCompositePlotSpec(result, plotId), [plotId, result]);
+  const spec = useMemo(
+    () =>
+      containerWidth
+        ? createCompositePlotSpec(result, plotId, Math.min(containerWidth, 1400))
+        : undefined,
+    [containerWidth, plotId, result],
+  );
 
   useEffect(() => {
     const element = elementRef.current;
@@ -35,18 +48,23 @@ export function CompositePlotFigure({
   }, [spec]);
 
   async function exportImage(format: ImageFormat) {
-    const element = elementRef.current;
-    if (!element || !spec) return;
+    const geometry = compositeGeometry(plotId);
+    const exportSpec = createCompositePlotSpec(result, plotId);
+    if (!exportSpec || !geometry) return;
     const { default: Plotly } = await import("plotly.js-dist-min");
-    await Plotly.downloadImage(element, {
-      ...imageExportOptions(plotId, "cooler_left", format, pngScale),
-      height: spec.layout.height ?? 900,
-      width: 950,
-    });
+    await Plotly.downloadImage(
+      exportSpec as unknown as Parameters<typeof Plotly.downloadImage>[0],
+      {
+        ...imageExportOptions(plotId, "cooler_left", format, pngScale),
+        height: Math.round(
+          (geometry.figureCm[1] / geometry.figureCm[0]) * referenceWidthPx(geometry),
+        ),
+        width: Math.round(referenceWidthPx(geometry)),
+      },
+    );
     setExportStatus(`Exported ${format.toUpperCase()} figure.`);
   }
 
-  if (!spec) return <p className="placeholder-note">Composite plot data are unavailable.</p>;
   return (
     <figure className="plot-figure plot-figure--composite">
       <h3 className="plot-figure__title">{plot.title}</h3>
@@ -74,12 +92,28 @@ export function CompositePlotFigure({
           </button>
         ))}
       </div>
-      <div
-        ref={elementRef}
-        className="plot-figure__canvas plot-figure__canvas--composite"
-        role="img"
-        aria-label={plot.description}
-      />
+      <div ref={containerRef} className="plot-figure__frame">
+        <div
+          ref={elementRef}
+          className="plot-figure__canvas plot-figure__canvas--composite"
+          role="img"
+          aria-label={plot.description}
+        />
+      </div>
+      {plotId === "design-boundary-lines" ? (
+        <ul className="plot-figure__legend" aria-label="Design screen boundary legend">
+          {designBoundaryLegendEntries.map((entry) => (
+            <li key={entry.label}>
+              <span
+                aria-hidden="true"
+                className="plot-figure__legend-swatch"
+                style={{ backgroundColor: entry.color }}
+              />
+              {entry.label}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {exportStatus ? (
         <p className="plot-figure__status" role="status">
           {exportStatus}

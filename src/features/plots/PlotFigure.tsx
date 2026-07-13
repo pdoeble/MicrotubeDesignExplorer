@@ -4,6 +4,7 @@ import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
 import {
   axisMillimeters,
+  colorDomainForPlot,
   type ColorDomain,
   createPlotSpec,
   fieldForPlot,
@@ -11,6 +12,8 @@ import {
   maskMatrixForPlot,
   matrixFromArray,
   overlayTracesForPlot,
+  paperContext,
+  paperGeometryForPlot,
   statusMatrixForPlot,
   preparePlotData,
   summarizePlotData,
@@ -20,6 +23,30 @@ import {
   type ImageFormat,
 } from "./plotSpec";
 import { presentationForPlot } from "./plotPresentation";
+import { referenceWidthPx } from "./paperLayout";
+
+/** Observed content width of a figure container, for paper-scaled rendering. */
+export function useContainerWidth(): [React.RefObject<HTMLDivElement>, number | undefined] {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || typeof ResizeObserver === "undefined") {
+      setWidth(element?.clientWidth || undefined);
+      return undefined;
+    }
+    const observer = new ResizeObserver((entries) => {
+      const measured = entries[0]?.contentRect.width;
+      if (measured)
+        setWidth((previous) =>
+          previous !== undefined && Math.abs(previous - measured) < 1 ? previous : measured,
+        );
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [containerRef, width];
+}
 
 type PlotFigureProps = {
   colorDomain?: ColorDomain | undefined;
@@ -30,6 +57,7 @@ type PlotFigureProps = {
 
 export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigureProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
+  const [containerRef, containerWidth] = useContainerWidth();
   const detailsId = useId();
   const [exportStatus, setExportStatus] = useState<string | null>(null);
   const [pngScale, setPngScale] = useState(2);
@@ -47,9 +75,11 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   );
   const titleScope = titleScopeForPlot(result.payload, plot, cooler);
   const presentation = presentationForPlot(plot);
-  const overlays = useMemo(
-    () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
-    [cooler, plot, result.arrays, result.payload],
+  // Robust/fixed color limits apply in single mode too (MATLAB shares k, kA
+  // and burst limits across Al+PA regardless of display mode).
+  const effectiveColorDomain = useMemo(
+    () => colorDomain ?? colorDomainForPlot(result.payload, result.arrays, plotId, [cooler]),
+    [colorDomain, cooler, plotId, result.arrays, result.payload],
   );
   const statusValues = useMemo(
     () => statusMatrixForPlot(result.payload, result.arrays, plot, cooler),
@@ -73,14 +103,24 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
         : undefined,
     [preparedData],
   );
+  const geometry = paperGeometryForPlot(plot);
+  const paper = useMemo(
+    () => paperContext(geometry, containerWidth ? Math.min(containerWidth, 1400) : undefined),
+    [containerWidth, geometry],
+  );
+  const paperOverlays = useMemo(
+    () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler, paper),
+    [cooler, paper, plot, result.arrays, result.payload],
+  );
   const plotSpec = useMemo(
     () =>
-      field && zValues
+      field && zValues && containerWidth
         ? createPlotSpec({
-            colorDomain,
+            colorDomain: effectiveColorDomain,
             cooler,
             field,
-            overlays,
+            overlays: paperOverlays,
+            paper,
             plot,
             provenance: result.payload.provenance,
             statusValues,
@@ -91,10 +131,12 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
           })
         : undefined,
     [
-      colorDomain,
+      containerWidth,
       cooler,
+      effectiveColorDomain,
       field,
-      overlays,
+      paper,
+      paperOverlays,
       plot,
       result.payload.provenance,
       statusValues,
@@ -124,15 +166,38 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   }, [plotSpec]);
 
   async function exportImage(format: ImageFormat) {
-    const element = elementRef.current;
-    if (!element) return;
+    if (!field || !zValues) return;
     setExportStatus(null);
     const { default: Plotly } = await import("plotly.js-dist-min");
-    await Plotly.downloadImage(element, imageExportOptions(plotId, cooler, format, pngScale));
+    // Export renders a fresh spec at the MATLAB reference size so the file
+    // keeps the paper geometry regardless of the on-screen zoom.
+    const exportSpec = createPlotSpec({
+      colorDomain: effectiveColorDomain,
+      cooler,
+      field,
+      overlays: overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
+      plot,
+      provenance: result.payload.provenance,
+      statusValues,
+      titleScope,
+      xValues,
+      yValues,
+      zValues,
+    });
+    await Plotly.downloadImage(
+      exportSpec as unknown as Parameters<typeof Plotly.downloadImage>[0],
+      {
+        ...imageExportOptions(plotId, cooler, format, pngScale),
+        height: Math.round(
+          (geometry.figureCm[1] / geometry.figureCm[0]) * referenceWidthPx(geometry),
+        ),
+        width: Math.round(referenceWidthPx(geometry)),
+      },
+    );
     setExportStatus(`Exported ${format.toUpperCase()} figure.`);
   }
 
-  if (!field || !array || !zValues || !plotSpec) {
+  if (!field || !array || !zValues) {
     return <p className="placeholder-note">Selected plot field is not available in this result.</p>;
   }
 
@@ -166,13 +231,15 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
           </button>
         ))}
       </div>
-      <div
-        ref={elementRef}
-        className="plot-figure__canvas"
-        role="img"
-        aria-label={plot.description}
-        aria-describedby={detailsId}
-      />
+      <div ref={containerRef} className="plot-figure__frame">
+        <div
+          ref={elementRef}
+          className="plot-figure__canvas"
+          role="img"
+          aria-label={plot.description}
+          aria-describedby={detailsId}
+        />
+      </div>
       {exportStatus ? (
         <p className="plot-figure__status" role="status">
           {exportStatus}

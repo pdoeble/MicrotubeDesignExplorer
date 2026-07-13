@@ -1,4 +1,28 @@
 declare module "plotly.js-dist-min" {
+  export type PlotlyFont = { color?: string; family?: string; size?: number };
+
+  export type PlotlyColorbar = {
+    title?: { font?: PlotlyFont; side?: "right" | "top"; text: string };
+    tickfont?: PlotlyFont;
+    ticklabelposition?: string;
+    ticklen?: number;
+    ticks?: "inside" | "outside" | "";
+    tickvals?: number[];
+    ticktext?: string[];
+    orientation?: "h" | "v";
+    outlinecolor?: string;
+    outlinewidth?: number;
+    showticklabels?: boolean;
+    x?: number;
+    xanchor?: "center" | "left" | "right";
+    y?: number;
+    yanchor?: "bottom" | "middle" | "top";
+    len?: number;
+    lenmode?: "fraction" | "pixels";
+    thickness?: number;
+    thicknessmode?: "fraction" | "pixels";
+  };
+
   export type PlotlyData = {
     type: "contour" | "heatmap" | "scatter";
     x?: unknown;
@@ -7,19 +31,12 @@ declare module "plotly.js-dist-min" {
     mode?: string;
     name?: string;
     colorscale?: string | Array<[number, string]>;
-    colorbar?: {
-      title?: { text: string };
-      tickvals?: number[];
-      ticktext?: string[];
-      orientation?: "h" | "v";
-      x?: number;
-      y?: number;
-      len?: number;
-      thickness?: number;
-    };
+    colorbar?: PlotlyColorbar;
     contours?: {
       coloring?: "none";
       end?: number;
+      labelfont?: PlotlyFont;
+      labelformat?: string;
       showlabels?: boolean;
       size?: number;
       start?: number;
@@ -29,11 +46,17 @@ declare module "plotly.js-dist-min" {
     hovertemplate?: string;
     fill?: "toself";
     fillcolor?: string;
-    labelfont?: { color?: string; family?: string; size?: number };
+    labelfont?: PlotlyFont;
     line?: { color?: string; dash?: string; width?: number };
     marker?: {
-      color?: string;
+      cmax?: number;
+      cmin?: number;
+      color?: string | number[];
+      colorbar?: PlotlyColorbar;
+      colorscale?: string | Array<[number, string]>;
       line?: { color?: string; width?: number };
+      opacity?: number;
+      showscale?: boolean;
       size?: number;
       symbol?: string;
     };
@@ -48,30 +71,54 @@ declare module "plotly.js-dist-min" {
     yaxis?: string;
   };
 
+  export type PlotlyAxis = {
+    anchor?: string;
+    domain?: number[];
+    dtick?: number | string;
+    gridcolor?: string;
+    griddash?: string;
+    gridwidth?: number;
+    linecolor?: string;
+    linewidth?: number;
+    minor?: {
+      dtick?: number | string;
+      gridcolor?: string;
+      griddash?: string;
+      gridwidth?: number;
+      showgrid?: boolean;
+      tickcolor?: string;
+      ticklen?: number;
+      ticks?: "inside" | "outside" | "";
+      tickwidth?: number;
+    };
+    mirror?: boolean | "ticks" | "all" | "allticks";
+    range?: [number, number];
+    showgrid?: boolean;
+    showline?: boolean;
+    showticklabels?: boolean;
+    tick0?: number;
+    tickcolor?: string;
+    tickfont?: PlotlyFont;
+    ticklen?: number;
+    tickmode?: "array" | "linear";
+    ticks?: "inside" | "outside" | "";
+    ticktext?: string[];
+    tickvals?: number[];
+    tickwidth?: number;
+    title?: { font?: PlotlyFont; standoff?: number; text: string };
+    type?: "linear" | "log";
+    zeroline?: boolean;
+  };
+
   export type PlotlyLayout = {
     title?: { text: string };
-    xaxis?: {
-      domain?: [number, number];
-      range?: [number, number];
-      tickmode?: "array" | "linear";
-      ticktext?: string[];
-      tickvals?: number[];
-      title?: { text: string };
-      type?: "linear" | "log";
-    };
-    yaxis?: {
-      domain?: [number, number];
-      dtick?: number;
-      range?: [number, number];
-      tick0?: number;
-      tickmode?: "array" | "linear";
-      title?: { text: string };
-      type?: "linear" | "log";
-    };
+    xaxis?: PlotlyAxis;
+    yaxis?: PlotlyAxis;
     margin?: { l?: number; r?: number; t?: number; b?: number };
     annotations?: Array<Record<string, unknown>>;
+    shapes?: Array<Record<string, unknown>>;
     legend?: { orientation?: "h" | "v"; x?: number; y?: number };
-    font?: { color?: string; family?: string; size?: number };
+    font?: PlotlyFont;
     height?: number;
     paper_bgcolor?: string;
     plot_bgcolor?: string;
@@ -93,9 +140,15 @@ declare module "plotly.js-dist-min" {
     };
   };
 
+  export type PlotlyFigure = {
+    config?: PlotlyConfig;
+    data: PlotlyData[];
+    layout: PlotlyLayout;
+  };
+
   const Plotly: {
     downloadImage: (
-      element: HTMLElement,
+      target: HTMLElement | PlotlyFigure,
       options: {
         filename: string;
         format: "png" | "svg";
@@ -112,7 +165,7 @@ declare module "plotly.js-dist-min" {
     ) => Promise<unknown>;
     purge: (element: HTMLElement) => void;
     toImage: (
-      element: HTMLElement,
+      target: HTMLElement | PlotlyFigure,
       options: { format: "png" | "svg"; height?: number; scale?: number; width?: number },
     ) => Promise<string>;
   };

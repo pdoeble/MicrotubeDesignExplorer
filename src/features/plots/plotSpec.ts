@@ -4,9 +4,19 @@ import type {
   SimulationResultPayload,
 } from "../../contracts/generated/simulation-result";
 import type { PlotlyConfig, PlotlyData, PlotlyLayout } from "plotly.js-dist-min";
-import { projectSpectral, projectSpectralReversed } from "./colormap";
+import { projectSpectral, projectSpectralReversed, type PlotlyColorScale } from "./colormap";
 import { plotById, type PlotDefinition, type PlotId } from "./plotRegistry";
-import { presentationForPlot } from "./plotPresentation";
+import { presentationForPlot, type PlotPresentation } from "./plotPresentation";
+import {
+  paperColorbarPlacement,
+  paperMargins,
+  paperZoom,
+  referenceWidthPx,
+  SINGLE_MAP,
+  TECH_KA_DELTA,
+  type PaperFigureGeometry,
+  type PaperZoom,
+} from "./paperLayout";
 
 export type CoolerKey = "cooler_left" | "cooler_right";
 export type ImageFormat = "png" | "svg";
@@ -34,11 +44,22 @@ export type PreparedPlotData = {
   tauValues: number[];
 };
 
+/**
+ * Rendering context tying trace/layout pixel quantities to one MATLAB paper
+ * geometry at one zoom. All fonts, line widths and marker sizes derive from
+ * it so the figure scales as a whole, exactly like resizing the printed page.
+ */
+export type PaperContext = {
+  geometry: PaperFigureGeometry;
+  zoom: PaperZoom;
+};
+
 type PlotSpecInput = {
   colorDomain?: ColorDomain | undefined;
   cooler: CoolerKey;
   field: GridFieldRef;
   overlays?: PlotlyData[];
+  paper?: PaperContext;
   plot: PlotDefinition;
   provenance: Provenance;
   statusValues?: string[][] | undefined;
@@ -51,9 +72,25 @@ type PlotSpecInput = {
 const TAU_MIN = 0;
 const TAU_MAX = 40;
 const TAU_STEP = 0.25;
-const PLOT_FONT = "Times New Roman, STIXGeneral, serif";
+export const PLOT_FONT = "Times New Roman, STIXGeneral, serif";
+// MATLAB axes/grid appearance: axis color [0.15 0.15 0.15]; major grid
+// alpha 0.15 and minor grid (dotted) alpha 0.25 flattened onto white.
+const AXIS_COLOR = "#262626";
+const MAJOR_GRID_COLOR = "#dfdfdf";
+const MINOR_GRID_COLOR = "#c6c6c6";
 
 export const supportedImageFormats: readonly ImageFormat[] = ["png", "svg"] as const;
+
+export function paperContext(geometry: PaperFigureGeometry, widthPx?: number): PaperContext {
+  return { geometry, zoom: paperZoom(geometry, widthPx) };
+}
+
+const DEFAULT_PAPER = paperContext(SINGLE_MAP);
+
+/** Geometry family used by a plot when rendered as its own figure. */
+export function paperGeometryForPlot(plot: PlotDefinition): PaperFigureGeometry {
+  return presentationForPlot(plot).paperVariant === "tech-ka-delta" ? TECH_KA_DELTA : SINGLE_MAP;
+}
 
 export function fieldForPlot(
   payload: SimulationResultPayload,
@@ -205,6 +242,7 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
     yValues,
     zValues,
   } = input;
+  const paper = input.paper ?? paperContext(paperGeometryForPlot(plot));
   const presentation = presentationForPlot(plot);
   const prepared = preparePlotData(xValues, yValues, zValues, plot, statusValues);
   const customdata = prepared.displayValues.map((row, rowIndex) =>
@@ -214,15 +252,16 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
     ]),
   );
   const domain = colorDomain ?? defaultColorDomain(plot, prepared.displayValues);
+  const reversedColormap = presentation.colormapReversed === true;
   const heatmap: PlotlyData = {
-    colorbar: colorbarSpec(plot, domain),
+    colorbar: colorbarSpec(plot, domain, paper),
     colorscale:
       presentation.colorScaleType === "binary"
         ? [
             [0, "#ffffff"],
             [1, "#3f7f93"],
           ]
-        : presentation.colormapReversed || presentation.colorbarReversed
+        : reversedColormap
           ? projectSpectralReversed
           : projectSpectral,
     customdata,
@@ -238,17 +277,103 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   };
   if (domain) applyColorDomain(heatmap, domain);
 
-  const contourTraces = isoContourTraces(plot, xValues, prepared.tauValues, prepared.plotValues);
-  const traces = [heatmap, ...contourTraces, ...overlays];
+  // MATLAB reverseColorbarScale flips only the bar display, not the data
+  // mapping. Plotly cannot reverse a colorbar, so the visible bar comes from
+  // an invisible carrier trace with negated domain and mirrored ticks.
+  const traces: PlotlyData[] = [heatmap];
+  if (presentation.colorbarReversed && domain && presentation.colorScaleType !== "binary") {
+    heatmap.showscale = false;
+    traces.push(
+      reversedColorbarCarrier(
+        domain,
+        reversedColormap ? projectSpectralReversed : projectSpectral,
+        colorbarSpec(plot, domain, paper),
+      ),
+    );
+  }
+
+  traces.push(
+    ...isoContourTraces(plot, cooler, xValues, prepared.tauValues, prepared.displayValues, paper),
+  );
+  traces.push(...overlays);
+  const layout = scientificLayout(provenance, plot, paper);
+  if (presentation.paperVariant === "tech-ka-delta") {
+    layout.annotations?.push(
+      ...percentCalloutAnnotations(xValues, prepared.tauValues, prepared.displayValues, paper),
+    );
+  }
   return {
     data: traces,
-    layout: scientificLayout(provenance, plot),
+    layout,
     config: {
       displaylogo: false,
-      responsive: true,
+      responsive: false,
       toImageButtonOptions: imageExportOptions(plot.id as PlotId, cooler, "png"),
     },
   };
+}
+
+// MATLAB Fig. 22 callout labels (+100 %, +150 %): the label sits at a fixed
+// axes-normalized position and a thin leader line points to the nearest
+// crossing of the contour level in the displayed field.
+function percentCalloutAnnotations(
+  xValues: number[],
+  tauValues: number[],
+  displayValues: number[][],
+  paper: PaperContext,
+): Array<Record<string, unknown>> {
+  const { geometry, zoom } = paper;
+  const { plotAreaCm } = paperMargins(geometry);
+  const plotWidthPx = zoom.cm(plotAreaCm[0]);
+  const plotHeightPx = zoom.cm(plotAreaCm[1]);
+  const targets = [
+    { labelXNorm: 0.14, labelYNorm: 0.385, level: 100 },
+    { labelXNorm: 0.13, labelYNorm: 0.235, level: 150 },
+  ];
+  const annotations: Array<Record<string, unknown>> = [];
+  for (const target of targets) {
+    let best: { distance: number; tau: number; x: number } | undefined;
+    const labelTau = target.labelYNorm * 40;
+    for (let row = 0; row < tauValues.length; row += 1) {
+      const values = displayValues[row];
+      const tau = tauValues[row];
+      if (!values || tau === undefined) continue;
+      for (let column = 0; column + 1 < values.length; column += 1) {
+        const left = values[column];
+        const right = values[column + 1];
+        const xLeft = xValues[column];
+        if (
+          left === undefined ||
+          right === undefined ||
+          xLeft === undefined ||
+          !Number.isFinite(left) ||
+          !Number.isFinite(right)
+        )
+          continue;
+        if ((left - target.level) * (right - target.level) > 0) continue;
+        const distance = Math.abs(tau - labelTau);
+        if (!best || distance < best.distance) best = { distance, tau, x: xLeft };
+      }
+    }
+    if (!best) continue;
+    const targetXPaper = (Math.log10(best.x) + 1) / 2;
+    const targetYPaper = best.tau / 40;
+    annotations.push({
+      arrowcolor: AXIS_COLOR,
+      arrowhead: 0,
+      arrowwidth: Math.max(1, zoom.pt(0.5)),
+      ax: (target.labelXNorm - targetXPaper) * plotWidthPx,
+      ay: (targetYPaper - target.labelYNorm) * plotHeightPx,
+      font: { color: "#1f1f1f", family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt - 2) },
+      showarrow: true,
+      text: `+${target.level} %`,
+      x: Math.log10(best.x),
+      xref: "x",
+      y: best.tau,
+      yref: "y",
+    });
+  }
+  return annotations;
 }
 
 export function overlayTracesForPlot(
@@ -256,19 +381,20 @@ export function overlayTracesForPlot(
   arrays: readonly Float64Array[],
   plot: PlotDefinition,
   cooler: CoolerKey,
+  paper: PaperContext = DEFAULT_PAPER,
 ): PlotlyData[] {
   const presentation = presentationForPlot(plot);
   const traces: PlotlyData[] = [];
   if (plot.family === "boundary-summary") {
-    traces.push(...screenBoundaryTraces(payload, arrays, cooler));
-    traces.push(...designPointTraces(payload, cooler));
-    if (cooler === "cooler_left") traces.push(validatedReferenceTrace());
+    traces.push(...screenBoundaryTraces(payload, arrays, cooler, paper));
+    traces.push(...designPointTraces(payload, cooler, paper));
+    if (cooler === "cooler_left") traces.push(validatedReferenceTrace(paper));
     return traces;
   }
 
   if (plot.source === "comparison") {
-    traces.push(...boundaryTraces(payload, arrays, "cooler_left"));
-    traces.push(...boundaryTraces(payload, arrays, "cooler_right"));
+    traces.push(...boundaryTraces(payload, arrays, "cooler_left", paper));
+    traces.push(...boundaryTraces(payload, arrays, "cooler_right", paper));
   }
 
   const techCoolers: readonly CoolerKey[] =
@@ -277,10 +403,13 @@ export function overlayTracesForPlot(
       : presentation.techLines === "own"
         ? [cooler]
         : [];
-  for (const current of techCoolers) traces.push(...minimumWallTraces(payload, current));
-  if (techCoolers.includes("cooler_left")) traces.push(validatedReferenceTrace());
-  traces.push(...designPointTraces(payload, cooler));
-  traces.push(...crossSectionTraces());
+  for (const current of techCoolers) traces.push(...minimumWallTraces(payload, current, paper));
+  // MATLAB shows the validated Al reference wherever the Al tech line is
+  // drawn, except in the small grid panels; explicit values override.
+  const showReference = presentation.showValidatedRef ?? techCoolers.includes("cooler_left");
+  if (showReference) traces.push(validatedReferenceTrace(paper));
+  traces.push(...designPointTraces(payload, cooler, paper));
+  traces.push(...crossSectionTraces(paper));
   return traces;
 }
 
@@ -339,10 +468,16 @@ export function colorDomainForPlot(
   } else {
     for (const current of useCoolers) {
       const field = fieldForPlot(payload, plotId, current);
+      // MATLAB robust limits run on the *_plot fields, which are NaN below
+      // the cooler's own minimum-wall technology limit.
+      const minWallMask = presentation.robustShared
+        ? maskArrayForCooler(payload, arrays, current)
+        : undefined;
       collectFiniteValues(
         field ? arrays[field.buffer_index] : undefined,
         values,
         presentation.displayFactor,
+        minWallMask,
       );
     }
   }
@@ -384,6 +519,8 @@ export function summarizePlotData(zValues: number[][], statusValues?: string[][]
   };
 }
 
+// Exports reproduce the MATLAB figure size (16.5 x 13.2 cm at 96 dpi) so an
+// exported SVG drops into the manuscript at the reference geometry.
 export function imageExportOptions(
   plotId: PlotId,
   cooler: CoolerKey,
@@ -393,9 +530,9 @@ export function imageExportOptions(
   return {
     filename: `${plotId}-${cooler}`,
     format,
-    height: 660,
+    height: Math.round(SINGLE_MAP.figureCm[1] * (96 / 2.54)),
     scale: format === "png" ? pngScale : 1,
-    width: 825,
+    width: Math.round(referenceWidthPx(SINGLE_MAP)),
   };
 }
 
@@ -486,104 +623,270 @@ function defaultColorDomain(plot: PlotDefinition, values: number[][]): ColorDoma
   if (!finite.length) return undefined;
   let lower = finite[0] ?? 0;
   let upper = finite.at(-1) ?? 1;
+  let centerZero = false;
   if (plot.family === "percent-delta" && !presentation.colorLimits) {
     const limit = Math.max(Math.abs(lower), Math.abs(upper));
     lower = -limit;
     upper = limit;
+    centerZero = true;
   }
-  return transformedDomain([lower, upper], presentation.colorScaleType);
+  return transformedDomain([lower, upper], presentation.colorScaleType, centerZero);
 }
 
+// MATLAB caxis maps colors linearly across the limits; zero-centering is only
+// used for auto-symmetric delta domains without explicit paper limits.
 function transformedDomain(
   bounds: readonly [number, number],
   type: "binary" | "linear" | "log",
+  centerZero = false,
 ): ColorDomain {
   if (type === "log") return { zmin: Math.log10(bounds[0]), zmax: Math.log10(bounds[1]) };
   return {
     zmin: bounds[0],
     zmax: bounds[1],
-    ...(bounds[0] < 0 && bounds[1] > 0 ? { zmid: 0 } : {}),
+    ...(centerZero && bounds[0] < 0 && bounds[1] > 0 ? { zmid: 0 } : {}),
   };
 }
 
-function colorbarSpec(
+export function colorbarSpec(
   plot: PlotDefinition,
   domain: ColorDomain | undefined,
+  paper: PaperContext = DEFAULT_PAPER,
 ): NonNullable<PlotlyData["colorbar"]> {
   const presentation = presentationForPlot(plot);
-  const spec: NonNullable<PlotlyData["colorbar"]> = { title: { text: presentation.colorbarLabel } };
-  if (domain && presentation.colorScaleType === "log") {
-    const ticks = logTicks(10 ** domain.zmin, 10 ** domain.zmax);
-    spec.tickvals = ticks.map(Math.log10);
-    spec.ticktext = ticks.map(formatPlainNumber);
-  } else if (presentation.colorLimits) {
-    const [minimum, maximum] = presentation.colorLimits;
-    const step =
-      plot.id === "tech-adjusted-delta-ka"
-        ? 50
-        : plot.id === "tech-adjusted-delta-k"
-          ? 20
-          : undefined;
-    if (step) {
-      const ticks = Array.from(
-        { length: Math.floor((maximum - minimum) / step) + 1 },
-        (_, index) => minimum + index * step,
-      );
-      spec.tickvals = ticks;
-      spec.ticktext = ticks.map((value) => `${value > 0 ? "+" : ""}${value} %`);
+  const { geometry, zoom } = paper;
+  const placement = paperColorbarPlacement(geometry, zoom);
+  // The vertical bar label is drawn as a rotated layout annotation instead
+  // (MATLAB reads it bottom-up; plotly's side-right title reads top-down).
+  const spec: NonNullable<PlotlyData["colorbar"]> = {
+    outlinecolor: AXIS_COLOR,
+    outlinewidth: zoom.pt(geometry.baseFontPt >= 19 ? 1.3 : 1.0),
+    tickfont: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+    ticks: "inside",
+    ticklen: zoom.cm(0.09),
+    title: {
+      font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+      side: "right",
+      text: "",
+    },
+  };
+  if (geometry.colorbarOrientation === "h")
+    spec.title = { ...spec.title, text: presentation.colorbarLabel };
+  if (placement) {
+    spec.len = placement.len;
+    spec.lenmode = "fraction";
+    spec.thickness = placement.thickness;
+    spec.thicknessmode = "pixels";
+    spec.x = placement.x;
+    spec.xanchor = placement.xanchor;
+    spec.y = placement.y;
+    spec.yanchor = placement.yanchor;
+    if (geometry.colorbarOrientation === "h") {
+      spec.orientation = "h";
+      // MATLAB top bars carry tick labels above the bar; plotly cannot move
+      // carrier-trace tick labels there, so they are drawn as annotations
+      // (horizontalBarTickAnnotations) and hidden on the bar itself.
+      spec.showticklabels = false;
+      spec.title = { ...spec.title, side: "top", text: spec.title?.text ?? "" };
     }
   }
-  if (plot.id === "tech-adjusted-delta-ka") {
-    spec.title = { text: "" };
-    spec.orientation = "h";
-    spec.x = 0.5;
-    spec.y = 1.1;
-    spec.len = 0.78;
-    spec.thickness = 14;
+  if (domain && presentation.colorScaleType === "log") {
+    const ticks = presentation.colorbarTicks
+      ? presentation.colorbarTicks.filter(
+          (value) =>
+            value >= 10 ** domain.zmin * (1 - 1e-10) && value <= 10 ** domain.zmax * (1 + 1e-10),
+        )
+      : logTicks(10 ** domain.zmin, 10 ** domain.zmax);
+    spec.tickvals = ticks.map(Math.log10);
+    spec.ticktext = ticks.map(formatPlainNumber);
+  } else if (presentation.colorbarTickValues && presentation.colorScaleType === "linear") {
+    const ticks = [...presentation.colorbarTickValues];
+    // Delta maps sign their percent ticks ("+50 %"); share-style maps with a
+    // non-negative caxis label plainly ("50 %"), matching MATLAB.
+    const signed = (presentation.colorLimits?.[0] ?? 0) < 0;
+    spec.tickvals = ticks;
+    spec.ticktext = ticks.map((value) =>
+      presentation.displayUnit === "%"
+        ? signed
+          ? formatSignedPercent(value)
+          : `${formatPlainNumber(value)} %`
+        : formatPlainNumber(value),
+    );
   }
   return spec;
 }
 
+/**
+ * Invisible trace that owns the visible colorbar. With `reversedBar`, the
+ * color axis is negated and the scale mirrored, which shows the identical
+ * color-to-value mapping with high values at the bar's start — MATLAB's
+ * colorbar Direction = 'reverse' (bar display only, data mapping unchanged).
+ */
+export function colorbarCarrierTrace(
+  domain: ColorDomain,
+  scale: PlotlyColorScale,
+  colorbar: NonNullable<PlotlyData["colorbar"]>,
+  reversedBar: boolean,
+): PlotlyData {
+  const carrierTicks = tickTargets(colorbar, domain);
+  const marker = reversedBar
+    ? {
+        cmax: -domain.zmin,
+        cmin: -domain.zmax,
+        color: [-domain.zmin, -domain.zmax],
+        colorbar: {
+          ...colorbar,
+          tickvals: carrierTicks.map((tick) => -tick.value),
+          ticktext: carrierTicks.map((tick) => tick.label),
+        },
+        colorscale: scale.map(([stop, color]) => [1 - stop, color]).reverse() as PlotlyColorScale,
+        opacity: 0,
+        showscale: true,
+      }
+    : {
+        cmax: domain.zmax,
+        cmin: domain.zmin,
+        color: [domain.zmin, domain.zmax],
+        colorbar,
+        colorscale: scale,
+        opacity: 0,
+        showscale: true,
+      };
+  return {
+    hoverinfo: "skip",
+    marker,
+    mode: "markers",
+    name: "",
+    showlegend: false,
+    type: "scatter",
+    x: [null],
+    y: [null],
+  };
+}
+
+function reversedColorbarCarrier(
+  domain: ColorDomain,
+  scale: PlotlyColorScale,
+  colorbar: NonNullable<PlotlyData["colorbar"]>,
+): PlotlyData {
+  return colorbarCarrierTrace(domain, scale, colorbar, true);
+}
+
+/**
+ * MATLAB top colorbars label above the bar; plotly keeps carrier-trace tick
+ * labels below, so the labels are layout annotations at bar fractions.
+ */
+export function horizontalBarTickAnnotations(
+  geometry: PaperFigureGeometry,
+  zoom: PaperZoom,
+  ticks: ReadonlyArray<{ fraction: number; label: string }>,
+): Array<Record<string, unknown>> {
+  if (!geometry.colorbarCm) return [];
+  const { margin, plotAreaCm } = paperMargins(geometry);
+  const [cbLeft, cbBottom, cbWidth, cbHeight] = geometry.colorbarCm;
+  return ticks
+    .filter((tick) => tick.fraction >= -1e-9 && tick.fraction <= 1 + 1e-9)
+    .map((tick) => ({
+      font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+      showarrow: false,
+      text: tick.label,
+      x: (cbLeft + cbWidth * tick.fraction - margin.l) / plotAreaCm[0],
+      xanchor: "center",
+      xref: "paper",
+      y: (cbBottom + cbHeight + 0.1 - margin.b) / plotAreaCm[1],
+      yanchor: "bottom",
+      yref: "paper",
+    }));
+}
+
+/** Simplified downward summary brace under a horizontal bar segment. */
+export function braceShape(
+  x0: number,
+  x1: number,
+  yTop: number,
+  yTip: number,
+  widthPx: number,
+): Record<string, unknown> {
+  const xm = (x0 + x1) / 2;
+  return {
+    line: { color: AXIS_COLOR, width: widthPx },
+    path:
+      `M ${x0},${yTop} L ${x0},${(yTop + yTip) / 2} L ${xm - (x1 - x0) * 0.02},${(yTop + yTip) / 2} ` +
+      `L ${xm},${yTip} L ${xm + (x1 - x0) * 0.02},${(yTop + yTip) / 2} ` +
+      `L ${x1},${(yTop + yTip) / 2} L ${x1},${yTop}`,
+    type: "path",
+    xref: "paper",
+    yref: "paper",
+  };
+}
+
+function tickTargets(
+  colorbar: NonNullable<PlotlyData["colorbar"]>,
+  domain: ColorDomain,
+): Array<{ label: string; value: number }> {
+  const values = (colorbar.tickvals as number[] | undefined) ?? [domain.zmin, domain.zmax];
+  const labels = (colorbar.ticktext as string[] | undefined) ?? values.map(formatPlainNumber);
+  return values.map((value, index) => ({
+    label: labels[index] ?? formatPlainNumber(value),
+    value,
+  }));
+}
+
 function isoContourTraces(
   plot: PlotDefinition,
+  cooler: CoolerKey,
   x: number[],
   y: number[],
   z: number[][],
+  paper: PaperContext,
 ): PlotlyData[] {
   const presentation = presentationForPlot(plot);
+  const { geometry, zoom } = paper;
   const traces: PlotlyData[] = [];
-  for (const level of presentation.contourLevels ?? []) {
-    if (presentation.colorScaleType === "log" && level <= 0) continue;
-    const transformed = presentation.colorScaleType === "log" ? Math.log10(level) : level;
+  // Contours are drawn on the linear display values so plotly's inline
+  // labels show the physical level (MATLAB labels), not a log10 transform.
+  const levels = contourLevelsForData(presentation, cooler, z);
+  const labelled = new Set(labelledContourLevels(presentation, levels));
+  // Percent maps label like MATLAB ("+25 %"/"25 %"): plotly contour labels
+  // only support d3 formats, so the label trace carries value/100 and signs
+  // the format only when negative levels exist (delta maps).
+  const percentLabels =
+    presentation.displayUnit === "%" && presentation.colorScaleType === "linear";
+  const percentFormat = levels.some((level) => level < 0) ? "+.0%" : ".0%";
+  const zPercent = percentLabels ? z.map((row) => row.map((value) => value / 100)) : undefined;
+  for (const level of levels) {
+    const transformed = percentLabels ? level / 100 : level;
     traces.push({
       contours: {
         coloring: "none",
         end: transformed,
-        showlabels: true,
+        labelfont: {
+          color: "#1f1f1f",
+          family: PLOT_FONT,
+          size: zoom.pt(geometry.baseFontPt - 2),
+        },
+        ...(percentLabels ? { labelformat: percentFormat } : {}),
+        showlabels: labelled.has(level),
         size: 1,
         start: transformed,
       },
       hoverinfo: "skip",
-      labelfont: { color: "#1f1f1f", family: PLOT_FONT, size: 11 },
-      line: { color: "#1f1f1f", width: 0.75 },
+      line: { color: "#1f1f1f", width: zoom.pt(presentation.contourWidthPt ?? 0.75) },
       name: `${formatPlainNumber(level)} ${presentation.displayUnit}`,
       showlegend: false,
       showscale: false,
       type: "contour",
       x,
       y,
-      z,
+      z: zPercent ?? z,
     });
   }
   if (presentation.transitionLevel) {
-    const level =
-      presentation.colorScaleType === "log"
-        ? Math.log10(presentation.transitionLevel)
-        : presentation.transitionLevel;
+    const level = presentation.transitionLevel;
     traces.push({
       contours: { coloring: "none", end: level, showlabels: false, size: 1, start: level },
       hoverinfo: "skip",
-      line: { color: "#000000", dash: "dash", width: 1.35 },
+      line: { color: "#000000", dash: "dash", width: zoom.pt(1.35) },
       name: "Re = 2300 transition",
       showlegend: false,
       showscale: false,
@@ -596,81 +899,296 @@ function isoContourTraces(
   return traces;
 }
 
-function scientificLayout(provenance: Provenance, plot: PlotDefinition): PlotlyLayout {
-  const yStep = presentationForPlot(plot).yTickStep ?? 10;
+function contourLevelsForData(
+  presentation: PlotPresentation,
+  cooler: CoolerKey,
+  z: number[][],
+): number[] {
+  let minimum = Number.POSITIVE_INFINITY;
+  let maximum = Number.NEGATIVE_INFINITY;
+  for (const row of z)
+    for (const value of row)
+      if (Number.isFinite(value)) {
+        minimum = Math.min(minimum, value);
+        maximum = Math.max(maximum, value);
+      }
+  if (!(maximum > minimum)) return [];
+  if (presentation.shareSparseLevels) return sparseShareLevels(minimum, maximum);
+  if (presentation.contourLevels)
+    return presentation.contourLevels.filter((level) => level > minimum && level < maximum);
+  const step = presentation.contourStepByCooler?.[cooler] ?? presentation.contourStep;
+  if (step) return steppedLevels(minimum, maximum, step);
+  return [];
+}
+
+function steppedLevels(minimum: number, maximum: number, step: number): number[] {
+  const levels: number[] = [];
+  for (let index = Math.ceil(minimum / step); index * step < maximum; index += 1) {
+    const level = index * step;
+    if (level > minimum) levels.push(Number(level.toPrecision(12)));
+  }
+  return levels;
+}
+
+// MATLAB makeSparseShareContourLevels: choose the candidate step whose level
+// count is closest to 11 (preferring 8..15). Small steps serve sub-percent
+// share panels (phi_w,Al).
+function sparseShareLevels(minimum: number, maximum: number): number[] {
+  const candidates =
+    maximum - minimum < 1.5 ? [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5] : [1, 2, 5, 10, 20, 25];
+  let best: number[] = [];
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (const step of candidates) {
+    const levels = steppedLevels(Math.max(minimum, 0), Math.min(maximum, 100), step);
+    if (!levels.length) continue;
+    const count = levels.length;
+    const inRange = count >= 8 && count <= 15;
+    const score =
+      (inRange ? 0 : 100 + Math.min(Math.abs(count - 8), Math.abs(count - 15))) +
+      Math.abs(count - 11);
+    if (score < bestScore) {
+      bestScore = score;
+      best = levels;
+    }
+  }
+  return best;
+}
+
+// MATLAB label selection: selectSingleMapContourLabels / selectBarContourLabels /
+// selectCostContourLabels; reynolds/mm/pressuredrop label every drawn level.
+function labelledContourLevels(presentation: PlotPresentation, levels: number[]): number[] {
+  if (!levels.length) return [];
+  if (presentation.shareSparseLevels) return spreadSelection(levels, 4);
+  const mode = presentation.contourLabelMode ?? "all";
+  if (mode === "all") return levels;
+  if (mode === "plain") {
+    const preferred = levels.filter((level) => level >= 100 && level % 100 === 0);
+    return preferred.length ? preferred : spreadSelection(levels, 6);
+  }
+  if (mode === "bar") {
+    const preferred =
+      Math.max(...levels) <= 120 ? [5, 10, 20, 30, 50, 75, 100] : [200, 400, 800, 1200, 1600, 2000];
+    const chosen = levels.filter((level) => preferred.includes(level));
+    return chosen.length ? chosen : spreadSelection(levels, 7);
+  }
+  if (mode === "cost") return spreadSelection(levels, 7);
+  if (mode === "percent") {
+    const preferred = presentation.contourLabelLevels ?? [];
+    const chosen = levels.filter((level) => preferred.includes(level));
+    return chosen.length ? chosen : levels;
+  }
+  return levels;
+}
+
+function spreadSelection(levels: number[], count: number): number[] {
+  if (levels.length <= count) return levels;
+  const indices = new Set<number>();
+  for (let index = 0; index < count; index += 1)
+    indices.add(Math.round((index * (levels.length - 1)) / (count - 1)));
+  return [...indices].map((index) => levels[index] ?? 0);
+}
+
+function scientificLayout(
+  provenance: Provenance,
+  plot: PlotDefinition,
+  paper: PaperContext,
+): PlotlyLayout {
+  const presentation = presentationForPlot(plot);
+  const { geometry, zoom } = paper;
+  const { margin } = paperMargins(geometry);
+  const yStep = presentation.yTickStep ?? 10;
+  const labelFont = {
+    color: AXIS_COLOR,
+    family: PLOT_FONT,
+    size: zoom.pt(geometry.baseFontPt * 1.1),
+  };
+  const marginPx = {
+    b: zoom.cm(margin.b),
+    l: zoom.cm(margin.l),
+    r: zoom.cm(margin.r),
+    t: zoom.cm(margin.t),
+  };
+  const plotHeightCm = geometry.figureCm[1] - margin.t - margin.b;
   const annotations: Array<Record<string, unknown>> = [
     {
-      font: { color: "#444444", family: PLOT_FONT, size: 10 },
+      font: { color: "#666666", family: PLOT_FONT, size: zoom.pt(8) },
       showarrow: false,
       text: provenanceFooter(provenance),
-      x: 0,
+      x: -margin.l / (geometry.figureCm[0] - margin.l - margin.r),
       xanchor: "left",
       xref: "paper",
-      y: -0.19,
-      yanchor: "top",
+      y: -(margin.b - 0.12) / plotHeightCm,
+      yanchor: "bottom",
       yref: "paper",
     },
   ];
-  if (plot.id === "tech-adjusted-delta-ka") {
+  if (geometry.colorbarOrientation === "v" && geometry.colorbarCm) {
+    // MATLAB colorbar label: rotated, reading bottom-up, right of the ticks.
+    const { plotAreaCm } = paperMargins(geometry);
+    const labelXCm = geometry.colorbarCm[0] + geometry.colorbarCm[2] + 1.85;
+    annotations.push({
+      font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+      showarrow: false,
+      text: presentation.colorbarLabel,
+      textangle: -90,
+      x: (labelXCm - margin.l) / plotAreaCm[0],
+      xanchor: "center",
+      xref: "paper",
+      y: 0.5,
+      yanchor: "middle",
+      yref: "paper",
+    });
+  }
+  const shapes: Array<Record<string, unknown>> = [];
+  if (presentation.paperVariant === "tech-ka-delta" && presentation.colorLimits) {
+    // MATLAB Fig. 22 top-bar dressing: tick labels above the reversed bar,
+    // superiority braces below it (params.ratio_pct_brace_*).
+    const [minimum, maximum] = presentation.colorLimits;
+    const tickValues = presentation.colorbarTickValues ?? [minimum, maximum];
+    annotations.push(
+      ...horizontalBarTickAnnotations(
+        geometry,
+        zoom,
+        tickValues.map((value) => ({
+          fraction: (maximum - value) / (maximum - minimum),
+          label: formatSignedPercent(value),
+        })),
+      ),
+    );
+    const zeroFraction = maximum / (maximum - minimum);
+    const { plotAreaCm } = paperMargins(geometry);
+    const paperXFromCm = (cm: number): number => (cm - margin.l) / plotAreaCm[0];
+    const paperYFromCm = (cm: number): number => (cm - margin.b) / plotHeightCm;
+    const cb = geometry.colorbarCm;
+    if (cb) {
+      const braceTop = paperYFromCm(15.09);
+      const braceTip = paperYFromCm(14.86);
+      const barX = (fraction: number): number => paperXFromCm(cb[0] + cb[2] * fraction);
+      shapes.push(
+        braceShape(barX(0.005), barX(zeroFraction - 0.005), braceTop, braceTip, zoom.pt(0.9)),
+        braceShape(barX(zeroFraction + 0.005), barX(0.995), braceTop, braceTip, zoom.pt(0.9)),
+      );
+    }
+    const labelY = paperYFromCm(14.74);
+    const braceFont = { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) };
     annotations.push(
       {
-        font: { family: PLOT_FONT, size: 14 },
-        showarrow: false,
-        text: presentationForPlot(plot).colorbarLabel,
-        x: 0.5,
-        xref: "paper",
-        y: 1.34,
-        yref: "paper",
-      },
-      {
-        font: { family: PLOT_FONT, size: 12 },
+        font: braceFont,
         showarrow: false,
         text: "PA superiority",
-        x: 0.24,
+        x: zeroFraction / 2,
         xref: "paper",
-        y: 1.26,
+        y: labelY,
+        yanchor: "top",
         yref: "paper",
       },
       {
-        font: { family: PLOT_FONT, size: 12 },
+        font: braceFont,
         showarrow: false,
         text: "Al superiority",
-        x: 0.76,
+        x: zeroFraction + (1 - zeroFraction) / 2,
         xref: "paper",
-        y: 1.26,
+        y: labelY,
+        yanchor: "top",
         yref: "paper",
       },
     );
   }
   return {
     annotations,
-    font: { family: PLOT_FONT, color: "#1a1a1a", size: 15 },
-    legend: { orientation: "h", x: 0, y: -0.11 },
-    margin: { b: 100, l: 88, r: 120, t: plot.id === "tech-adjusted-delta-ka" ? 155 : 26 },
+    ...(shapes.length ? { shapes } : {}),
+    font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+    height: Math.round(zoom.height),
+    margin: {
+      b: Math.round(marginPx.b),
+      l: Math.round(marginPx.l),
+      r: Math.round(marginPx.r),
+      t: Math.round(marginPx.t),
+    },
     paper_bgcolor: "#ffffff",
     plot_bgcolor: "#ffffff",
+    showlegend: false,
+    width: Math.round(zoom.width),
     xaxis: {
+      ...paperAxisStyle(paper, "x"),
       range: [-1, 1],
-      tickmode: "array",
-      ticktext: ["0.1", "1", "10"],
-      tickvals: [0.1, 1, 10],
-      title: { text: "Outer diameter, <i>d</i><sub>o</sub> [mm]" },
+      title: {
+        font: labelFont,
+        standoff: zoom.cm(0.18),
+        text: "Outer diameter, <i>d</i><sub>o</sub> [mm]",
+      },
       type: "log",
     },
     yaxis: {
-      range: [0, 40],
-      tickmode: "linear",
-      tick0: 0,
+      ...paperAxisStyle(paper, "y"),
       dtick: yStep,
-      title: { text: "Wall-thickness ratio, τ = <i>t</i>/<i>d</i><sub>o</sub> [%]" },
+      range: [0, 40],
+      tick0: 0,
+      tickmode: "linear",
+      title: {
+        font: labelFont,
+        text: "Wall-thickness ratio, <i>τ</i> = <i>t</i>/<i>d</i><sub>o</sub> [%]",
+      },
     },
   };
+}
+
+/**
+ * Shared MATLAB axis appearance: boxed axes with mirrored inside ticks,
+ * light solid major grid, dotted minor grid (log x only), Times fonts.
+ * `tickLabelStyle` "power" shows 10^n labels (MATLAB log default, single
+ * maps); "plain" shows 0.1/1/10 (grid figures).
+ */
+export function paperAxisStyle(
+  paper: PaperContext,
+  axis: "x" | "y",
+  tickLabelStyle: "plain" | "power" = "power",
+): Record<string, unknown> {
+  const { geometry, zoom } = paper;
+  const base: Record<string, unknown> = {
+    gridcolor: MAJOR_GRID_COLOR,
+    gridwidth: Math.max(1, zoom.pt(0.5)),
+    linecolor: AXIS_COLOR,
+    linewidth: zoom.pt(geometry.baseFontPt >= 19 ? 1.3 : 1.0),
+    mirror: "ticks",
+    showgrid: true,
+    showline: true,
+    tickcolor: AXIS_COLOR,
+    tickfont: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+    ticklen: zoom.cm(0.097),
+    ticks: "inside",
+    tickwidth: zoom.pt(geometry.baseFontPt >= 19 ? 1.3 : 1.0),
+    zeroline: false,
+  };
+  if (axis === "x") {
+    base.tickmode = "array";
+    base.tickvals = [0.1, 1, 10];
+    base.ticktext =
+      tickLabelStyle === "power"
+        ? ["10<sup>−1</sup>", "10<sup>0</sup>", "10<sup>1</sup>"]
+        : ["0.1", "1", "10"];
+    base.minor = {
+      // "D1" = log-decade minors at 2..9 (matches MATLAB log minor grid);
+      // without it plotly falls back to dense linear minor ticks.
+      dtick: "D1",
+      gridcolor: MINOR_GRID_COLOR,
+      griddash: "dot",
+      gridwidth: Math.max(1, zoom.pt(0.5)),
+      showgrid: true,
+      tickcolor: AXIS_COLOR,
+      ticklen: zoom.cm(0.055),
+      ticks: "inside",
+      tickwidth: Math.max(1, zoom.pt(0.5)),
+    };
+  }
+  return base;
 }
 
 function boundaryTraces(
   payload: SimulationResultPayload,
   arrays: readonly Float64Array[],
   cooler: CoolerKey,
+  paper: PaperContext,
 ): PlotlyData[] {
   const ratio = vectorForField(payload.comparison.fields, arrays, "boundary_wall_ratio");
   const diameter = vectorForField(
@@ -697,8 +1215,18 @@ function boundaryTraces(
   return x.length
     ? [
         {
+          hoverinfo: "skip",
+          line: { color: "#ffffff", width: paper.zoom.pt(3.6) },
+          mode: "lines",
+          name: "",
+          showlegend: false,
+          type: "scatter",
+          x,
+          y,
+        },
+        {
           hovertemplate: "d_o=%{x:.4g} mm<br>τ=%{y:.3g} %<extra>Feasible boundary</extra>",
-          line: techLineStyle(cooler),
+          line: techLineStyle(cooler, paper),
           mode: "lines",
           name: `Feasible boundary - ${payload[cooler].label}`,
           showlegend: false,
@@ -710,11 +1238,13 @@ function boundaryTraces(
     : [];
 }
 
-const screenBoundaryDefinitions = [
+// MATLAB design-boundary screen-line colors and legend wording
+// (params.design_boundary_color_*, addDesignBoundaryLegend).
+export const screenBoundaryDefinitions = [
   { color: "#000000", label: "Minimum wall", mask: "mask_screen_min_wall" },
-  { color: "#005294", label: "Coolant flow", mask: "mask_screen_coolant_flow" },
+  { color: "#0052bd", label: "Coolant throughput", mask: "mask_screen_coolant_flow" },
   { color: "#e68c00", label: "Pressure drop", mask: "mask_screen_pressure_drop" },
-  { color: "#9400d4", label: "Cost", mask: "mask_screen_cost" },
+  { color: "#9400d4", label: "Tube cost", mask: "mask_screen_cost" },
   { color: "#009433", label: "Burst pressure", mask: "mask_screen_burst_pressure" },
   { color: "#cc0000", label: "Capillary rise", mask: "mask_screen_capillary" },
 ] as const;
@@ -723,10 +1253,17 @@ function screenBoundaryTraces(
   payload: SimulationResultPayload,
   arrays: readonly Float64Array[],
   cooler: CoolerKey,
+  paper: PaperContext,
 ): PlotlyData[] {
   const x = axisMillimeters(payload.outer_diameter_axis);
   const t = axisMillimeters(payload.wall_thickness_axis);
-  const tau = regularTauAxis();
+  // A finer display-only tau grid keeps the screen boundary lines smooth
+  // (MATLAB contours the masks on the native curvilinear grid).
+  const fineStep = 0.05;
+  const tau = Array.from(
+    { length: Math.round((TAU_MAX - TAU_MIN) / fineStep) + 1 },
+    (_, index) => TAU_MIN + index * fineStep,
+  );
   const traces: PlotlyData[] = [];
   for (const boundary of screenBoundaryDefinitions) {
     const matrix = matrixForField(payload[cooler].masks, arrays, boundary.mask);
@@ -735,16 +1272,16 @@ function screenBoundaryTraces(
     traces.push({
       contours: { coloring: "none", end: 0.5, showlabels: false, size: 1, start: 0.5 },
       hoverinfo: "skip",
-      line: { color: boundary.color, width: 1.45 },
+      line: { color: boundary.color, width: paper.zoom.pt(1.45) },
       name: boundary.label,
-      showlegend: true,
+      showlegend: false,
       showscale: false,
       type: "contour",
       x,
       y: tau,
       z: resampled,
     });
-    const hatch = screenHatchTrace(x, tau, resampled, boundary.color);
+    const hatch = screenHatchTrace(x, tau, resampled, boundary.color, paper);
     if (hatch) traces.push(hatch);
   }
   return traces;
@@ -755,6 +1292,7 @@ function screenHatchTrace(
   tauValues: number[],
   mask: number[][],
   color: string,
+  paper: PaperContext,
 ): PlotlyData | undefined {
   const x: Array<number | null> = [];
   const y: Array<number | null> = [];
@@ -771,7 +1309,7 @@ function screenHatchTrace(
       ];
       if (!neighbours.some((neighbour) => neighbour !== undefined && neighbour <= 0.5)) continue;
       candidateIndex += 1;
-      if (candidateIndex % 7 !== 0) continue;
+      if (candidateIndex % 29 !== 0) continue;
       const centerX = xValues[column];
       const centerY = tauValues[row];
       if (centerX === undefined || centerY === undefined) continue;
@@ -782,7 +1320,7 @@ function screenHatchTrace(
   return x.length
     ? {
         hoverinfo: "skip",
-        line: { color, width: 1 },
+        line: { color, width: Math.max(1, paper.zoom.pt(0.75)) },
         mode: "lines",
         name: "",
         showlegend: false,
@@ -793,16 +1331,20 @@ function screenHatchTrace(
     : undefined;
 }
 
-function minimumWallTraces(payload: SimulationResultPayload, cooler: CoolerKey): PlotlyData[] {
+function minimumWallTraces(
+  payload: SimulationResultPayload,
+  cooler: CoolerKey,
+  paper: PaperContext,
+): PlotlyData[] {
   const minWall = finiteSummaryValue(payload, cooler, "material_min_wall_thickness");
   const x = axisMillimeters(payload.outer_diameter_axis);
   if (minWall === undefined || x.length === 0) return [];
   const y = x.map((diameter) => (100 * minWall * 1000) / diameter);
-  const style = techLineStyle(cooler);
+  const style = techLineStyle(cooler, paper);
   return [
     {
       hoverinfo: "skip",
-      line: { color: "#ffffff", width: 5 },
+      line: { color: "#ffffff", width: paper.zoom.pt(3.6) },
       mode: "lines",
       name: "",
       showlegend: false,
@@ -823,7 +1365,11 @@ function minimumWallTraces(payload: SimulationResultPayload, cooler: CoolerKey):
   ];
 }
 
-function designPointTraces(payload: SimulationResultPayload, cooler: CoolerKey): PlotlyData[] {
+function designPointTraces(
+  payload: SimulationResultPayload,
+  cooler: CoolerKey,
+  paper: PaperContext,
+): PlotlyData[] {
   const diameter = finiteSummaryValue(payload, cooler, "design_outer_diameter");
   const wall = finiteSummaryValue(payload, cooler, "design_wall_thickness");
   if (diameter === undefined || wall === undefined || diameter <= 0) return [];
@@ -832,8 +1378,8 @@ function designPointTraces(payload: SimulationResultPayload, cooler: CoolerKey):
       hovertemplate: "d_o=%{x:.4g} mm<br>τ=%{y:.3g} %<extra>Request design point</extra>",
       marker: {
         color: cooler === "cooler_left" ? "#00427e" : "#b35c00",
-        line: { color: "#ffffff", width: 1 },
-        size: 8,
+        line: { color: "#ffffff", width: Math.max(1, paper.zoom.pt(0.75)) },
+        size: paper.zoom.pt(6),
         symbol: cooler === "cooler_left" ? "circle" : "diamond",
       },
       mode: "markers",
@@ -846,10 +1392,17 @@ function designPointTraces(payload: SimulationResultPayload, cooler: CoolerKey):
   ];
 }
 
-function validatedReferenceTrace(): PlotlyData {
+// MATLAB params.validated_ref: blue x, size 10 pt, line width 2.2 pt at
+// d_o = 1 mm, tau = 10 %.
+function validatedReferenceTrace(paper: PaperContext): PlotlyData {
   return {
     hovertemplate: "d_o=1 mm<br>τ=10 %<extra>Validated aluminum reference</extra>",
-    marker: { color: "#001ae6", line: { color: "#001ae6", width: 2.2 }, size: 12, symbol: "x" },
+    marker: {
+      color: "#001ae6",
+      line: { color: "#001ae6", width: paper.zoom.pt(2.2) },
+      size: paper.zoom.pt(10),
+      symbol: "x-thin",
+    },
     mode: "markers",
     name: "Validated aluminum reference",
     showlegend: false,
@@ -859,18 +1412,27 @@ function validatedReferenceTrace(): PlotlyData {
   };
 }
 
-function crossSectionTraces(): PlotlyData[] {
+/**
+ * Tube cross-section sketches (MATLAB plotCrossSectionSketches). The log-x
+ * half width follows rLog = rY * (xLogRange/yRange) * (axesH/axesW) with the
+ * panel's own axes size, so the ring is a circle whenever the panel renders
+ * at its cm aspect ratio — which the paper layout guarantees at every zoom.
+ */
+export function crossSectionTraces(paper: PaperContext = DEFAULT_PAPER): PlotlyData[] {
+  const { geometry, zoom } = paper;
+  const axesRef = geometry.axesCm[0] ?? SINGLE_MAP.axesCm[0];
+  const aspect = (axesRef?.[3] ?? 8.75) / (axesRef?.[2] ?? 9.7);
   const traces: PlotlyData[] = [];
-  const thetaFull = Array.from({ length: 80 }, (_, index) => (2 * Math.PI * index) / 79);
+  const thetaFull = Array.from({ length: 120 }, (_, index) => (2 * Math.PI * index) / 119);
   const thetaQuarter = Array.from(
-    { length: 40 },
-    (_, index) => Math.PI / 2 + ((Math.PI / 2) * index) / 39,
+    { length: 60 },
+    (_, index) => Math.PI / 2 + ((Math.PI / 2) * index) / 59,
   );
   for (const tau of [7.5, 20, 32.5]) {
     const innerScale = Math.max(0, 1 - (2 * tau) / 100);
     for (const diameter of [0.25, 1, 6]) {
       const rY = 1.2 * diameter;
-      const rLog = rY * (2 / 40) * (8.75 / 9.7);
+      const rLog = rY * (2 / 40) * aspect;
       const quarter = diameter >= 6;
       const theta = quarter ? thetaQuarter : thetaFull;
       const outerX = theta.map((angle) => 10 ** (Math.log10(diameter) + rLog * Math.cos(angle)));
@@ -893,7 +1455,7 @@ function crossSectionTraces(): PlotlyData[] {
         fill: "toself",
         fillcolor: "#4d4d4d",
         hoverinfo: "skip",
-        line: { color: "#4d4d4d", width: 0.7 },
+        line: { color: "#4d4d4d", width: Math.max(0.5, zoom.pt(0.7)) },
         mode: "lines",
         name: "",
         showlegend: false,
@@ -905,7 +1467,7 @@ function crossSectionTraces(): PlotlyData[] {
         fill: "toself",
         fillcolor: "#ffffff",
         hoverinfo: "skip",
-        line: { color: "#4d4d4d", width: 0.5 },
+        line: { color: "#4d4d4d", width: Math.max(0.5, zoom.pt(0.5)) },
         mode: "lines",
         name: "",
         showlegend: false,
@@ -929,13 +1491,29 @@ function heatmapHoverTemplate(unit: string, includeStatus: boolean): string {
   return `d_o=%{x:.4g} mm<br>τ=%{y:.3g} %<br>value=%{customdata[0]:.4g} ${unit}${includeStatus ? "<br>status=%{customdata[1]}" : ""}<extra></extra>`;
 }
 
+function maskArrayForCooler(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  cooler: CoolerKey,
+): Float64Array | undefined {
+  const ref = payload[cooler].masks.find((field) => field.name === "mask_below_min_wall");
+  return ref ? arrays[ref.buffer_index] : undefined;
+}
+
 function collectFiniteValues(
   array: Float64Array | undefined,
   values: number[],
   factor: number,
+  skipMask?: Float64Array,
 ): void {
   if (!array) return;
-  for (const value of array) if (Number.isFinite(value)) values.push(value * factor);
+  for (let index = 0; index < array.length; index += 1) {
+    const value = array[index] ?? Number.NaN;
+    if (!Number.isFinite(value)) continue;
+    const masked = skipMask?.[index];
+    if (masked !== undefined && Number.isFinite(masked) && masked > 0.5) continue;
+    values.push(value * factor);
+  }
 }
 
 function percentile(sorted: number[], percent: number): number {
@@ -949,6 +1527,7 @@ function percentile(sorted: number[], percent: number): number {
   );
 }
 
+// MATLAB makeLogColorbarTicks: 1/2/5-decade values inside the caxis.
 function logTicks(minimum: number, maximum: number): number[] {
   const ticks: number[] = [];
   for (
@@ -968,6 +1547,12 @@ function formatPlainNumber(value: number): string {
   return Math.abs(value) >= 1
     ? value.toFixed(0)
     : value.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function formatSignedPercent(value: number): string {
+  if (value > 0) return `+${value.toFixed(0)} %`;
+  if (value < 0) return `${value.toFixed(0)} %`;
+  return "0 %";
 }
 
 function shortIdentifier(value: string): string {
@@ -1009,10 +1594,15 @@ function hasBinaryTransition(matrix: number[][]): boolean {
     }
   return false;
 }
-function techLineStyle(cooler: CoolerKey): { color: string; dash: string; width: number } {
+// MATLAB tech-limit styles: Al dark blue dashed, Poly dark green dotted,
+// width 2.6 pt with white underlay.
+function techLineStyle(
+  cooler: CoolerKey,
+  paper: PaperContext,
+): { color: string; dash: string; width: number } {
   return cooler === "cooler_left"
-    ? { color: "#001a99", dash: "dash", width: 2.6 }
-    : { color: "#00801a", dash: "dot", width: 2.6 };
+    ? { color: "#001999", dash: "dash", width: paper.zoom.pt(2.6) }
+    : { color: "#00801a", dash: "dot", width: paper.zoom.pt(2.6) };
 }
 function statusAtCell(
   invalid?: number,

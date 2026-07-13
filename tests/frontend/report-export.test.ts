@@ -132,10 +132,13 @@ describe("report export", () => {
       scope: "Left <core>",
       title: "Overall heat-transfer coefficient - Left <core>",
     });
-    expect(spec?.spec.data[0]).toMatchObject({
-      colorbar: { title: { text: "<i>k</i><sub>o</sub> [W/(m² K)]" } },
-      type: "heatmap",
-    });
+    expect(spec?.spec.data[0]).toMatchObject({ type: "heatmap" });
+    // The MATLAB-style colorbar label is a rotated annotation, not a title.
+    expect(
+      spec?.spec.layout.annotations?.some(
+        (annotation) => annotation.text === "<i>k</i><sub>o</sub> [W/(m² K)]",
+      ),
+    ).toBe(true);
     expect(spec?.spec.layout.title).toBeUndefined();
     expect(spec?.spec.layout.yaxis).toMatchObject({ range: [0, 40] });
   });

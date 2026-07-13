@@ -64,7 +64,7 @@ export async function captureReportFigures(
         format: "svg",
         height: reportSpec.spec.layout.height ?? 720,
         scale: 1,
-        width: 900,
+        width: reportSpec.spec.layout.width ?? 900,
       });
       figures.push({
         ...reportSpec.figure,
