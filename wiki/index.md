@@ -16,6 +16,10 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
 
 ## Key documents
 
+- [paper-companion-application.md](paper-companion-application.md) —
+  self-contained German overview of the application for the accompanying
+  paper repository: scientific scope, architecture, workflow, plots,
+  reproducibility, deployment, limitations, maintenance, and citation.
 - [Impementierungsreport.md](Impementierungsreport.md) — original implementation
   briefing (historical input; where it conflicts with `AGENTS.md` or the master
   roadmap, those take precedence — see ADR-0001).
