@@ -23,9 +23,13 @@ restrained Springer-like scientific visual language.
 - Results presents the primary workflow first: Run simulation, plot selection,
   and the selected plot. Computation status, design-point summary, and report
   exports follow below the plot in both visual and DOM order.
+- Start describes the design-space calculation in the paper for external
+  readers and cites the VDI-Wärmeatlas, 12th edition (2019), without exposing
+  implementation history.
 - Settings exposes the software/build identity, author and copyright holder,
-  MIT application-source scope, excluded scientific-material scope, warranty
-  summary, accompanying-paper authors, and canonical LICENSE/CITATION links.
+  MIT application-source license, warranty summary, all accompanying-paper
+  authors, and canonical LICENSE/CITATION links. It does not expose URL-state
+  diagnostics, linked-group diagnostics, or internal validation-material notes.
 - Main and Model Setup tab navigation implement the WAI-ARIA Tabs pattern with
   roving tabindex, arrow keys, Home/End, and automatic activation
   (`src/components/Tabs.tsx`); panels are preloaded so activation is

@@ -80,9 +80,11 @@ binary masks and statuses use nearest-neighbour display placement.
 
 Every figure has an accessible image label, detailed caption, tabular numeric
 summary where applicable, and explicit PNG/SVG controls. Provenance is placed
-in a dedicated footer band. Report capture uses the same tested specs and a
-paper-like fixed geometry; standalone HTML keeps machine JSON available on
-screen but excludes it from print. Image export renders a fresh zoom-1 spec;
+in a dedicated footer band with public contract, core, request and generation
+identifiers; the internal golden-validation identifier is not rendered.
+Report capture uses the same tested specs and a paper-like fixed geometry;
+standalone HTML keeps machine JSON available on screen but excludes it from
+print. Image export renders a fresh zoom-1 spec;
 the standard 16.5×13.2 cm single map is therefore 624×499 px at 96 dpi, while
 grids and portrait figures retain their own MATLAB-derived dimensions.
 

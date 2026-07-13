@@ -123,7 +123,8 @@ export function CompositePlotFigure({
         </p>
       ) : null}
       <figcaption>
-        {plot.description} Shared scales and provenance are included in PNG and SVG exports.
+        {plot.description} Both panels use shared scales. PNG and SVG exports include calculation
+        provenance.
       </figcaption>
     </figure>
   );

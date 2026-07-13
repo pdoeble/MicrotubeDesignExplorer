@@ -109,6 +109,7 @@ describe("report export", () => {
     expect(html).not.toContain("<script>");
     expect(html).toContain("Canonical sidecar JSON");
     expect(html).toContain('class="machine-details"');
+    expect(html).not.toContain("Golden reference");
     expect(html).toContain("L min⁻¹");
     expect(html).toContain(".machine-details { display: none; }");
     expect(buildStandaloneHtmlReport(payload, { figures })).toBe(

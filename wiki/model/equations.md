@@ -7,8 +7,9 @@ and display boundaries.
 ## VDI G7 inline tube bank
 
 Implemented in `models.correlations.vdi_g7_inline_tube_bank_alpha`, ported
-from `Waermedurchgang_V10_physical.m` line 3691. Source: VDI-Waermeatlas 2013,
-chapter G7.
+from `Waermedurchgang_V10_physical.m` line 3691. Source: VDI-Wärmeatlas,
+12th edition (2019), chapter G7; see ADR-0014 for the resolved legacy citation
+conflict.
 
 - characteristic length: `l = pi d_o / 2`
 - void fraction: `c = 1 - pi/(4a)` for `b >= 1`, else `c = 1 - pi/(4ab)`
@@ -31,7 +32,8 @@ The API marks VDI G7 values outside `10 <= Re_c,l <= 1e6` or
 ## VDI G1 internal tube flow
 
 Implemented in `models.correlations.vdi_g1_internal_tube_alpha`, ported from
-MATLAB line 3756. Source: VDI-Waermeatlas 2013, chapter G1.
+MATLAB line 3756. Source: VDI-Wärmeatlas, 12th edition (2019), chapter G1;
+see ADR-0014 for the resolved legacy citation conflict.
 
 - Reynolds number: `Re_i = v_i d_i / nu`
 - heat-transfer coefficient: `alpha_i = Nu_i lambda / d_i`

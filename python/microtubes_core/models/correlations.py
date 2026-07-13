@@ -3,7 +3,7 @@
 The implemented equations are ported from
 ``source_materials/Waermedurchgang_V10_physical.m`` local functions
 ``vdiG7InlineTubeBankAlpha`` (line 3691) and ``vdiG1InternalTubeAlpha``
-(line 3756). Source: VDI-Waermeatlas 2013, chapters G7 and G1.
+(line 3756). Source: VDI-Wärmeatlas, 12th edition (2019), chapters G7 and G1.
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def vdi_g1_internal_tube_alpha(
     """Return tube-side ``alpha_i`` for circular internal flow.
 
     SI inputs and outputs. Laminar, transition and turbulent branches match
-    VDI-Waermeatlas 2013 G1 as ported in MATLAB line 3756.
+    VDI-Wärmeatlas, 12th edition (2019), G1 as ported in MATLAB line 3756.
     """
     velocity, diameter = broadcast_float_arrays(coolant_velocity, d_i)
     alpha = nan_array(diameter.shape)

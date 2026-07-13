@@ -164,7 +164,6 @@ export function buildStandaloneHtmlReport(
   ${keyValueTable({
     "Contract version": payload.provenance.contract_version,
     "Core version": payload.provenance.core_version,
-    "Golden reference": payload.provenance.golden_reference || "n/a",
     "Request hash": payload.request_hash,
     "Result generated UTC": payload.provenance.generated_utc,
   })}

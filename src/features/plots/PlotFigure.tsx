@@ -266,22 +266,14 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
         </p>
       ) : null}
       <figcaption>
-        {plot.description} Values are read from `SimulationResult`; axes use SI-derived display
-        conversions. The exported figure includes request and version provenance.
+        {plot.description} Values use the units shown on the axes and color scale. PNG and SVG
+        exports include calculation provenance.
       </figcaption>
       {dataSummary ? (
         <div className="plot-figure__details" id={detailsId}>
           <table className="summary-table">
             <caption>Current plot data summary</caption>
             <tbody>
-              <tr>
-                <th scope="row">Plot ID</th>
-                <td>{plot.id}</td>
-              </tr>
-              <tr>
-                <th scope="row">Field</th>
-                <td>{field.name}</td>
-              </tr>
               <tr>
                 <th scope="row">Unit</th>
                 <td>{presentation.displayUnit}</td>

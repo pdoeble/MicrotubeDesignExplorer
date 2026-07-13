@@ -6,14 +6,14 @@ export function StartTab() {
     <section aria-labelledby="start-heading">
       <h2 id="start-heading">About this application</h2>
       <p>
-        This static web application accompanies the paper{" "}
+        This application lets readers reproduce and explore the design-space calculation presented
+        in the paper{" "}
         <em>
           Local Resistance-Based Design-Space Analysis of Polyamide Microtubes for Compact Heat
           Exchangers
         </em>{" "}
-        (Döbler, Henzler, Auerbach et&nbsp;al., Esslingen University of Applied Sciences). It ports
-        the complete approved MATLAB screening model to Python and executes it locally in your
-        browser — no data leaves your device.
+        (Döbler et&nbsp;al.). It evaluates heat-transfer performance and feasibility across outer
+        diameter and wall thickness for a reference and a comparison design.
       </p>
       <h3>How to use it</h3>
       <ol>
@@ -31,10 +31,11 @@ export function StartTab() {
       </ol>
       <h3>Scientific basis</h3>
       <p>
-        Outer convection: VDI-Wärmeatlas 2013 G7 (inline cross-flow tube bank). Inner convection:
-        VDI-Wärmeatlas 2013 G1 (circular internal flow, constant wall temperature). Pressure
-        integrity: Lamé with tolerance-adjusted minimum wall. All assumptions, validity limits, and
-        screens are shown with the results.
+        The calculation follows the VDI-Wärmeatlas, 12th edition (2019): chapter G7 for outer
+        convection in an inline cross-flow tube bank and chapter G1 for circular internal flow with
+        constant wall temperature. Pressure integrity is evaluated with Lamé using the
+        tolerance-adjusted minimum wall. All assumptions, validity limits, and screens are shown
+        with the results.
       </p>
       <h3>Version and citation</h3>
       <dl className="meta-list">

@@ -98,7 +98,7 @@ export function createReportFigureSpec(
     return {
       figure: {
         alt: plot.description,
-        description: `${plot.description} Values are read from SimulationResult and exported as SVG.`,
+        description: `${plot.description} Values use the units shown on the axes and color scale.`,
         plot_id: plot.id,
         scope: "Both coolers",
         title: plot.title,
@@ -155,7 +155,7 @@ export function createReportFigureSpec(
   return {
     figure: {
       alt: plot.description,
-      description: `${plot.description} Values are read from SimulationResult and exported as SVG.`,
+      description: `${plot.description} Values use the units shown on the axes and color scale.`,
       plot_id: plot.id,
       scope: titleScope,
       title: `${plot.title} - ${titleScope}`,

@@ -938,15 +938,12 @@ export function imageExportOptions(
 }
 
 export function provenanceFooter(provenance: Provenance): string {
-  const parts = [
+  return [
     `contract ${provenance.contract_version}`,
     `core ${provenance.core_version}`,
     `request ${shortIdentifier(provenance.request_hash)}`,
     `generated ${provenance.generated_utc}`,
-  ];
-  if (provenance.golden_reference)
-    parts.push(`golden ${shortIdentifier(provenance.golden_reference)}`);
-  return parts.join(" | ");
+  ].join(" | ");
 }
 
 function regularTauAxis(): number[] {

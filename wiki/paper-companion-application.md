@@ -128,9 +128,9 @@ werden nicht verdeckt geklemmt oder extrapoliert.
 
 Der thermische Kern ist widerstandsbasiert:
 
-- **außen:** VDI-Wärmeatlas 2013, Kapitel G7, quer angeströmtes Inline-
-  Rohrbündel;
-- **innen:** VDI-Wärmeatlas 2013, Kapitel G1, Kreisrohrströmung;
+- **außen:** VDI-Wärmeatlas, 12. Auflage (2019), Kapitel G7, quer
+  angeströmtes Inline-Rohrbündel;
+- **innen:** VDI-Wärmeatlas, 12. Auflage (2019), Kapitel G1, Kreisrohrströmung;
 - **Wand:** zylindrische Wärmeleitung;
 - **Aggregation:** Summe der auf die Außenfläche bezogenen Widerstände.
 
@@ -445,8 +445,9 @@ Die Anwendung hat vier Haupttabs:
 1. **Start** – Zweck, Kurzanleitung, Modellgrundlage, Version und Zitation;
 2. **Model Setup** – wissenschaftliche Eingaben;
 3. **Results** – Rechnung, Plotwahl, Kennwerte und Exporte;
-4. **Settings** – Rücksetzen, URL-State, Verknüpfungsstatus, Autorenschaft,
-   Lizenz und Repository.
+4. **Settings** – Rücksetzen, öffentliche Softwareidentität, Autorenschaft,
+   Lizenz, Zitation und Repository. URL-State-Diagnostik, interne
+   Validierungsquellen und Verknüpfungsstatus werden dort nicht angezeigt.
 
 Die frühere Route `#/materials` wird kompatibel auf `#/input` normalisiert.
 

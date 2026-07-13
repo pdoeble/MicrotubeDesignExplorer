@@ -18,3 +18,4 @@ Numbering is sequential and never reused.
 | [ADR-0011](ADR-0011-scientific-plot-audit-and-navigation.md) | Scientific plot audit, boundary rendering, and navigation | accepted |
 | [ADR-0012](ADR-0012-github-preserving-pages-portability.md) | GitHub-preserving static Pages portability | accepted |
 | [ADR-0013](ADR-0013-compressed-url-state-v2.md) | Lossless compressed URL state v2 | accepted |
+| [ADR-0014](ADR-0014-vdi-waermeatlas-edition-citation.md) | VDI-Wärmeatlas edition citation follows the paper | accepted |

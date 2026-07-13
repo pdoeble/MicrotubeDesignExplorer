@@ -144,7 +144,7 @@ describe("plot spec", () => {
     expect(spec.data[1]).toMatchObject({ type: "contour" });
     expect(spec.data.at(-1)).toMatchObject({ type: "scatter" });
     expect(spec.layout.annotations?.[0]).toMatchObject({
-      text: "contract 1.0.0 | core 0.1.0 | request abcdef012345 | generated 2026-07-10T12:00:00Z | golden 0123456789ab",
+      text: "contract 1.0.0 | core 0.1.0 | request abcdef012345 | generated 2026-07-10T12:00:00Z",
     });
     expect(spec.config.toImageButtonOptions).toEqual({
       filename: "same-geometry-ratio-cooler_right",
@@ -593,6 +593,6 @@ describe("plot spec", () => {
 
   it("keeps provenance footer identifiers compact", () => {
     expect(provenanceFooter(provenance)).toContain("request abcdef012345");
-    expect(provenanceFooter(provenance)).toContain("golden 0123456789ab");
+    expect(provenanceFooter(provenance)).not.toContain("golden");
   });
 });

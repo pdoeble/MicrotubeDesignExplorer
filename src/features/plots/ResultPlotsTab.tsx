@@ -122,7 +122,7 @@ export function ResultPlotsTab() {
         <div>
           <h2 id="plots-heading">Results</h2>
           <p className="section-kicker">
-            Compute, compare and export figures from the current `SimulationResult`.
+            Calculate, compare, and export the design-space results for the selected inputs.
           </p>
         </div>
         <button type="button" className="primary-button" onClick={runSimulation} disabled={running}>
@@ -239,7 +239,7 @@ export function ResultPlotsTab() {
               <div>
                 <h3 id="report-export-heading">Report exports</h3>
                 <p className="section-kicker">
-                  Reports use the current immutable `SimulationResult` and request hash.
+                  Reports contain the current inputs, results, figures, warnings, and provenance.
                 </p>
               </div>
               <div className="report-export-actions" aria-label="Report export controls">

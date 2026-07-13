@@ -3,7 +3,6 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "../../src/App";
 import { useSimulationStore } from "../../src/state/simulationStore";
-import { URL_STATE_VERSION } from "../../src/state/urlState";
 
 describe("App shell", () => {
   beforeEach(() => {
@@ -18,6 +17,14 @@ describe("App shell", () => {
     expect(tabs.map((t) => t.textContent)).toEqual(["Start", "Model Setup", "Results", "Settings"]);
     expect(tabs[0]).toHaveAttribute("aria-selected", "true");
     expect(tabs[1]).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("presents the paper calculation and current Wärmeatlas edition to external readers", () => {
+    render(<App />);
+
+    expect(screen.getByText(/reproduce and explore the design-space calculation/)).toBeVisible();
+    expect(screen.getByText(/VDI-Wärmeatlas, 12th edition \(2019\)/)).toBeVisible();
+    expect(screen.queryByText(/MATLAB|Python/)).not.toBeInTheDocument();
   });
 
   it("activates tabs with arrow keys (roving tabindex)", async () => {
@@ -113,7 +120,7 @@ describe("App shell", () => {
     await waitFor(() => expect(window.location.hash).toBe("#/input"));
   });
 
-  it("shows explicit authorship, citation, and license scope in Settings", async () => {
+  it("shows public authorship, citation, license, and warranty information in Settings", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("tab", { name: "Settings" }));
@@ -122,9 +129,15 @@ describe("App shell", () => {
     expect(
       screen.getByText("Philip Döbler, Esslingen University of Applied Sciences"),
     ).toBeVisible();
-    expect(screen.getByText(/not licensed for reuse outside this project/)).toBeVisible();
+    expect(screen.getByText(/André Casal Kulzer/)).toBeVisible();
     expect(screen.getByText(/provided “as is”, without warranty/)).toBeVisible();
-    expect(screen.getByText(URL_STATE_VERSION)).toBeVisible();
+    expect(screen.queryByText("URL state schema")).not.toBeInTheDocument();
+    expect(screen.queryByText("Encoded scientific state")).not.toBeInTheDocument();
+    expect(screen.queryByText("Left/right links")).not.toBeInTheDocument();
+    expect(screen.queryByText("Scientific-material license scope")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/not licensed for reuse outside this project/),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "MIT License" })).toHaveAttribute(
       "href",
       "https://github.com/pdoeble/MicrotubeDesignExplorer/blob/main/LICENSE",
