@@ -199,6 +199,17 @@ export function createCompositePlotSpec(
       trace.showlegend = false;
       data.push(trace);
     }
+    // Preserve only data-bound annotations (manual contour labels/callouts)
+    // from the single-panel adapter; figure labels and provenance are rebuilt
+    // once below for the composite geometry.
+    for (const annotation of panelSpec.layout.annotations ?? []) {
+      if (annotation.xref !== "x" || annotation.yref !== "y") continue;
+      annotations.push({
+        ...annotation,
+        xref: `x${axisSuffix}`,
+        yref: `y${axisSuffix}`,
+      });
+    }
     const column = index % columns;
     const row = Math.floor(index / columns);
     const xAxis = {

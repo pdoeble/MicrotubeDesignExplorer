@@ -3,7 +3,7 @@
 > **Path:** `/plans/260712-plot-visual-polish.md`
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M8/M9 (review-finding closure), workstream W7 (Plots)
-> **Status:** in-progress — implementation largely landed, final visual round + validation/commit open
+> **Status:** completed
 > **Created:** 2026-07-12
 > **Last updated:** 2026-07-13
 > **Predecessor:** `/plans/260712-plot-fidelity-review.md` (completed)
@@ -24,7 +24,7 @@
 Out of scope: physics, contracts, golden data, the parallel model-setup UX
 work (`/plans/260712-model-setup-ux.md`).
 
-## 2. What was implemented (all landed on the working tree, NOT committed)
+## 2. What was implemented
 
 - **A1 Exact colormap** — `src/features/plots/colormap.ts` now holds the
   exact 256×3 `slanCM('spectral')` table dumped from the local MATLAB R2024b
@@ -87,7 +87,15 @@ work (`/plans/260712-model-setup-ux.md`).
   data-driven callouts (`percentCalloutAnnotations`) for +100/+150 that only
   appear when those levels exist in the data (current default data max is
   ~+76 %, so none appear — correct behavior; the paper reference was made
-  from a different data state).
+  from a different data state). The horizontal title is a separate annotation
+  at the MATLAB position, and the −25/0/+25/+50 % contours use deterministic,
+  data-interpolated annotations in the narrow feasible band.
+- **Deterministic contour labels** — annotation targets reproduce the MATLAB
+  label coverage where Plotly cannot place text reliably: k_o 300/400 W/m²K,
+  bundle kA 50/300/500 W/K, all drawable aluminum design-boundary levels,
+  and the 0 % Fig. 9 contour. Target points are interpolated on the computed
+  contour and rotated from its local tangent; no scientific values are fitted
+  or changed.
 - **Components** — `PlotFigure`/`CompositePlotFigure` measure width via
   `useContainerWidth` (ResizeObserver, jsdom-guarded) and re-render at the
   paper zoom; exports render a fresh spec at reference size via
@@ -126,63 +134,51 @@ Ineffective / rejected:
 
 ## 4. Per-plot checklist
 
-Status: `[ ]` open · `[~]` believed fixed, needs r4 visual confirmation ·
-`[x]` visually verified against reference.
+Status: every item is visually verified in r4 against the corresponding
+MATLAB export or, for app-only plots, against the shared approved conventions.
 
 ### 4.1 Paper figures
 
-- [~] `overall-coefficient-map` ↔ 01/02 — r2 verified (colors, ticks, label,
-  contours, sketches); residual: only "200" gets an inline label (plotly
-  placement limits; MATLAB labels 300/400/500 too).
-- [ ] `bundle-conductance-map` ↔ 20/21 (+ portrait via tandem) — not yet
-  individually reviewed; single map shares k_o pipeline.
-- [~] `burst-pressure-map` ↔ 03/04 — r2 good (bar labels 800/1200/1600);
-  compare directly against 03/04 PDFs in r4.
-- [~] `reynolds-tube-side-map` ↔ 05 — r2 very close (levels, 2300 dash).
-- [ ] `reynolds-air-simple-map` ↔ 07 / `reynolds-air-vdi-map` ↔ 08.
-- [ ] `friction-pressure-drop-map` ↔ 18 (reversed map — check bar colors).
-- [~] `coolant-throughput-map` ↔ 19 — r2 near-perfect (reversed linear bar).
-- [ ] spacing maps ↔ 06/10/11/13.
-- [~] `tube-supply-cost-map` ↔ 16/17 — r2 good; labels hidden under sketches
-  (MATLAB layering also puts sketches on top — compare 16 in r4).
-- [ ] `tech-adjusted-delta-k` ↔ 09 — check ticks [−20,−10,0,20…80], no ref X.
-- [~] `tech-adjusted-delta-ka` ↔ 22 — r3: tick labels above bar ✓ braces ✓
-  short title ✓ linear colors ✓; OPEN: plotly colorbar title (side top)
-  collides with tick-label row → set title text "" for the h-bar and add an
-  annotation at MATLAB y = 17.15 cm; thin-band inline labels (0/+25/+50)
-  missing → annotation labels at MATLAB target τ ([-25:15.5, 0:12.6,
-  25:16.2, 50:13.7]) with ~−72° rotation, and disable plotly inline labels
-  for this plot (percent mode without fallback).
-- [~] `burst-tolerance-grid` ↔ 15 — layout/bar direction correct in r2; ref
-  X restored after wrongly suppressing it; confirm in r4.
-- [~] `capillary-rise-grid` ↔ 14 — r2 structure ✓; flipped colormap, no ref
-  X, footer band added after r2 → r4.
-- [~] `resistance-shares-grid` ↔ 12 — r2 structure ✓; sparse dynamic levels,
-  ticks [0,10,25,50,75,90,100], unsigned "%" labels, label
-  "Resistance share, φ_j [%]" added after r3 → r4.
-- [~] `design-boundary-lines` ↔ 20_design — r2 verified (anchors, dtick 5,
-  legend wording, linear labels, fill); r3 additions unverified: tick
-  labels above bar, 0.05 % smoothing, label mode "all".
+- [x] `overall-coefficient-map` ↔ 01/02 — colors, ticks, contours including
+  200/300/400 labels, sketches and both coolers.
+- [x] `bundle-conductance-map` ↔ 20/21 (+ portrait via tandem) — both
+  coolers, 50/300/500 labels and shared limits.
+- [x] `burst-pressure-map` ↔ 03/04 — both coolers and 800/1200/1600 labels.
+- [x] `reynolds-tube-side-map` ↔ 05 — levels and Re=2300 transition.
+- [x] `reynolds-air-simple-map` ↔ 07 / `reynolds-air-vdi-map` ↔ 08.
+- [x] `friction-pressure-drop-map` ↔ 18 — reversed color orientation.
+- [x] `coolant-throughput-map` ↔ 19 — reversed linear colorbar.
+- [x] spacing maps ↔ 06/10/11/13.
+- [x] `tube-supply-cost-map` ↔ 16/17 — both coolers and approved layering.
+- [x] `tech-adjusted-delta-k` ↔ 09 — fixed ticks, annotated 0 % contour,
+  no validated-reference marker.
+- [x] `tech-adjusted-delta-ka` ↔ 22 — separate title, top ticks, braces and
+  data-interpolated −25/0/+25/+50 % labels.
+- [x] `burst-tolerance-grid` ↔ 15 — layout, bar direction and reference X.
+- [x] `capillary-rise-grid` ↔ 14 — flipped colormap, no reference X.
+- [x] `resistance-shares-grid` ↔ 12 — sparse levels, ticks and figure label.
+- [x] `design-boundary-lines` ↔ 20_design — anchored panels, 5 % y ticks,
+  top bar, smoothed display boundary, labels, hatch and HTML legend.
 
 ### 4.2 App-only diagnostics (shared style)
 
-- [~] `inner/outer-heat-transfer`, `tube-count`, `bundle-area`,
+- [x] `inner/outer-heat-transfer`, `tube-count`, `bundle-area`,
   `hydraulic-power`, `coolant-mass-flow`, `capillary-rise(-1g/-5g/-10g)`,
-  `resistance-inner/wall/outer` — inherit the shared pipeline; spot-check
-  in r4 (capillary singles now use the flipped map deliberately).
-- [ ] `feasibility-mask-map` — binary white/accent; verify white infeasible.
-- [ ] `tech-adjusted-ratio-k/-ka`, `same-geometry-ratio(-value)` —
-  comparison style: composite boundaries only, both-feasible clip.
+  `resistance-inner/wall/outer` — shared pipeline spot-checked in r4;
+  capillary singles deliberately use the flipped map.
+- [x] `feasibility-mask-map` — binary white/accent with white infeasible.
+- [x] `tech-adjusted-ratio-k/-ka`, `same-geometry-ratio(-value)` —
+  composite boundaries only and both-feasible clipping.
 
 ### 4.3 Cross-cutting
 
-- [ ] Width sweep ~700/1100/1600 px — circles must stay round (set env
-  `WIDTH` in shoot-plots.mjs).
-- [ ] Tandem mode (two scaled panels, shared domains, no overlap).
-- [ ] PNG/SVG export keeps reference size 624×499 (or per-geometry size)
-  and typography (exportImage renders fresh spec at zoom 1).
-- [ ] HTML report figure spot-check (uses same specs; capture at
-  layout size).
+- [x] Width sweep 700/1100/1600 px — invariant plot-area ratio and round
+  cross-section circles at every width.
+- [x] Tandem mode — two scaled panels, shared domains, no overlap.
+- [x] PNG/SVG export — single-map reference size 624×499 and paper zoom 1,
+  asserted from real Chromium downloads.
+- [x] HTML report figure spot-check — same fixed-size specs captured as SVG;
+  JSON sidecar remains embedded and machine-readable.
 - [x] Colormap exactness (256-entry MATLAB dump).
 
 ## 5. Verification log
@@ -193,8 +189,10 @@ Status: `[ ]` open · `[~]` believed fixed, needs r4 visual confirmation ·
 | 2026-07-13 | diag | `scratchpad/shots/diag` — stripe pattern = plotly linear log-minor fallback |
 | 2026-07-13 | r2 | `scratchpad/shots/r2` — F1–F9 verified; findings F11–F16 |
 | 2026-07-13 | r3 | `scratchpad/shots/r3` — F10–F16 partially verified; Fig. 22 title/band labels still open |
+| 2026-07-13 | r4 | `scratchpad/shots/r4`, `r4-target*`, `r4-final-labels` — all registered plots and both-cooler variants reviewed; F17–F19 closed |
+| 2026-07-13 | width/tandem | `scratchpad/shots/r4-width-{700,1100,1600}`, `r4-tandem` — responsive geometry and tandem layout verified |
 
-### Findings (all fixed unless marked open)
+### Findings (all fixed)
 
 - F1 robust/fixed shared color limits missing in single mode → always via
   `colorDomainForPlot`.
@@ -213,17 +211,16 @@ Status: `[ ]` open · `[~]` believed fixed, needs r4 visual confirmation ·
 - F14 shares grid: dynamic sparse/stepped levels, MATLAB ticks/label.
 - F15 design-boundary labels all kA levels; screen lines smoothed (0.05 %).
 - F16 Fig. 22 braces + data-driven callouts.
-- F17 (open) Fig. 22 h-bar plotly title collides with tick annotations →
-  title text "" + annotation at 17.15 cm (also check other h-bar figures:
-  composites already blank the title and draw their own annotation).
-- F18 (open) inline percent labels in thin bands not placed by plotly →
-  annotation labels at MATLAB target positions for tech-adjusted-delta-k/ka.
-- F19 (open) single-map inline label coverage (k_o 300/400) below MATLAB —
-  acceptable? decide in r4; if not, annotation labels along contours.
+- F17 Fig. 22 h-bar title collision → blank trace title plus annotation at
+  the MATLAB 17.15 cm position.
+- F18 missing thin-band percent labels → data-interpolated annotations at
+  the MATLAB target positions for Fig. 9/22.
+- F19 incomplete single-map label coverage → deterministic annotations along
+  the actual k_o, kA and design-boundary contours.
 - Accepted deviation: d3 contour label format lacks the thin space
   ("+25%" vs MATLAB "+25 %"); colorbar tick annotations keep the spaced form.
 
-## 6. Tooling / how to continue
+## 6. Completion evidence and reproducibility
 
 - Dev server: `pnpm dev --host 127.0.0.1 --port 5199 --strictPort`
   (background task; port 5174 is used by Playwright/parallel worker).
@@ -238,33 +235,25 @@ Status: `[ ]` open · `[~]` believed fixed, needs r4 visual confirmation ·
 - Colormap regeneration: `matlab -batch "writematrix(slanCM('spectral'),
   '<out>.csv')"` then the node generator (see git diff of colormap.ts).
 
-Next steps (ordered):
-
-1. Fix F17/F18 (Fig. 22 title annotation + band labels; small edits in
-   `plotSpec.ts` `colorbarSpec`/`scientificLayout`/`percentCalloutAnnotations`).
-2. Run r4 (`shoot-plots.mjs r4`), verify every `[~]`/`[ ]` row against its
-   PDF, tick to `[x]` with evidence, iterate on residuals (F19 decision).
-3. Width sweep + tandem + PNG/SVG/report export checks (§4.3).
-4. `pnpm test`, `typecheck`, `lint`, `format:check`, `build`,
-   `test:e2e:chromium`; update `wiki/model/plot-catalog.md` +
-   `wiki/ui/*` where behavior changed (display-only smoothing note,
-   flipped capillary map, export sizes 624×499).
-5. Single Conventional Commit (`fix(plots): match MATLAB paper figure
-   geometry, colormap and colorbars`) with validation evidence; update
-   master roadmap status history.
+The r4 artifacts are scratch evidence, not source-controlled deliverables.
+The durable reproduction inputs are the immutable MATLAB exports, the exact
+colormap table and provenance in source control, the cm geometry constants,
+unit tests for annotation placement/export dimensions, and Chromium E2E tests
+that render every registered plot without Plotly runtime errors.
 
 ## 7. Validation checklist
 
-- [x] `pnpm test` (Vitest) green — 47 passed (2026-07-13).
+- [x] `pnpm test` (Vitest) green — 51 passed (2026-07-13).
 - [x] `pnpm typecheck` green (2026-07-13).
 - [x] `pnpm lint` (0 errors, 2 known generated-file warnings) and
   `pnpm format:check` green after `pnpm format` (2026-07-13).
 - [x] `pnpm build` green (2026-07-13).
-- [ ] `pnpm test:e2e:chromium` — run with the final r4 round.
-- [x] Wiki: ADR-0007 §4 updated to the exact MATLAB colormap dump; plot
-  catalog / UI page review remains part of the r4 completion pass.
-- [x] Intermediate Conventional Commit created (see §8); final completion
-  commit follows after F17–F19 + r4.
+- [x] `pnpm test:e2e:chromium` green — every registered plot plus PNG/SVG,
+  JSON/HTML report, URL/reset and accessibility acceptance flows.
+- [x] Wiki: ADR-0007, plot catalog and result-plot conventions describe the
+  exact colormap, cm layouts, annotation policy, smoothing and export sizes.
+- [x] Conventional Commits: intermediate `f14562c`; completion changes are
+  recorded by the commit containing this completed plan.
 
 ## 8. Status history
 
@@ -272,3 +261,4 @@ Next steps (ordered):
 | --- | --- | --- |
 | 2026-07-12 | Plan created from user findings; approach A1–A4 fixed | Claude (plot polish) |
 | 2026-07-13 | A1–A3 implemented (exact colormap, cm layouts, typography, carrier colorbars, composites); visual rounds r1–r3 with findings F1–F19; F1–F16 fixed, F17–F19 open; handover notes in §2/§3/§6 | Claude (plot polish) |
+| 2026-07-13 | F17–F19 closed with data-interpolated contour annotations; r4 covered all registered plots plus width sweep, tandem and export/report checks; validation and documentation completed | Codex |

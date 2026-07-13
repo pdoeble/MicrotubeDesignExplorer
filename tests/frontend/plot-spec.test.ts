@@ -232,6 +232,102 @@ describe("plot spec", () => {
     expect(spec.data[0]?.zmax).toBe(8);
   });
 
+  it("places the short aluminum coefficient labels as deterministic annotations", () => {
+    const spec = createPlotSpec({
+      cooler: "cooler_left",
+      field,
+      plot: plotById("overall-coefficient-map"),
+      provenance,
+      titleScope: "Aluminum",
+      xValues: [0.1, 1, 10],
+      yValues: [0, 4],
+      zValues: [
+        [250, 350, 450],
+        [250, 350, 450],
+      ],
+    });
+
+    const annotationText = spec.layout.annotations?.map((annotation) => annotation.text);
+    expect(annotationText).toEqual(expect.arrayContaining(["300", "400"]));
+    const contour300 = spec.data.find((trace) => trace.name === "300 W/(m² K)");
+    const contour400 = spec.data.find((trace) => trace.name === "400 W/(m² K)");
+    expect(contour300?.contours?.showlabels).toBe(false);
+    expect(contour400?.contours?.showlabels).toBe(false);
+  });
+
+  it("places short aluminum conductance labels for the single and design-boundary maps", () => {
+    for (const plotId of ["bundle-conductance-map", "design-boundary-lines"] as const) {
+      const spec = createPlotSpec({
+        cooler: "cooler_left",
+        field,
+        plot: plotById(plotId),
+        provenance,
+        titleScope: "Aluminum",
+        xValues: [0.1, 1, 10],
+        yValues: [0, 4],
+        zValues: [
+          [1, 350, 600],
+          [1, 350, 600],
+        ],
+      });
+
+      const annotationText = spec.layout.annotations?.map((annotation) => annotation.text);
+      expect(annotationText).toEqual(expect.arrayContaining(["50", "300", "500"]));
+    }
+  });
+
+  it("separates the Figure 22 colorbar title and places every available inline percent label", () => {
+    const spec = createPlotSpec({
+      cooler: "cooler_left",
+      field,
+      plot: plotById("tech-adjusted-delta-ka"),
+      provenance,
+      titleScope: "Comparison",
+      xValues: [0.1, 1, 10],
+      yValues: [0, 4],
+      zValues: [
+        [-50, 10, 75],
+        [-50, 10, 75],
+      ],
+    });
+
+    expect(spec.data[0]?.colorbar?.title?.text).toBe("");
+    const annotationText = spec.layout.annotations?.map((annotation) => annotation.text);
+    expect(annotationText).toEqual(
+      expect.arrayContaining([
+        "Δ(<i>k</i><sub>o</sub><i>A</i><sub>o</sub>)<sub>feas</sub>",
+        "-25 %",
+        "0 %",
+        "+25 %",
+        "+50 %",
+      ]),
+    );
+    for (const level of [-25, 0, 25, 50]) {
+      const contour = spec.data.find((trace) => trace.name === `${level} %`);
+      expect(contour?.contours?.showlabels).toBe(false);
+    }
+  });
+
+  it("places the Figure 09 zero-percent label in its narrow feasible band", () => {
+    const spec = createPlotSpec({
+      cooler: "cooler_left",
+      field,
+      plot: plotById("tech-adjusted-delta-k"),
+      provenance,
+      titleScope: "Comparison",
+      xValues: [0.1, 1, 10],
+      yValues: [0, 4],
+      zValues: [
+        [-20, 5, 20],
+        [-20, 5, 20],
+      ],
+    });
+
+    expect(spec.layout.annotations?.map((annotation) => annotation.text)).toContain("0 %");
+    const zeroContour = spec.data.find((trace) => trace.name === "0 %");
+    expect(zeroContour?.contours?.showlabels).toBe(false);
+  });
+
   it("creates boundary, minimum-wall, and design-point overlays from SimulationResult", () => {
     const traces = overlayTracesForPlot(
       payload,

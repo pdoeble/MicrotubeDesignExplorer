@@ -36,11 +36,11 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `resistance-wall-map` | log-map | 12 data companion | R_w (m²K/W) | log color | resistance-share source component |
 | `resistance-outer-map` | log-map | 12 data companion | R_o (m²K/W) | log color | resistance-share source component |
 | `resistance-shares-grid` | share-grid | 12 | φ_i, φ_w, φ_o (%) | linear color 0–100 | 3 shares × 2 coolers, shared colorbar |
-| `capillary-rise-map` | log-map | 14 data companion | h_cap (mm) | log color | configured acceleration |
-| `capillary-rise-1g-map` | log-map | 14 data companion | h_cap,1g (mm) | log color | fixed sensitivity companion |
-| `capillary-rise-5g-map` | log-map | 14 data companion | h_cap,5g (mm) | log color | fixed sensitivity companion |
-| `capillary-rise-10g-map` | log-map | 14 data companion | h_cap,10g (mm) | log color | fixed sensitivity companion |
-| `capillary-rise-grid` | log-map-grid | 14 | h_cap (mm) | log color | rows = acceleration {1g, 5g, 10g} |
+| `capillary-rise-map` | log-map | 14 data companion | h_cap (mm) | log color, reversed | configured acceleration; MATLAB `flipud` orientation |
+| `capillary-rise-1g-map` | log-map | 14 data companion | h_cap,1g (mm) | log color, reversed | fixed sensitivity companion |
+| `capillary-rise-5g-map` | log-map | 14 data companion | h_cap,5g (mm) | log color, reversed | fixed sensitivity companion |
+| `capillary-rise-10g-map` | log-map | 14 data companion | h_cap,10g (mm) | log color, reversed | fixed sensitivity companion |
+| `capillary-rise-grid` | log-map-grid | 14 | h_cap (mm) | log color, reversed | rows = acceleration {1g, 5g, 10g}; no validated-reference X |
 | `tube-supply-cost-map` | log-map | 16, 17 | C_tube/C_fin (–) | log color, reversed | footprint cost orientation |
 | `feasibility-mask-map` | linear-map | 20_design data companion | feasible (-) | binary linear | composite all-screen mask from `SimulationResult.masks` |
 | `tech-adjusted-delta-k` | percent-delta | 09 | Δk_o,feas (%) | fixed spectral linear | PA vs nearest feasible Al reference; needs both coolers feasible |
@@ -64,6 +64,21 @@ Cross-section sketches, labelled iso-contours, technology-limit lines,
 validated-reference markers and design-boundary hatching are required figure
 semantics and are implemented by the shared SVG-compatible plot adapters.
 
+The spectral scale is the exact 256×3 `slanCM('spectral')` table dumped from
+the local MATLAB R2024b installation. Figure and axes rectangles are specified
+in the MATLAB source's centimetre geometry. A single paper-zoom factor scales
+the whole figure—including margins, fonts, strokes, markers and colorbars—so
+axes ratios and circular cross-section sketches remain invariant as the HTML
+container changes width. Single-map exports use the paper geometry 16.5×13.2
+cm, rendered as 624×499 px at 96 dpi; other families use their own recorded
+MATLAB geometry.
+
+Plotly's automatic contour placement is retained where it reproduces the
+reference. Where short or steep segments prevent required labels, the adapter
+interpolates the requested level crossing in the displayed data and derives
+the text angle from the local contour tangent. These annotations select label
+positions only; they do not alter, smooth or fit the scientific field.
+
 ## Non-negotiable rendering rules (from AGENTS §8)
 
 - No WebGL traces (SVG export fidelity).
@@ -74,3 +89,9 @@ semantics and are implemented by the shared SVG-compatible plot adapters.
 - Native `(t, d_o)` results are transformed for display only to a regular τ
   grid under ADR-0007. The adapter never interpolates across non-finite cells;
   masks use nearest-neighbour display resampling.
+- The design-boundary summary alone resamples screen contours to a 0.05 % τ
+  display grid to avoid stair-step linework. The feasible fill, values and
+  exported scientific masks remain the original nearest-neighbour data.
+- Horizontal shared colorbars use an invisible carrier trace to reproduce
+  MATLAB's reversed top-bar direction. Their titles and tick labels are
+  positioned as figure annotations; this is a presentation-only workaround.

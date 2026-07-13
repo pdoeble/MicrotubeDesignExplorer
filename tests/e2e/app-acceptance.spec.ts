@@ -11,7 +11,7 @@ const defaultsJson = JSON.parse(
 ) as { request: SimulationRequest };
 const defaultsRequest = defaultsJson.request;
 
-test("runs a reduced paper-default workflow and exports JSON plus HTML reports", async ({
+test("runs a reduced paper-default workflow and exports figures plus JSON/HTML reports", async ({
   browserName,
   page,
 }) => {
@@ -38,6 +38,30 @@ test("runs a reduced paper-default workflow and exports JSON plus HTML reports",
       name: "VDI G1/G7 plus wall-conduction resistance aggregation.",
     }),
   ).toBeVisible();
+
+  const figure = page.locator(".plot-figure").first();
+  await figure.getByLabel("PNG scale").selectOption("1");
+  const [pngDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    figure.getByRole("button", { exact: true, name: "PNG" }).click(),
+  ]);
+  expect(pngDownload.suggestedFilename()).toBe("overall-coefficient-map-cooler_left.png");
+  const pngPath = await pngDownload.path();
+  if (!pngPath) throw new Error("PNG figure download path was not available.");
+  const png = readFileSync(pngPath);
+  expect(png.subarray(1, 4).toString("ascii")).toBe("PNG");
+  expect(png.readUInt32BE(16)).toBe(624);
+  expect(png.readUInt32BE(20)).toBe(499);
+
+  const [svgDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    figure.getByRole("button", { exact: true, name: "SVG" }).click(),
+  ]);
+  expect(svgDownload.suggestedFilename()).toBe("overall-coefficient-map-cooler_left.svg");
+  const svgPath = await svgDownload.path();
+  if (!svgPath) throw new Error("SVG figure download path was not available.");
+  const svg = readFileSync(svgPath, "utf8");
+  expect(svg).toMatch(/<svg[^>]+width="624"[^>]+height="499"/);
 
   const [jsonDownload] = await Promise.all([
     page.waitForEvent("download"),

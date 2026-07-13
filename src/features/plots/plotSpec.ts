@@ -299,7 +299,63 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   const layout = scientificLayout(provenance, plot, paper);
   if (presentation.paperVariant === "tech-ka-delta") {
     layout.annotations?.push(
+      ...inlineContourAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        TECH_KA_INLINE_LABEL_TARGETS,
+        paper,
+        true,
+      ),
       ...percentCalloutAnnotations(xValues, prepared.tauValues, prepared.displayValues, paper),
+    );
+  }
+  if (plot.id === "tech-adjusted-delta-k") {
+    layout.annotations?.push(
+      ...inlineContourAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        TECH_K_INLINE_LABEL_TARGETS,
+        paper,
+        true,
+      ),
+    );
+  }
+  if (plot.id === "overall-coefficient-map" && cooler === "cooler_left") {
+    layout.annotations?.push(
+      ...inlineContourAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        OVERALL_AL_INLINE_LABEL_TARGETS,
+        paper,
+        false,
+      ),
+    );
+  }
+  if (plot.id === "bundle-conductance-map" && cooler === "cooler_left") {
+    layout.annotations?.push(
+      ...inlineContourAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        BUNDLE_AL_INLINE_LABEL_TARGETS,
+        paper,
+        false,
+      ),
+    );
+  }
+  if (plot.id === "design-boundary-lines" && cooler === "cooler_left") {
+    layout.annotations?.push(
+      ...inlineContourAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        DESIGN_AL_INLINE_LABEL_TARGETS,
+        paper,
+        false,
+      ),
     );
   }
   return {
@@ -311,6 +367,177 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
       toImageButtonOptions: imageExportOptions(plot.id as PlotId, cooler, "png"),
     },
   };
+}
+
+type ContourLabelTarget = {
+  level: number;
+  targetTau: number;
+  targetXNorm?: number;
+};
+
+type ContourCrossing = {
+  logX: number;
+  tau: number;
+};
+
+// MATLAB params_kA_delta.ratio_pct_label_* (V10 l. 918-920). The +100 %
+// and +150 % contours use callouts instead and are configured below.
+const TECH_KA_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
+  { level: -25, targetTau: 15.5, targetXNorm: 0.7 },
+  { level: 0, targetTau: 12.6 },
+  { level: 25, targetTau: 16.2 },
+  { level: 50, targetTau: 13.7 },
+];
+
+// Figure 09's narrow comparison band requires an explicit 0 % label; the
+// automatic Plotly label is rejected because the contour segment is short.
+const TECH_K_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
+  { level: 0, targetTau: 14.5, targetXNorm: (Math.log10(0.5) + 1) / 2 },
+];
+
+// The approved MATLAB Figure 01 deliberately labels the short Al 300 and
+// 400 W/(m2 K) contours. Plotly cannot place labels on those segments, so the
+// adapter uses deterministic annotation targets read from that reference.
+const OVERALL_AL_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
+  { level: 300, targetTau: 25 },
+  { level: 400, targetTau: 35 },
+];
+
+// MATLAB manualContourLabelSpecs fixes the 50 W/K Al label near 3.3 mm,
+// 29 %, while Figure 20 also requires the short 300 and 500 W/K segments.
+const BUNDLE_AL_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
+  { level: 50, targetTau: 29, targetXNorm: (Math.log10(3.3) + 1) / 2 },
+  { level: 300, targetTau: 27 },
+  { level: 500, targetTau: 35 },
+];
+
+// Figure 20_design labels every drawable Al conductance isoline. Plotly's
+// automatic labels reject the short clipped upper-panel segments, so the
+// target tau values distribute the labels across the approved feasible band.
+const DESIGN_AL_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
+  { level: 5, targetTau: 3 },
+  { level: 10, targetTau: 5 },
+  { level: 25, targetTau: 8 },
+  { level: 50, targetTau: 10 },
+  { level: 75, targetTau: 13 },
+  { level: 100, targetTau: 15 },
+  { level: 150, targetTau: 16 },
+  { level: 200, targetTau: 14 },
+  { level: 300, targetTau: 12 },
+  { level: 500, targetTau: 10 },
+];
+
+function contourCrossings(
+  xValues: number[],
+  tauValues: number[],
+  displayValues: number[][],
+  level: number,
+): ContourCrossing[] {
+  const crossings: ContourCrossing[] = [];
+  for (let row = 0; row < tauValues.length; row += 1) {
+    const values = displayValues[row];
+    const tau = tauValues[row];
+    if (!values || tau === undefined || !Number.isFinite(tau)) continue;
+    for (let column = 0; column + 1 < values.length; column += 1) {
+      const left = values[column];
+      const right = values[column + 1];
+      const xLeft = xValues[column];
+      const xRight = xValues[column + 1];
+      if (
+        left === undefined ||
+        right === undefined ||
+        xLeft === undefined ||
+        xRight === undefined ||
+        !Number.isFinite(left) ||
+        !Number.isFinite(right) ||
+        !(xLeft > 0) ||
+        !(xRight > 0) ||
+        (left - level) * (right - level) > 0 ||
+        left === right
+      )
+        continue;
+      const fraction = (level - left) / (right - left);
+      if (fraction < 0 || fraction > 1) continue;
+      const logLeft = Math.log10(xLeft);
+      const logX = logLeft + fraction * (Math.log10(xRight) - logLeft);
+      crossings.push({ logX, tau });
+    }
+  }
+  return crossings;
+}
+
+function nearestContourCrossing(
+  crossings: readonly ContourCrossing[],
+  target: ContourLabelTarget,
+): ContourCrossing | undefined {
+  let best: { crossing: ContourCrossing; score: number } | undefined;
+  for (const crossing of crossings) {
+    const yDistance = Math.abs(crossing.tau - target.targetTau) / 40;
+    const xDistance =
+      target.targetXNorm === undefined ? 0 : Math.abs((crossing.logX + 1) / 2 - target.targetXNorm);
+    const score = yDistance + xDistance;
+    if (!best || score < best.score) best = { crossing, score };
+  }
+  return best?.crossing;
+}
+
+function contourTextAngle(
+  crossing: ContourCrossing,
+  crossings: readonly ContourCrossing[],
+  paper: PaperContext,
+): number {
+  const { plotAreaCm } = paperMargins(paper.geometry);
+  let neighbor: { crossing: ContourCrossing; score: number } | undefined;
+  for (const candidate of crossings) {
+    const deltaTau = candidate.tau - crossing.tau;
+    if (Math.abs(deltaTau) < 1e-9) continue;
+    const deltaLogX = candidate.logX - crossing.logX;
+    const score = Math.abs(deltaTau) / 40 + Math.abs(deltaLogX) / 2;
+    if (!neighbor || score < neighbor.score) neighbor = { crossing: candidate, score };
+  }
+  if (!neighbor) return 0;
+  const angle =
+    (Math.atan2(
+      ((neighbor.crossing.tau - crossing.tau) / 40) * plotAreaCm[1],
+      ((neighbor.crossing.logX - crossing.logX) / 2) * plotAreaCm[0],
+    ) *
+      180) /
+    Math.PI;
+  if (angle > 90) return angle - 180;
+  if (angle < -90) return angle + 180;
+  return angle;
+}
+
+function inlineContourAnnotations(
+  xValues: number[],
+  tauValues: number[],
+  displayValues: number[][],
+  targets: readonly ContourLabelTarget[],
+  paper: PaperContext,
+  percent: boolean,
+): Array<Record<string, unknown>> {
+  const annotations: Array<Record<string, unknown>> = [];
+  for (const target of targets) {
+    const crossings = contourCrossings(xValues, tauValues, displayValues, target.level);
+    const crossing = nearestContourCrossing(crossings, target);
+    if (!crossing) continue;
+    annotations.push({
+      font: {
+        color: "#1f1f1f",
+        family: PLOT_FONT,
+        size: paper.zoom.pt(paper.geometry.baseFontPt - (percent ? 3 : 2)),
+      },
+      showarrow: false,
+      text: percent ? formatSignedPercent(target.level) : formatPlainNumber(target.level),
+      textangle: contourTextAngle(crossing, crossings, paper),
+      // Plotly layout annotations on log axes use log10 axis coordinates.
+      x: crossing.logX,
+      xref: "x",
+      y: crossing.tau,
+      yref: "y",
+    });
+  }
+  return annotations;
 }
 
 // MATLAB Fig. 22 callout labels (+100 %, +150 %): the label sits at a fixed
@@ -332,31 +559,13 @@ function percentCalloutAnnotations(
   ];
   const annotations: Array<Record<string, unknown>> = [];
   for (const target of targets) {
-    let best: { distance: number; tau: number; x: number } | undefined;
     const labelTau = target.labelYNorm * 40;
-    for (let row = 0; row < tauValues.length; row += 1) {
-      const values = displayValues[row];
-      const tau = tauValues[row];
-      if (!values || tau === undefined) continue;
-      for (let column = 0; column + 1 < values.length; column += 1) {
-        const left = values[column];
-        const right = values[column + 1];
-        const xLeft = xValues[column];
-        if (
-          left === undefined ||
-          right === undefined ||
-          xLeft === undefined ||
-          !Number.isFinite(left) ||
-          !Number.isFinite(right)
-        )
-          continue;
-        if ((left - target.level) * (right - target.level) > 0) continue;
-        const distance = Math.abs(tau - labelTau);
-        if (!best || distance < best.distance) best = { distance, tau, x: xLeft };
-      }
-    }
+    const best = nearestContourCrossing(
+      contourCrossings(xValues, tauValues, displayValues, target.level),
+      { level: target.level, targetTau: labelTau },
+    );
     if (!best) continue;
-    const targetXPaper = (Math.log10(best.x) + 1) / 2;
+    const targetXPaper = (best.logX + 1) / 2;
     const targetYPaper = best.tau / 40;
     annotations.push({
       arrowcolor: AXIS_COLOR,
@@ -367,7 +576,7 @@ function percentCalloutAnnotations(
       font: { color: "#1f1f1f", family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt - 2) },
       showarrow: true,
       text: `+${target.level} %`,
-      x: Math.log10(best.x),
+      x: best.logX,
       xref: "x",
       y: best.tau,
       yref: "y",
@@ -670,8 +879,6 @@ export function colorbarSpec(
       text: "",
     },
   };
-  if (geometry.colorbarOrientation === "h")
-    spec.title = { ...spec.title, text: presentation.colorbarLabel };
   if (placement) {
     spec.len = placement.len;
     spec.lenmode = "fraction";
@@ -687,7 +894,7 @@ export function colorbarSpec(
       // carrier-trace tick labels there, so they are drawn as annotations
       // (horizontalBarTickAnnotations) and hidden on the bar itself.
       spec.showticklabels = false;
-      spec.title = { ...spec.title, side: "top", text: spec.title?.text ?? "" };
+      spec.title = { ...spec.title, side: "top", text: "" };
     }
   }
   if (domain && presentation.colorScaleType === "log") {
@@ -847,6 +1054,21 @@ function isoContourTraces(
   // labels show the physical level (MATLAB labels), not a log10 transform.
   const levels = contourLevelsForData(presentation, cooler, z);
   const labelled = new Set(labelledContourLevels(presentation, levels));
+  const annotationTargets =
+    presentation.paperVariant === "tech-ka-delta"
+      ? levels.map((level) => ({ level }))
+      : plot.id === "tech-adjusted-delta-k"
+        ? TECH_K_INLINE_LABEL_TARGETS
+        : cooler !== "cooler_left"
+          ? []
+          : plot.id === "overall-coefficient-map"
+            ? OVERALL_AL_INLINE_LABEL_TARGETS
+            : plot.id === "bundle-conductance-map"
+              ? BUNDLE_AL_INLINE_LABEL_TARGETS
+              : plot.id === "design-boundary-lines"
+                ? DESIGN_AL_INLINE_LABEL_TARGETS
+                : [];
+  const annotationOnlyLevels = new Set(annotationTargets.map((target) => target.level));
   // Percent maps label like MATLAB ("+25 %"/"25 %"): plotly contour labels
   // only support d3 formats, so the label trace carries value/100 and signs
   // the format only when negative levels exist (delta maps).
@@ -866,7 +1088,7 @@ function isoContourTraces(
           size: zoom.pt(geometry.baseFontPt - 2),
         },
         ...(percentLabels ? { labelformat: percentFormat } : {}),
-        showlabels: labelled.has(level),
+        showlabels: labelled.has(level) && !annotationOnlyLevels.has(level),
         size: 1,
         start: transformed,
       },
@@ -1061,6 +1283,18 @@ function scientificLayout(
     const paperYFromCm = (cm: number): number => (cm - margin.b) / plotHeightCm;
     const cb = geometry.colorbarCm;
     if (cb) {
+      // MATLAB params_kA_delta.ratio_pct_colorbar_label_y_cm = 17.15.
+      annotations.push({
+        font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
+        showarrow: false,
+        text: presentation.colorbarLabel,
+        x: paperXFromCm(cb[0] + cb[2] / 2),
+        xanchor: "center",
+        xref: "paper",
+        y: paperYFromCm(17.15),
+        yanchor: "middle",
+        yref: "paper",
+      });
       const braceTop = paperYFromCm(15.09);
       const braceTip = paperYFromCm(14.86);
       const barX = (fraction: number): number => paperXFromCm(cb[0] + cb[2] * fraction);
