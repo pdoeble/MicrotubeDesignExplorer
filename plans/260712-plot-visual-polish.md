@@ -469,8 +469,9 @@ Chromium visual-audit test.
   exact colormap/cm layouts, adaptive scales, deterministic isolines/labels,
   exact comparison clipping, continuous boundaries, local 45° hatches,
   scientific navigation and export sizes.
-- [x] Conventional Commits: predecessor `f14562c`; reopened completion work is
-  recorded by the commit containing this completed living plan.
+- [x] Conventional Commits: predecessor `f14562c`; reopened implementation,
+  tests, ADR/wiki alignment and completed matrix are recorded in `7e55c9f`
+  (`fix(plots): close exhaustive visual fidelity audit`).
 
 ## 8. Status history
 
@@ -480,4 +481,4 @@ Chromium visual-audit test.
 | 2026-07-13 | A1–A3 implemented (exact colormap, cm layouts, typography, carrier colorbars, composites); visual rounds r1–r3 with findings F1–F19; F1–F16 fixed, F17–F19 open; handover notes in §2/§3/§6 | Claude (plot polish) |
 | 2026-07-13 | F17–F19 closed with data-interpolated contour annotations; r4 covered all registered plots plus width sweep, tandem and export/report checks; validation and documentation completed | Codex |
 | 2026-07-13 | Plan reopened after maintainer review; exhaustive per-plot matrix and 250×250 audit gate added; F20–F27 recorded | Codex |
-| 2026-07-13 | F20–F27 closed; every matrix row PASS/REMOVED, 66 screenshots plus contact sheets reviewed, ADR-0011 and wiki aligned, full checks green; plan completed | Codex |
+| 2026-07-13 | F20–F27 closed; every matrix row PASS/REMOVED, 66 screenshots plus contact sheets reviewed, ADR-0011 and wiki aligned, full checks green; plan completed in `7e55c9f` | Codex |
