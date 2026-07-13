@@ -1,16 +1,17 @@
 import { useState } from "react";
-import type { LinkGroup } from "../../state/simulationStore";
-import { useSimulationStore } from "../../state/simulationStore";
-import { MaterialsTab } from "../materials/MaterialsTab";
-import { InputTab } from "./InputTab";
+import { LinkedGroupNotice } from "../../components/LinkedGroupNotice";
+import { Tabs } from "../../components/Tabs";
+import { type CoolerKey, type LinkGroup, useSimulationStore } from "../../state/simulationStore";
+import { PropertyInputs } from "../materials/MaterialsTab";
+import { DesignInputs, SweepInputs } from "./InputTab";
 
-type SetupStep = "design" | "properties";
-
-const LINK_GROUPS: readonly {
+type SetupCategory = {
   description: string;
   group: LinkGroup;
   label: string;
-}[] = [
+};
+
+const SETUP_CATEGORIES: readonly SetupCategory[] = [
   {
     description: "Package geometry, tube arrangement and design point",
     group: "geometry",
@@ -22,40 +23,46 @@ const LINK_GROUPS: readonly {
     label: "Solid material",
   },
   {
-    description: "Fluid properties, operating mode and target",
+    description: "Air properties, operating mode and target",
     group: "air_side",
     label: "Air circuit",
   },
   {
-    description: "Fluid properties, operating mode and target",
+    description: "Coolant properties, operating mode and target",
     group: "coolant_side",
     label: "Coolant circuit",
   },
   {
-    description: "Thermal boundary condition, tolerances and screens",
+    description: "Thermal boundary condition, tolerances, screens and sweep grid",
     group: "boundary_conditions",
     label: "Screens & boundaries",
   },
 ] as const;
 
 export function ModelSetupTab({ onContinue }: { onContinue: () => void }) {
-  const [step, setStep] = useState<SetupStep>("design");
+  const [activeCategory, setActiveCategory] = useState<LinkGroup>("geometry");
+  const [visibleDesign, setVisibleDesign] = useState<CoolerKey>("cooler_left");
   const request = useSimulationStore((state) => state.request);
   const setCoolerLabel = useSimulationStore((state) => state.setCoolerLabel);
-  const setLinkedGroup = useSimulationStore((state) => state.setLinkedGroup);
+
+  const tabs = SETUP_CATEGORIES.map((category) => ({
+    id: category.group,
+    label: category.label,
+    panel: (
+      <SetupCategoryPanel
+        category={category}
+        visibleDesign={visibleDesign}
+        onVisibleDesignChange={setVisibleDesign}
+      />
+    ),
+  }));
 
   return (
     <section aria-labelledby="model-setup-heading" className="workflow-section">
-      <div className="section-heading-row">
-        <div>
-          <h2 id="model-setup-heading">Model setup</h2>
-          <p className="section-kicker">
-            Configure two designs in one workflow. Linked groups are edited once in the reference
-            design and applied to both.
-          </p>
-        </div>
-        <p className="setup-progress" aria-live="polite">
-          Step {step === "design" ? "1" : "2"} of 2
+      <div>
+        <h2 id="model-setup-heading">Model setup</h2>
+        <p className="section-kicker">
+          Configure each scientific category for the reference and comparison designs.
         </p>
       </div>
 
@@ -80,75 +87,167 @@ export function ModelSetupTab({ onContinue }: { onContinue: () => void }) {
         </div>
       </fieldset>
 
-      <fieldset className="link-controls link-controls--setup" aria-describedby="link-help">
-        <legend>Reference/comparison linking</legend>
-        <p className="fieldset-description" id="link-help">
-          Linking copies the reference group to the comparison design. Unlinking restores its last
-          independent values.
-        </p>
-        <div className="link-controls__grid">
-          {LINK_GROUPS.map(({ description, group, label }) => (
-            <label className="link-control" htmlFor={`link-${group}`} key={group}>
-              <input
-                id={`link-${group}`}
-                type="checkbox"
-                aria-label={label}
-                checked={Boolean(request.linked_groups[group])}
-                onChange={(event) => setLinkedGroup(group, event.target.checked)}
-              />
-              <span>
-                <strong>{label}</strong>
-                <small>{description}</small>
-              </span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <nav className="setup-stepper" aria-label="Model setup steps">
-        <button
-          className={step === "design" ? "setup-step setup-step--active" : "setup-step"}
-          type="button"
-          aria-current={step === "design" ? "step" : undefined}
-          onClick={() => setStep("design")}
-        >
-          <span>1</span>
-          <strong>Design & operation</strong>
-          <small>Geometry, operating points and screens</small>
-        </button>
-        <button
-          className={step === "properties" ? "setup-step setup-step--active" : "setup-step"}
-          type="button"
-          aria-current={step === "properties" ? "step" : undefined}
-          onClick={() => setStep("properties")}
-        >
-          <span>2</span>
-          <strong>Materials & fluids</strong>
-          <small>Solid and fluid property sets</small>
-        </button>
-      </nav>
-
-      {step === "design" ? <InputTab /> : <MaterialsTab />}
+      <div className="setup-category-tabs">
+        <Tabs
+          tabs={tabs}
+          activeId={activeCategory}
+          onActivate={(id) => setActiveCategory(id as LinkGroup)}
+          ariaLabel="Model setup categories"
+        />
+      </div>
 
       <div className="setup-actions" aria-label="Model setup navigation">
-        {step === "properties" ? (
-          <button className="text-button" type="button" onClick={() => setStep("design")}>
-            Back to design & operation
-          </button>
-        ) : (
-          <span />
-        )}
-        {step === "design" ? (
-          <button className="primary-button" type="button" onClick={() => setStep("properties")}>
-            Continue to materials & fluids
-          </button>
-        ) : (
-          <button className="primary-button" type="button" onClick={onContinue}>
-            Continue to results
-          </button>
-        )}
+        <span />
+        <button className="primary-button" type="button" onClick={onContinue}>
+          Continue to results
+        </button>
       </div>
     </section>
+  );
+}
+
+function SetupCategoryPanel({
+  category,
+  visibleDesign,
+  onVisibleDesignChange,
+}: {
+  category: SetupCategory;
+  visibleDesign: CoolerKey;
+  onVisibleDesignChange: (value: CoolerKey) => void;
+}) {
+  const request = useSimulationStore((state) => state.request);
+  const setLinkedGroup = useSimulationStore((state) => state.setLinkedGroup);
+  const linked = Boolean(request.linked_groups[category.group]);
+  const isLinkedComparison = visibleDesign === "cooler_right" && linked;
+  const role = visibleDesign === "cooler_left" ? "Reference design" : "Comparison design";
+  const headingId = `${category.group}-category-heading`;
+  const editorHeadingId = `${category.group}-${visibleDesign}-heading`;
+
+  return (
+    <section className="setup-category" aria-labelledby={headingId}>
+      <div>
+        <h3 id={headingId}>{category.label}</h3>
+        <p className="section-kicker">{category.description}</p>
+      </div>
+
+      <div className="setup-switches">
+        <div>
+          <p className="switch-label">Design view</p>
+          <DesignViewSwitch value={visibleDesign} onChange={onVisibleDesignChange} />
+        </div>
+        <div>
+          <p className="switch-label">Comparison mode</p>
+          <LinkModeSwitch
+            group={category.group}
+            linked={linked}
+            onChange={(nextLinked) => setLinkedGroup(category.group, nextLinked)}
+          />
+        </div>
+      </div>
+
+      <section className="cooler-panel setup-category__editor" aria-labelledby={editorHeadingId}>
+        <p className="cooler-panel__role">{role}</p>
+        <h4 id={editorHeadingId}>{request[visibleDesign].label}</h4>
+        {isLinkedComparison ? (
+          <LinkedGroupNotice
+            group={category.group}
+            sourceLabel={request.cooler_left.label}
+            title={category.label}
+            onUnlink={(group) => setLinkedGroup(group, false)}
+          />
+        ) : (
+          <CategoryInputs group={category.group} cooler={visibleDesign} />
+        )}
+      </section>
+
+      {category.group === "boundary_conditions" ? <SweepInputs /> : null}
+    </section>
+  );
+}
+
+function CategoryInputs({ group, cooler }: { group: LinkGroup; cooler: CoolerKey }) {
+  switch (group) {
+    case "geometry":
+    case "boundary_conditions":
+      return <DesignInputs cooler={cooler} group={group} />;
+    case "materials":
+      return <PropertyInputs cooler={cooler} group={group} />;
+    case "air_side":
+    case "coolant_side":
+      return (
+        <>
+          <DesignInputs cooler={cooler} group={group} />
+          <PropertyInputs cooler={cooler} group={group} />
+        </>
+      );
+  }
+}
+
+function DesignViewSwitch({
+  value,
+  onChange,
+}: {
+  value: CoolerKey;
+  onChange: (value: CoolerKey) => void;
+}) {
+  return (
+    <div className="design-view-switch" role="group" aria-label="Visible design">
+      <button
+        className={
+          value === "cooler_left" ? "switch-button switch-button--active" : "switch-button"
+        }
+        type="button"
+        aria-pressed={value === "cooler_left"}
+        onClick={() => onChange("cooler_left")}
+      >
+        Reference
+      </button>
+      <button
+        className={
+          value === "cooler_right" ? "switch-button switch-button--active" : "switch-button"
+        }
+        type="button"
+        aria-pressed={value === "cooler_right"}
+        onClick={() => onChange("cooler_right")}
+      >
+        Comparison
+      </button>
+    </div>
+  );
+}
+
+function LinkModeSwitch({
+  group,
+  linked,
+  onChange,
+}: {
+  group: LinkGroup;
+  linked: boolean;
+  onChange: (linked: boolean) => void;
+}) {
+  return (
+    <div
+      className="link-mode-switch"
+      role="group"
+      aria-label={`${group.replaceAll("_", " ")} value relationship`}
+    >
+      <button
+        className={linked ? "switch-button switch-button--active" : "switch-button"}
+        type="button"
+        aria-pressed={linked}
+        onClick={() => onChange(true)}
+      >
+        Same values
+      </button>
+      <button
+        className={!linked ? "switch-button switch-button--active" : "switch-button"}
+        type="button"
+        aria-pressed={!linked}
+        onClick={() => onChange(false)}
+      >
+        Separate values
+      </button>
+    </div>
   );
 }
 

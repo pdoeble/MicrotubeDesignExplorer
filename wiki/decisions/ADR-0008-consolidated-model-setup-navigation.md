@@ -1,9 +1,14 @@
 # ADR-0008: Consolidated model-setup navigation
 
-- Status: accepted
+- Status: superseded by ADR-0009
 - Date: 2026-07-12
 - Deciders: project maintainer, Codex implementation agent
 - Related plan: `plans/260712-model-setup-ux.md`
+
+ADR-0009 supersedes the two-step internal navigation and persistent central
+link-control block. The consolidated top-level Model Setup tab, legacy route,
+independent design labels, and snapshot-restoring link semantics remain in
+force.
 
 ## Context
 

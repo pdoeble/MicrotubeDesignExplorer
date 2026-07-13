@@ -12,12 +12,17 @@ restrained Springer-like scientific visual language.
 ## Current application navigation
 
 - Four workflow tabs: Start, Model Setup, Results, Settings (ADR-0008).
-- Model Setup contains two local steps: Design & operation, followed by
-  Materials & fluids. One persistent comparison block owns all group-linking
-  controls; linked right-hand forms are replaced by explicit status notices.
+- Model Setup contains five local tabs: Geometry, Solid material, Air circuit,
+  Coolant circuit, and Screens & boundaries (ADR-0009). Every category has a
+  Reference/Comparison view switch and a Same values/Separate values switch;
+  linked comparison forms are replaced by explicit status notices.
+- Air and coolant tabs each contain their operating target and fluid-property
+  set. The single global sweep editor appears in Screens & boundaries and is
+  labelled as shared by both designs.
 - Legacy `#/materials` URLs normalize to `#/input` so saved links remain usable.
-- Tab navigation implements the WAI-ARIA Tabs pattern with roving tabindex,
-  arrow keys, Home/End, and automatic activation (`src/components/Tabs.tsx`);
-  panels are preloaded so activation is instantaneous.
+- Main and Model Setup tab navigation implement the WAI-ARIA Tabs pattern with
+  roving tabindex, arrow keys, Home/End, and automatic activation
+  (`src/components/Tabs.tsx`); panels are preloaded so activation is
+  instantaneous.
 - Focus indicators use a 3px high-contrast outline (`--color-focus`).
 - Color is never the only carrier of feasibility/threshold meaning.

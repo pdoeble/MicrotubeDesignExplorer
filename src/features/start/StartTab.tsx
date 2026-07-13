@@ -18,13 +18,11 @@ export function StartTab() {
       <h3>How to use it</h3>
       <ol>
         <li>
-          Open <strong>Model Setup</strong>, name the reference and comparison designs, and choose
-          which scientific groups should remain linked.
+          Open <strong>Model Setup</strong> and name the reference and comparison designs.
         </li>
         <li>
-          Complete the two guided setup steps: <strong>Design &amp; operation</strong>, then
-          <strong> Materials &amp; fluids</strong>. Linked comparison fields are shown once instead
-          of duplicated.
+          Work through Geometry, Solid material, Air circuit, Coolant circuit, and Screens &amp;
+          boundaries. Each category can use the same values for both designs or separate values.
         </li>
         <li>
           Continue to <strong>Results</strong> to compute design-space maps and export figures or a

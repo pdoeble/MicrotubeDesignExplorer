@@ -241,6 +241,77 @@ code {
   margin-top: 0.1rem;
 }
 
+.setup-category-tabs > .tabpanel {
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  padding: 1rem;
+}
+
+.setup-category {
+  display: grid;
+  gap: 1rem;
+}
+
+.setup-category h3 {
+  margin: 0;
+}
+
+.setup-category__editor {
+  max-width: 48rem;
+}
+
+.setup-switches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0.75rem 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+
+.switch-label {
+  margin: 0 0 0.3rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.design-view-switch,
+.link-mode-switch {
+  display: inline-flex;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.switch-button {
+  appearance: none;
+  border: 0;
+  border-left: 1px solid var(--color-border);
+  background: #ffffff;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  padding: 0.42rem 0.7rem;
+}
+
+.switch-button:first-child {
+  border-left: 0;
+}
+
+.switch-button:hover {
+  background: #ebebe6;
+}
+
+.switch-button--active,
+.switch-button--active:hover {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
 .setup-progress {
   background: var(--color-surface);
   border: 1px solid var(--color-border);

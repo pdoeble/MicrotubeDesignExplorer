@@ -33,29 +33,73 @@ describe("App shell", () => {
     expect(screen.getByRole("tab", { name: "Settings" })).toHaveAttribute("aria-selected", "true");
   });
 
-  it("provides one guided setup workflow without duplicate linked editors", async () => {
+  it("organizes model setup into five categories with per-category design and link switches", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("tab", { name: "Model Setup" }));
 
-    expect(screen.getAllByRole("group", { name: "Reference/comparison linking" })).toHaveLength(1);
-    expect(screen.getAllByLabelText("Air circuit")).toHaveLength(1);
-    const comparison = screen.getByRole("region", { name: "Polyamide (PA)" });
+    const categoryTabs = within(
+      screen.getByRole("tablist", { name: "Model setup categories" }),
+    ).getAllByRole("tab");
+    expect(categoryTabs.map((tab) => tab.textContent)).toEqual([
+      "Geometry",
+      "Solid material",
+      "Air circuit",
+      "Coolant circuit",
+      "Screens & boundaries",
+    ]);
+    categoryTabs[0]?.focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Solid material" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await user.keyboard("{Home}");
+    expect(screen.getByRole("tab", { name: "Geometry" })).toHaveAttribute("aria-selected", "true");
+
+    expect(screen.getByRole("button", { name: "Reference" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Same values" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("region", { name: "Aluminum" })).toHaveAccessibleName("Aluminum");
+
+    await user.click(screen.getByRole("button", { name: "Comparison" }));
+    let comparison = screen.getByRole("region", { name: "Polyamide (PA)" });
     expect(within(comparison).queryByLabelText("Geometry representation")).not.toBeInTheDocument();
+    expect(within(comparison).getByRole("region", { name: "Geometry linked" })).toBeVisible();
 
-    const geometryNotice = within(comparison).getByRole("region", {
-      name: "Geometry & design point linked",
+    await user.click(screen.getByRole("button", { name: "Separate values" }));
+    comparison = screen.getByRole("region", { name: "Polyamide (PA)" });
+    const width = within(comparison).getByLabelText("Package width (transverse)", {
+      exact: true,
     });
-    await user.click(within(geometryNotice).getByRole("button", { name: "Edit separately" }));
-    expect(within(comparison).getByLabelText("Geometry representation")).toBeVisible();
-
-    await user.click(screen.getByRole("button", { name: "Continue to materials & fluids" }));
-    expect(screen.getByRole("heading", { name: "Materials & fluids" })).toBeVisible();
-    const comparisonProperties = screen.getByRole("region", { name: "Polyamide (PA)" });
-    expect(within(comparisonProperties).getByLabelText("Material name")).toBeVisible();
+    await user.clear(width);
+    await user.type(width, "120");
+    await user.click(screen.getByRole("button", { name: "Same values" }));
     expect(
-      within(comparisonProperties).queryByLabelText("Air property set"),
+      within(comparison).queryByLabelText("Package width (transverse)"),
     ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Separate values" }));
+    expect(
+      within(comparison).getByLabelText("Package width (transverse)", { exact: true }),
+    ).toHaveValue(120);
+
+    await user.click(screen.getByRole("tab", { name: "Solid material" }));
+    comparison = screen.getByRole("region", { name: "Polyamide (PA)" });
+    expect(within(comparison).getByLabelText("Material name")).toBeVisible();
+
+    await user.click(screen.getByRole("tab", { name: "Air circuit" }));
+    await user.click(screen.getByRole("button", { name: "Reference" }));
+    const reference = screen.getByRole("region", { name: "Aluminum" });
+    expect(within(reference).getByLabelText("Air operating mode")).toBeVisible();
+    expect(within(reference).getByLabelText("Air property set")).toBeVisible();
+
+    await user.click(screen.getByRole("tab", { name: "Screens & boundaries" }));
+    expect(screen.getByRole("heading", { name: "Shared sweep grid" })).toBeVisible();
   });
 
   it("normalizes the legacy materials route to model setup", async () => {

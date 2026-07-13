@@ -12,4 +12,5 @@ Numbering is sequential and never reused.
 | [ADR-0005](ADR-0005-sweep-axis-generation-for-golden-parity.md) | Sweep axis generation for golden parity | accepted |
 | [ADR-0006](ADR-0006-pyodide-asset-hosting.md) | Pyodide and core-wheel asset hosting | accepted |
 | [ADR-0007](ADR-0007-plot-display-fidelity-policy.md) | Plot display fidelity policy | accepted |
-| [ADR-0008](ADR-0008-consolidated-model-setup-navigation.md) | Consolidated model-setup navigation | accepted |
+| [ADR-0008](ADR-0008-consolidated-model-setup-navigation.md) | Consolidated model-setup navigation | superseded by ADR-0009 |
+| [ADR-0009](ADR-0009-category-tabs-and-comparison-switches.md) | Model-setup category tabs and comparison switches | accepted |

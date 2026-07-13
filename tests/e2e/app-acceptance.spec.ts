@@ -160,7 +160,7 @@ test("supports keyboard tab navigation, URL round-trips, and reset to defaults",
   ).toHaveValue("98.4");
 });
 
-test("uses one model-setup workflow and preserves the legacy materials route", async ({
+test("uses five model-setup categories and preserves the legacy materials route", async ({
   page,
 }, testInfo) => {
   await page.goto("./#/materials", { waitUntil: "networkidle" });
@@ -169,22 +169,41 @@ test("uses one model-setup workflow and preserves the legacy materials route", a
     "true",
   );
   await expect.poll(() => new URL(page.url()).hash).toBe("#/input");
-  await expect(page.getByRole("checkbox", { name: "Air circuit", exact: true })).toHaveCount(1);
+  const categoryTabs = page.getByRole("tablist", { name: "Model setup categories" });
+  await expect(categoryTabs.getByRole("tab")).toHaveText([
+    "Geometry",
+    "Solid material",
+    "Air circuit",
+    "Coolant circuit",
+    "Screens & boundaries",
+  ]);
 
-  const comparison = page.getByRole("region", { name: "Polyamide (PA)" });
+  await page.getByRole("button", { name: "Comparison" }).click();
+  let comparison = page.getByRole("region", { name: "Polyamide (PA)" });
   await expect(comparison.getByLabel("Geometry representation")).toHaveCount(0);
-  await expect(comparison.getByText("Geometry & design point is linked")).toBeVisible();
-  await page.locator(".tabpanel:not([hidden])").screenshot({
-    path: testInfo.outputPath("model-setup-design.png"),
+  await expect(comparison.getByText("Geometry is linked")).toBeVisible();
+  await page.getByRole("tabpanel", { name: "Geometry" }).screenshot({
+    path: testInfo.outputPath("model-setup-geometry.png"),
   });
 
-  await page.getByRole("button", { name: "Continue to materials & fluids" }).click();
-  await expect(page.getByRole("heading", { name: "Materials & fluids" })).toBeVisible();
+  await page.getByRole("button", { name: "Separate values" }).click();
+  await expect(comparison.getByLabel("Geometry representation")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Solid material" }).click();
+  comparison = page.getByRole("region", { name: "Polyamide (PA)" });
   await expect(comparison.getByLabel("Material name")).toBeVisible();
-  await expect(comparison.getByLabel("Air property set")).toHaveCount(0);
-  await page.locator(".tabpanel:not([hidden])").screenshot({
-    path: testInfo.outputPath("model-setup-properties.png"),
+  await page.getByRole("tabpanel", { name: "Solid material" }).screenshot({
+    path: testInfo.outputPath("model-setup-solid-material.png"),
   });
+
+  await page.getByRole("tab", { name: "Air circuit" }).click();
+  await page.getByRole("button", { name: "Reference" }).click();
+  const reference = page.getByRole("region", { name: "Aluminum" });
+  await expect(reference.getByLabel("Air operating mode")).toBeVisible();
+  await expect(reference.getByLabel("Air property set")).toBeVisible();
+
+  await page.getByRole("tab", { name: "Screens & boundaries" }).click();
+  await expect(page.getByRole("heading", { name: "Shared sweep grid" })).toBeVisible();
 
   await page.getByRole("button", { name: "Continue to results" }).click();
   await expect(page.getByRole("tab", { name: "Results" })).toHaveAttribute("aria-selected", "true");
@@ -281,7 +300,9 @@ test("exposes screen-reader landmarks and reflows under 200 percent text zoom", 
   await expect(page.getByRole("main")).toBeVisible();
   await expect(page.getByRole("tablist", { name: "Main sections" })).toBeVisible();
   await expect(page.getByRole("tabpanel", { name: "Model Setup" })).toBeVisible();
-  await expect(page.getByRole("group", { name: "Reference/comparison linking" })).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Model setup categories" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "Visible design" })).toBeVisible();
+  await expect(page.getByRole("group", { name: "geometry value relationship" })).toBeVisible();
   await expect(
     page.getByRole("group", { name: "Geometry and design point" }).first(),
   ).toBeVisible();
