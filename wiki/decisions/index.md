@@ -14,3 +14,4 @@ Numbering is sequential and never reused.
 | [ADR-0007](ADR-0007-plot-display-fidelity-policy.md) | Plot display fidelity policy | accepted |
 | [ADR-0008](ADR-0008-consolidated-model-setup-navigation.md) | Consolidated model-setup navigation | superseded by ADR-0009 |
 | [ADR-0009](ADR-0009-category-tabs-and-comparison-switches.md) | Model-setup category tabs and comparison switches | accepted |
+| [ADR-0010](ADR-0010-github-canonical-gitlab-internal-mirror.md) | GitHub canonical repository with internal GitLab mirror | accepted with external limitation |
