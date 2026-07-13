@@ -14,7 +14,13 @@
 - Resolve conflicts explicitly; never silently choose one source.
 - Record each resolved conflict in `/wiki/decisions/`.
 ## 3. Fixed architecture
-- Deployment target: static GitHub Pages only; no production backend, database, server session, or secret. Make sure that all istallaitions are avialable and compatible on Github Pages
+- Mandatory deployment target: static GitHub Pages. A static, access-controlled
+  GitLab Pages deployment on the Hochschule Self-Managed instance may run in
+  parallel after its external prerequisites and deployment ADR are satisfied.
+  Every hosting change must remain available and compatible on GitHub Pages;
+  removing or redirecting GitHub Pages requires a separate explicit ADR.
+- No production backend, database, application server session, or runtime
+  secret is permitted on either Pages host.
 - Frontend: React, TypeScript, and Vite.
 - Scientific core: pure Python package under `python/microtubes_core/`.
 - Browser execution: Pyodide inside a dedicated Web Worker.
@@ -63,6 +69,8 @@
 - Local state stores transient UI details; global state stores simulation configuration, results, and export state.
 - Derived quantities must be recomputed, not duplicated in state.
 - Persisted state must include a schema version.
+- New URL-state encodings must continue to read all previously published
+  versions or provide an explicit, documented migration.
 - Defaults must be defined once in a versioned configuration file.
 ## 8. Plot and visual conventions
 - All plots must expose units, validity limits, and active assumptions.
@@ -100,6 +108,8 @@
 - Provide cancellation for superseded simulations.
 - Show progress for long sweeps.
 - Handle Pyodide startup, worker failure, and out-of-memory conditions explicitly.
+- Resolve the static base path from the deployment environment; never hardcode
+  a GitHub, GitLab, namespace, or project path in runtime asset URLs.
 - The default sweep must remain usable on a typical current laptop.
 - Performance optimizations may not change numerical results without approval.
 ## 12. Accessibility and scientific UX

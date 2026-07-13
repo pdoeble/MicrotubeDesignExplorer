@@ -2,8 +2,8 @@ export type PlotlyColorScale = Array<[number, string]>;
 
 // Exact slanCM('spectral') table (256 x 3) dumped on 2026-07-12 from the
 // same MATLAB R2024b installation that produced the approved paper exports
-// (getProjectColormap, source_materials/Waermedurchgang_V10_physical.m
-// l. 4288: cmap = slanCM(params.colormap_name) with colormap_name
+// (getProjectColormap, legacy reference l. 4288:
+// cmap = slanCM(params.colormap_name) with colormap_name
 // 'spectral'). Dump command: writematrix(slanCM('spectral'), ...); the
 // double table is converted to 8-bit RGB once, here, via round(255 * c).
 const MATLAB_SPECTRAL_RGB = [

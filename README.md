@@ -52,6 +52,7 @@ pnpm build        # static production build (dist/)
 pnpm test         # Vitest unit tests
 pnpm typecheck    # strict TypeScript
 pnpm lint         # ESLint
+pnpm test:e2e:pages-path  # production smoke at a nested static Pages path
 
 # Python core (run inside python/)
 uv sync           # create venv from lockfile
@@ -59,6 +60,19 @@ uv run pytest     # scientific tests incl. golden parity
 uv run ruff check .
 uv run mypy .
 ```
+
+`pnpm build` also verifies the static Pages artifact, including its resolved
+base path, Pyodide/core-wheel hashes, size/file budgets, and prohibited source
+formats or source-path tokens.
+
+## Deployment
+
+GitHub Pages remains the mandatory public production host. The static build is
+also prepared for a future access-controlled GitLab Pages deployment on the
+Hochschule Self-Managed instance, but no `.gitlab-ci.yml` or GitLab deployment
+is active yet. See
+`plans/260713-gitlab-pages-migration.md` and ADR-0012 for the staged migration
+and GitHub-continuity requirements.
 
 ## Scientific fidelity
 

@@ -4,10 +4,11 @@
 > **Type:** Master living document  
 > **Status:** active  
 > **Created:** 2026-07-10  
-> **Last updated:** 2026-07-12
+> **Last updated:** 2026-07-13
 > **Governing document:** `/AGENTS.md`  
 > **Authoritative executable reference:** `Waermedurchgang_V10_physical.m`  
-> **Deployment target:** static GitHub Pages
+> **Deployment target:** mandatory static GitHub Pages; prepared optional
+> parallel static GitLab Pages after external enablement
 
 ---
 
@@ -47,7 +48,8 @@ Build a fully static scientific web application that:
 - exposes all scientifically meaningful MATLAB plots;
 - exports PNG, SVG, standalone HTML reports, PDF reports, and JSON sidecars;
 - makes assumptions, limits, warnings, screens, and provenance visible;
-- deploys reproducibly to GitHub Pages.
+- deploys reproducibly to GitHub Pages and preserves that deployment while
+  preparing a future access-controlled on-premise GitLab Pages peer.
 
 Scientific fidelity and traceability take priority over visual convenience.
 
@@ -67,7 +69,8 @@ Changes require an ADR under `/wiki/decisions/`.
 - Validation: Pydantic in Python and generated TypeScript contracts.
 - Public API: `SimulationRequest` → `SimulationResult`.
 - State: versioned URL state for shareable scientific inputs.
-- Deployment: GitHub Actions → GitHub Pages.
+- Deployment: GitHub Actions → GitHub Pages remains mandatory and active;
+  host-neutral static GitLab Pages is prepared but not activated.
 - No backend, database, account system, server session, or secret.
 - Accessibility target: WCAG 2.2 AA.
 
@@ -166,14 +169,15 @@ A breaking change requires:
 ## 7.1 Lean CI/CD operating model
 
 **Goal:** keep every pull request cheap to validate while making every deployed
-GitHub Pages build reproducible, traceable, and scientifically reviewable.
+GitHub Pages build reproducible, traceable, scientifically reviewable, and
+portable to a later parallel GitLab Pages host without weakening GitHub.
 
 ### Required workflows
 
 | Workflow         | Trigger                                 | Required gates                                                                                                                                                                                                                                                | Output                       |
 | ---------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| PR/main CI       | `pull_request`, `push` to `main`        | prohibited-file check; locked `uv` sync; `ruff`; `ruff format --check`; `mypy`; `pytest`; Python contract export drift check; frozen `pnpm` install; generated TypeScript contract drift check; `typecheck`; `lint`; `format:check`; Vitest; production build | merge/block signal           |
-| Pages deployment | `push` to `main`, manual dispatch       | prohibited-file check; frozen install; frontend type/unit test gate; deterministic Vite build with version and commit metadata; Pages artifact upload; GitHub Pages deployment                                                                                | live static review candidate |
+| PR/main CI       | `pull_request`, `push` to `main`        | prohibited-file check; locked `uv` sync; `ruff`; `ruff format --check`; `mypy`; `pytest`; Python contract export drift check; frozen `pnpm` install; generated TypeScript contract drift check; `typecheck`; `lint`; `format:check`; Vitest; production build plus Pages artifact gate | merge/block signal           |
+| Pages deployment | `push` to `main`, manual dispatch       | prohibited-file check; frozen install; frontend type/unit test gate; deterministic Vite build with version and commit metadata; base/runtime/hash/size artifact gate; Pages artifact upload; GitHub Pages deployment                                           | live static review candidate |
 | Deployed smoke   | after Pages deployment, manual fallback | Playwright against the deployed URL: app loads, Pyodide worker starts, reduced paper-default request completes, at least one result plot renders, export/report smoke path is checked once M7 exists, no fatal console errors                                 | deployment evidence          |
 | Release gate     | manual before tag/release               | green CI; deployed smoke evidence; no contract/default drift; license and `CITATION.cff` reviewed; changelog/release notes prepared; prohibited-source check on source and `dist` artifact                                                                    | releasable tag candidate     |
 
@@ -186,6 +190,9 @@ GitHub Pages build reproducible, traceable, and scientifically reviewable.
   hits as evidence of correctness.
 - Deployment uses the built static `dist` artifact only; no backend, secret, or
   runtime network dependency may be introduced.
+- Every production build validates its resolved base, non-empty index,
+  prohibited formats, file/size budgets, and Pyodide/core-wheel hashes before
+  upload. A nested production-preview smoke covers future GitLab paths.
 - Pages permissions stay minimal: read repository contents, write Pages, and
   request the OIDC token required by GitHub Pages.
 - Contract, defaults, golden references, and generated artifacts are drift
@@ -608,6 +615,9 @@ The project is complete only when:
 ### Technical
 
 - [x] Application is fully static and deployed on GitHub Pages.
+- [x] Root, GitHub project, GitLab project, namespace-in-path, and unique-domain
+      base resolution is tested without activating GitLab CI or weakening
+      GitHub Pages.
 - [x] Heavy computation runs outside the main thread.
 - [x] Contracts are typed, tested, and versioned.
 - [x] Clean checkout builds deterministically in CI.
@@ -679,3 +689,5 @@ A task is not complete while code, tests, wiki, plans, and acceptance criteria d
 | 2026-07-11 | External review package added: `wiki/review/index.md` and GitHub issue templates define the required scientific and accessibility approval records. Remote release-gate workflow run `29173624206` passed on `6130d58978daa4229a1777e2e7a1058844a05450`. Remaining blockers are still independent approval and post-approval tag/release publication.                                                                                                                                                                                                                                                     | Codex                         |
 | 2026-07-12 UTC | GitHub review tracking issues opened: scientific review #1 and accessibility review #2. These are the active external records for M8 approval and M9/M10 review-finding closure before tag/release publication.                                                                                                                                                                                                                                                                                                                              | Codex                         |
 | 2026-07-13 | Plot visual polish completed (W7, `/plans/260712-plot-visual-polish.md`): exact 256-entry `slanCM('spectral')`, cm-faithful responsive layouts, MATLAB colorbar/contour/grid conventions and deterministic labels close F1–F19. Visual r4 covered all registered plots plus 700/1100/1600 px widths and tandem mode; Chromium verifies 624×499 PNG/SVG downloads and JSON/HTML reports. `pnpm test` (51 passed), typecheck, lint, format check, build and Chromium E2E are green.                                                               | Claude + Codex                |
+| 2026-07-13 | GitLab Pages readiness authorized without a cutover: ADR-0012 preserves mandatory GitHub Pages while adding host-neutral base resolution, nested-path production smoke and a deterministic Pages artifact gate; ADR-0013 introduces lossless URL state v2 below GitLab's default URI limit while retaining v1 links. Active GitLab CI/Pages remains blocked on external enablement. | Codex |
+| 2026-07-13 | GitLab repository-readiness implementation validated locally: 72 frontend and 58 Python tests plus all type, format, contract, artifact and release gates passed; Chromium production smokes completed under both the unchanged GitHub project path and a nested GitLab-style namespace path. | Codex |

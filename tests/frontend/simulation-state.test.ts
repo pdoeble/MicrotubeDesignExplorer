@@ -6,7 +6,12 @@ import {
   geometryVolumeAspectToDimensions,
   useSimulationStore,
 } from "../../src/state/simulationStore";
-import { decodeUrlState, encodeUrlState } from "../../src/state/urlState";
+import {
+  LEGACY_URL_STATE_VERSION,
+  URL_STATE_VERSION,
+  decodeUrlState,
+  encodeUrlState,
+} from "../../src/state/urlState";
 
 const defaultsRequest = defaultsJson.request as SimulationRequest;
 
@@ -18,7 +23,37 @@ describe("simulation state", () => {
 
   it("round-trips the scientific request through versioned URL state", () => {
     const encoded = encodeUrlState(defaultsRequest);
+    expect(encoded.startsWith("v2.")).toBe(true);
+    expect(encoded.length).toBeLessThan(1_800);
     expect(decodeUrlState(encoded)).toEqual(defaultsRequest);
+  });
+
+  it("encodes URL state deterministically and preserves exact Unicode input", () => {
+    const request = structuredClone(defaultsRequest);
+    request.cooler_right.label = "Wärmeübertrager Δ — Vergleich";
+    const encoded = encodeUrlState(request);
+    expect(encodeUrlState(request)).toBe(encoded);
+    expect(decodeUrlState(encoded)).toEqual(request);
+  });
+
+  it("continues to decode legacy version 1 links", () => {
+    const legacyPayload = JSON.stringify({
+      request: defaultsRequest,
+      version: LEGACY_URL_STATE_VERSION,
+    });
+    const encoded = Buffer.from(legacyPayload, "utf8").toString("base64url");
+    expect(decodeUrlState(encoded)).toEqual(defaultsRequest);
+  });
+
+  it("rejects corrupt, unsupported, or excessively large URL state", () => {
+    const unsupported = Buffer.from(
+      JSON.stringify({ request: defaultsRequest, version: "3.0.0" }),
+      "utf8",
+    ).toString("base64url");
+    expect(decodeUrlState("v2.not-valid-zlib")).toBeNull();
+    expect(decodeUrlState(unsupported)).toBeNull();
+    expect(decodeUrlState("x".repeat(32_769))).toBeNull();
+    expect(URL_STATE_VERSION).toBe("2.0.0");
   });
 
   it("converts geometry dimensions and volume/aspect representation without drift", () => {

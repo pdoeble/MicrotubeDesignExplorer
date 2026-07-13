@@ -6,11 +6,13 @@
   "description": "Static companion web app for the polyamide microtube heat-exchanger design-space paper",
   "scripts": {
     "dev": "pnpm prepare:pyodide && vite",
-    "build": "pnpm prepare:pyodide && tsc --noEmit && vite build",
+    "build": "pnpm prepare:pyodide && tsc --noEmit && vite build && pnpm check:pages-artifact",
+    "check:pages-artifact": "node scripts/check_pages_artifact.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:pages-path": "node scripts/run_pages_path_smoke.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests/frontend",
@@ -20,6 +22,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"tests/frontend/**/*.{ts,tsx}\" \"tests/e2e/**/*.ts\""
   },
   "dependencies": {
+    "fflate": "0.8.3",
     "plotly.js-dist-min": "^2.35.2",
     "pyodide": "^314.0.2",
     "react": "^18.3.1",

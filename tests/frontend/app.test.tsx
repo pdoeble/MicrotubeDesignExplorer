@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "../../src/App";
 import { useSimulationStore } from "../../src/state/simulationStore";
+import { URL_STATE_VERSION } from "../../src/state/urlState";
 
 describe("App shell", () => {
   beforeEach(() => {
@@ -123,6 +124,7 @@ describe("App shell", () => {
     ).toBeVisible();
     expect(screen.getByText(/not licensed for reuse outside this project/)).toBeVisible();
     expect(screen.getByText(/provided “as is”, without warranty/)).toBeVisible();
+    expect(screen.getByText(URL_STATE_VERSION)).toBeVisible();
     expect(screen.getByRole("link", { name: "MIT License" })).toHaveAttribute(
       "href",
       "https://github.com/pdoeble/MicrotubeDesignExplorer/blob/main/LICENSE",

@@ -1,11 +1,22 @@
 import { defineConfig, devices } from "@playwright/test";
+import { normalizeViteBasePath } from "./src/config/viteBase";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:5174/";
+const managedPreviewPath = process.env.PLAYWRIGHT_MANAGED_PREVIEW_PATH
+  ? normalizeViteBasePath(process.env.PLAYWRIGHT_MANAGED_PREVIEW_PATH)
+  : undefined;
+const managedPreviewPort = process.env.PLAYWRIGHT_MANAGED_PREVIEW_PORT ?? "4175";
+const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL ??
+  (managedPreviewPath
+    ? `http://127.0.0.1:${managedPreviewPort}${managedPreviewPath}`
+    : "http://127.0.0.1:5174/");
 const webServer =
   process.env.PLAYWRIGHT_BASE_URL === undefined
     ? {
-        command: "pnpm dev --host 127.0.0.1 --port 5174 --strictPort",
-        reuseExistingServer: !process.env.CI,
+        command: managedPreviewPath
+          ? `pnpm preview --host 127.0.0.1 --port ${managedPreviewPort} --strictPort`
+          : "pnpm dev --host 127.0.0.1 --port 5174 --strictPort",
+        reuseExistingServer: managedPreviewPath ? false : !process.env.CI,
         timeout: 180_000,
         url: baseURL,
       }

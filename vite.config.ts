@@ -1,10 +1,11 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { resolveViteBase } from "./src/config/viteBase";
 
-// GitHub Pages serves the site under /<repo-name>/. The base path is derived
-// from the CI environment so local dev keeps "/".
-const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1];
-const base = process.env.GITHUB_ACTIONS === "true" && repoName ? `/${repoName}/` : "/";
+// GitHub retains its established /<repo-name>/ path. GitLab Pages may use a
+// unique-domain root, a project path, or namespace-in-path; CI_PAGES_URL keeps
+// all three cases host-neutral. Local development remains at "/".
+const base = resolveViteBase(process.env);
 
 export default defineConfig({
   base,

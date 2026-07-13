@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 import type { SimulationRequest } from "../../src/contracts/generated/simulation-request";
 import { plotRegistry } from "../../src/features/plots/plotRegistry";
+import { encodeUrlState } from "../../src/state/urlState";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const defaultsJson = JSON.parse(
@@ -376,7 +377,5 @@ function reducedDefaultRequest(): SimulationRequest {
 }
 
 function stateUrl(tab: string, request: SimulationRequest): string {
-  const payload = JSON.stringify({ request, version: "1.0.0" });
-  const encoded = Buffer.from(payload, "utf8").toString("base64url");
-  return `?state=${encoded}#/${tab}`;
+  return `?state=${encodeUrlState(request)}#/${tab}`;
 }

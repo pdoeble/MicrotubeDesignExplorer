@@ -6,7 +6,7 @@
 > **Workstream:** W10 (CI and release)
 > **Status:** review
 > **Created:** 2026-07-10
-> **Last updated:** 2026-07-12
+> **Last updated:** 2026-07-13
 
 ## Scope
 
@@ -18,7 +18,8 @@ operating model.
 ## Interfaces
 
 - Produces: `.github/workflows/ci.yml`, `.github/workflows/pages.yml`,
-  `scripts/check_prohibited_files.py`, release notes.
+  `scripts/check_prohibited_files.py`, `scripts/check_pages_artifact.mjs`,
+  release notes.
 
 ## Tasks
 
@@ -32,6 +33,11 @@ operating model.
 - [x] Gate Pages deployment with prohibited-file checks, frozen frontend
       install, type/unit tests, deterministic build metadata, artifact upload,
       and minimal Pages permissions.
+- [x] Gate every production build on resolved base-path references, artifact
+      size/file limits, prohibited formats, and Pyodide/core-wheel manifest
+      hashes while preserving the established GitHub repository path.
+- [x] Add a production-preview Chromium smoke at the nested GitLab
+      namespace/project path without activating GitLab CI.
 - [x] Deployed-site Playwright smoke tests: app load, Pyodide worker startup,
       reduced paper-default computation, at least one rendered result plot,
       export/report smoke path after M7, and no fatal console errors.
@@ -45,7 +51,7 @@ operating model.
 
 | Risk                                            | Mitigation                                                                                                                        |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Pages base path breaks assets                   | `base` derived from `GITHUB_REPOSITORY` in vite.config.ts                                                                         |
+| Pages base path breaks assets                   | Tested precedence: explicit base, `CI_PAGES_URL`, unchanged GitHub repository path, local `/`; nested production-preview smoke    |
 | PR validation becomes too slow                  | Keep PR CI lean; reserve full deployed smoke, accessibility, performance, and release evidence for M8/M9 unless directly affected |
 | Deployed artifact differs from validated source | Build from frozen lockfiles, stamp version/commit metadata, upload the validated `dist` artifact, and smoke-test the deployed URL |
 
@@ -75,6 +81,15 @@ operating model.
   `6130d58978daa4229a1777e2e7a1058844a05450`.
 - 2026-07-12 UTC review tracking issues are open for the final pre-tag
   approvals: scientific review #1 and accessibility review #2.
+- 2026-07-13 GitLab-readiness slice: host-neutral base unit tests, integrated
+  Pages artifact gate, and nested production-preview smoke added under
+  ADR-0012. `.github/workflows/pages.yml` remains unchanged and `pnpm build`
+  enforces the new gate for GitHub automatically.
+- 2026-07-13 portability validation: GitHub `/MicrotubeDesignExplorer/` and
+  GitLab-style `/phdoeble/MicrotubeDesignExplorer/` production builds passed
+  the artifact and strict release gates; both Chromium acceptance smokes
+  completed the reduced Pyodide computation and export workflow. Full local
+  suites passed with 72 frontend and 58 Python tests.
 - M10 release publication remains blocked on independent scientific and
   accessibility approval.
 
@@ -90,6 +105,8 @@ operating model.
 | 2026-07-11 | M9 deployment evidence completed: CI passed, Pages was enabled for GitHub Actions, production deploy succeeded, deployed smoke passed, full paper-default compute works on the live site, and all export paths were smoke-tested from the deployed URL. M10 release publication still awaits independent approval. |
 | 2026-07-11 | Manual remote release-gate workflow passed on the current release-candidate source. Tagging and release notes publication remain held for independent approval.                                                                                                                                                    |
 | 2026-07-12 UTC | Final pre-tag review tracking issues opened: scientific review #1 and accessibility review #2. |
+| 2026-07-13 | GitHub-preserving Pages portability added: every build validates its artifact and base path, while an opt-in nested-path production smoke prepares GitLab layouts without adding `.gitlab-ci.yml`. |
+| 2026-07-13 | Final portability validation passed for both GitHub and nested GitLab-style paths, including Pyodide computation, exports, runtime hashes, source-leak checks, and the strict release gate. |
 
 ## Final commits
 

@@ -1,9 +1,10 @@
 # ADR-0010: GitHub canonical repository with internal GitLab mirror
 
-- Status: accepted with external limitation
+- Status: accepted with external limitation; amended by ADR-0012
 - Date: 2026-07-13
 - Deciders: project maintainer, Codex implementation agent
 - Related plan: `plans/260713-github-gitlab-mirroring.md`
+- Amendment: `wiki/decisions/ADR-0012-github-preserving-pages-portability.md`
 
 ## Context
 
@@ -30,7 +31,12 @@ API nor the deprecated API-v4 configuration path for this project tier.
   recovery operations.
 - Store GitLab authentication only in Git Credential Manager. Never put a
   password or token in `.git/config`, repository files, CI variables, or URLs.
-- Disable GitLab Auto DevOps and do not add GitLab CI or Pages configuration.
+- Disable GitLab Auto DevOps. Do not add active GitLab CI or Pages
+  configuration until the external Pages prerequisites and staged activation
+  gates in ADR-0012 and the migration plan are satisfied.
+- Host-neutral application, test, artifact-validation, and documentation
+  preparation is allowed under ADR-0012 only while it preserves the existing
+  GitHub deployment.
 - Retain GitLab pull mirroring as a requested but blocked enhancement. Do not
   emulate it with a scheduled CI job or new repository secret without a new
   maintainer decision.
@@ -44,6 +50,7 @@ API nor the deprecated API-v4 configuration path for this project tier.
   reproduce it explicitly if they should publish to both hosts.
 - GitLab users with access to internal projects can use the downstream copy;
   anonymous users cannot.
-- GitHub remains the only source for deployment and automation behavior.
+- GitHub remains the only active source for deployment and automation behavior
+  until a later recorded GitLab activation milestone.
 - Server-side recovery from GitHub is not automatic until the institutional
   GitLab license or administrator settings expose pull mirroring.

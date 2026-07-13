@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useSimulationStore } from "../../state/simulationStore";
-import { encodeUrlState } from "../../state/urlState";
+import { encodeUrlState, URL_STATE_VERSION } from "../../state/urlState";
 
 const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "dev";
 const COMMIT_HASH = import.meta.env.VITE_COMMIT_HASH ?? "local";
@@ -21,7 +21,7 @@ export function SettingsTab() {
       </div>
       <dl className="meta-list">
         <dt>URL state schema</dt>
-        <dd>1.0.0</dd>
+        <dd>{URL_STATE_VERSION}</dd>
         <dt>Encoded scientific state</dt>
         <dd>{encodedLength} characters in the `state` query parameter</dd>
         <dt>Left/right links</dt>
@@ -54,9 +54,9 @@ export function SettingsTab() {
           </dd>
           <dt>Scientific-material license scope</dt>
           <dd>
-            The paper sources, MATLAB reference script, and MATLAB-derived golden datasets in
-            <code>source_materials/</code> and <code>reference/</code> remain under their authors’
-            copyright and are not licensed for reuse outside this project by the MIT license.
+            The paper sources, MATLAB reference script, and MATLAB-derived golden datasets remain
+            under their authors’ copyright and are not licensed for reuse outside this project by
+            the MIT license. They are not included in the deployed application.
           </dd>
           <dt>Warranty</dt>
           <dd>

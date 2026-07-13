@@ -32,6 +32,7 @@ the static application.
    pnpm format:check
    pnpm test
    pnpm build
+   pnpm test:e2e:pages-path
    python scripts/check_release_gate.py
    ```
 
@@ -44,6 +45,36 @@ the static application.
    ```
 
 5. Tag the release only after the deployed site matches the source commit.
+
+`pnpm build` now includes `scripts/check_pages_artifact.mjs`. The gate verifies
+the resolved base path, required runtime manifests and hashes, prohibited
+source formats and source-path tokens, safe manifest-relative paths, a maximum
+of 1,000 files, and a default 50 MiB uncompressed artifact budget. CI can
+tighten these limits, but must not weaken them without a documented reason.
+
+## Static Pages portability
+
+GitHub Pages remains mandatory and is still deployed by
+`.github/workflows/pages.yml`. The build base resolves in this order:
+
+1. `VITE_PUBLIC_BASE_PATH` for an explicit controlled build;
+2. the path of GitLab `CI_PAGES_URL` when a future GitLab Pages job runs;
+3. the existing GitHub repository-name path in GitHub Actions;
+4. `/` for local development.
+
+The production-preview path smoke builds and runs the deployed acceptance flow
+at `/phdoeble/MicrotubeDesignExplorer/`, covering the deepest anticipated
+GitLab single-domain path without activating GitLab CI:
+
+```powershell
+pnpm test:e2e:pages-path
+```
+
+An active GitLab deployment remains blocked on the administrator prerequisites
+and activation gates in
+[`plans/260713-gitlab-pages-migration.md`](../plans/260713-gitlab-pages-migration.md).
+ADR-0012 guarantees that this preparation may not remove, redirect, or weaken
+GitHub Pages.
 
 ## Current release-candidate evidence
 
@@ -116,3 +147,6 @@ review of the MATLAB reference script hash.
 - The first formal release tag and GitHub release have not been published.
 - Firefox-specific Pyodide tests are skipped only for the Vite dev-server path;
   production-preview smoke has passed locally.
+- GitLab Pages is not yet enabled on the Hochschule Self-Managed instance. No
+  `.gitlab-ci.yml` or GitLab deployment is active; GitHub Pages remains the
+  production site.

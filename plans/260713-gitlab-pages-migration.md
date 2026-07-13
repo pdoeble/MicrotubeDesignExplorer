@@ -8,7 +8,7 @@
 > **Milestone:** post-M9 deployment portability / on-premise readiness
 > **Workstream:** deployment, CI/CD, access control, operations
 > **Owner:** project maintainer; GitLab administrators for instance prerequisites
-> **Status:** blocked on external GitLab Pages enablement; repository preparation ready
+> **Status:** in-progress; repository readiness implemented, external GitLab Pages enablement blocked
 > **Created:** 2026-07-13
 > **Last updated:** 2026-07-13
 
@@ -26,15 +26,14 @@ Folgende Gates sind offen:
 
 1. GitLab Pages und Pages Access Control müssen instanzweit durch die
    Administratoren aktiviert und mit DNS/TLS/OAuth fertig konfiguriert werden.
-2. Der Vite-Basispfad ist derzeit ausschließlich auf GitHub Actions oder `/`
-   ausgelegt. Er muss den tatsächlichen `CI_PAGES_URL`-Pfad unterstützen, ohne
-   das bestehende GitHub-Verhalten zu ändern.
-3. Der aktuelle shareable URL state überschreitet mit etwa 4.3 KiB das
-   GitLab-Pages-Standardlimit von 2,048 Zeichen. Vor dem Canary ist entweder
-   `gitlab_pages['max_uri_length'] >= 8192` erforderlich oder eine
-   rückwärtskompatible kompakte URL-Kodierung muss ausgeliefert sein. Für eine
-   robuste Dauerlösung sind beide Maßnahmen vorgesehen: vorübergehendes
-   Serverlimit plus kompakte, versionierte Kodierung.
+2. Der Vite-Basispfad unterstützt inzwischen explizite Pfade, den Pfad von
+   `CI_PAGES_URL`, die unveränderte GitHub-Actions-Ableitung und `/`. Die
+   tatsächliche GitLab-URL bleibt im Canary zu bestätigen.
+3. URL state v2 komprimiert den vollständigen Request verlustfrei auf etwa
+   1.214 Request-Zeichen und liegt unter dem GitLab-Pages-Standardlimit von
+   2.048. `gitlab_pages['max_uri_length'] >= 8192` bleibt für die
+   Rückwärtskompatibilität bereits veröffentlichter, etwa 4.3 KiB langer
+   v1-Links bis nach dem Rollout erforderlich.
 4. Der vorhandene Runner ist online, aber sein Build-Image, seine
    Netzwerkfreigaben, Artefaktgrenzen und die ausgelieferten MIME-Typen müssen
    in einem Canary nachgewiesen werden.
@@ -133,14 +132,14 @@ Entscheidungen nicht stillschweigend auf.
 | --- | --- | --- | --- |
 | React/TypeScript/Vite | Statischer `dist/`-Output | geeignet | `dist` über `pages.publish` veröffentlichen. |
 | Routing | Hash-Routing plus Query-Parameter, kein BrowserRouter | geeignet | Kein serverseitiger SPA-Fallback erforderlich. Direkte `#/...`-Links testen. |
-| Vite base | `GITHUB_ACTIONS` + `GITHUB_REPOSITORY`, sonst `/` | bedingt | Expliziten, normalisierten Basispfad ergänzen und aus `CI_PAGES_URL` ableiten. GitHub-Fallback unverändert lassen. |
+| Vite base | expliziter Pfad → `CI_PAGES_URL` → GitHub repository → `/` | vorbereitet | Tatsächlichen `CI_PAGES_URL` im Canary bestätigen; GitHub-Regression bleibt Pflicht. |
 | Module Web Worker | Vite-erzeugter same-origin Worker | geeignet | Root-, Projektpfad-, Single-Domain- und Unique-Domain-Build testen. |
 | Pyodide/WebAssembly | Same-origin, single-threaded | geeignet | MIME, OAuth-Session, Wasm-CSP und Download aller Runtime-Assets im Canary prüfen. Kein COOP/COEP oder SharedArrayBuffer erforderlich. |
 | Python Core | Reproduzierbares lokales Wheel | geeignet | Wheel im Runner mit `uv` bauen; SHA-256-Manifest und direkte Python-Parität prüfen. |
 | NumPy/Pydantic | Build-time kopierte, hashgeprüfte Pyodide-Wheels | geeignet | Runner-Egress oder internen Cache für jsDelivr sicherstellen. Keine Runtime-CDN-Abhängigkeit. |
 | Plotly | Gebündeltes JavaScript, clientseitige SVG/PNG-Exporte | geeignet | Große Bundle-/Sourcemap-Dateien und CSP prüfen. |
 | HTML/PDF report | Clientseitig; PDF über Printdialog | geeignet | Popup/Blob/Data-URI-Verhalten unter den institutionellen Browserregeln testen. |
-| URL state | Versioniertes Base64URL-JSON | derzeit nicht vollständig geeignet | URI-Limit >= 8192 und später rückwärtskompatible kompakte Kodierung. |
+| URL state | v2: verlustfrei Zlib+Base64URL; v1 bleibt lesbar | vorbereitet | v2 liegt unter 2.048; URI-Limit >= 8192 nur für alte v1-Links während der Migration. |
 | Access Control | Noch nicht instanzweit verfügbar | blockiert | Pages Access Control aktivieren; niemals öffentliches Pages-Level wählen. |
 | CI Runner | Online, aber für dieses Projekt unbenutzt | bedingt | Reproduzierbares Image, Egress, Cache, Speicher und Timeout nachweisen. |
 | Provenienz | Appversion und Commit werden zur Buildzeit injiziert | geeignet | GitLab: `VITE_APP_VERSION=$CI_COMMIT_REF_NAME`, `VITE_COMMIT_HASH=$CI_COMMIT_SHA`. |
@@ -262,14 +261,16 @@ Caches dürfen die Builds beschleunigen, sind aber keine Vertrauensquelle.
 Cachekeys müssen mindestens `pnpm-lock.yaml`, `python/uv.lock`, Pyodide-Version
 und Runner-Plattform enthalten.
 
-## Geplante Repository-Änderungen nach Freischaltung
+## Repository-Readiness und Änderungen nach Freischaltung
 
-Keine der folgenden Änderungen wird vor dem erforderlichen ADR und einer
-erreichbaren Pages-Canary-Umgebung aktiviert.
+ADR-0012 erlaubt die hostneutralen Punkte 1 und 2 sowie das Artefaktgate vor
+der externen Freischaltung, solange GitHub unverändert bleibt. Eine aktive
+GitLab-Pipeline aus Punkt 3 bleibt bis zur erreichbaren Pages-Canary-Umgebung
+gesperrt.
 
 ### 1. Hosting-neutraler Vite-Basispfad
 
-`vite.config.ts` erhält einen expliziten `VITE_PUBLIC_BASE_PATH` mit
+`vite.config.ts` verwendet einen expliziten `VITE_PUBLIC_BASE_PATH` mit
 Normalisierung auf führenden und abschließenden Slash. Die Reihenfolge soll
 sein:
 
@@ -277,8 +278,8 @@ sein:
 2. bestehende GitHub-Actions-Ableitung aus `GITHUB_REPOSITORY`;
 3. lokaler Fallback `/`.
 
-Die GitLab-Pipeline leitet `VITE_PUBLIC_BASE_PATH` aus dem Pfadanteil von
-`CI_PAGES_URL` ab. Damit funktionieren Unique Domains (`/`), klassische
+Ohne expliziten Wert wird der Pfadanteil von `CI_PAGES_URL` verwendet. Damit
+funktionieren Unique Domains (`/`), klassische
 Projektseiten (`/<project>/`) und Single-Domain-Sites
 (`/<namespace>/<project>/`) ohne hartcodierte Hochschuldomain. Der Worker darf
 weiter ausschließlich `import.meta.env.BASE_URL` verwenden.
@@ -294,19 +295,20 @@ Pflichttests:
 
 ### 2. Rückwärtskompatible URL-state-Strategie
 
-Kurzfristig schützt das 8-KiB-Serverlimit die vorhandene Kodierung. Dauerhaft
-wird ein neues URL-state-Schemaversion-Format entworfen, das wissenschaftliche
-Eingaben verlustfrei und deterministisch komprimiert. Dabei gelten:
+URL state v2 ist gemäß ADR-0013 mit Zlib/DEFLATE und Base64URL umgesetzt. Das
+8-KiB-Serverlimit schützt während der Migration weiterhin alte v1-Links. Es
+gelten:
 
-- alte `version=1.0.0`-Links bleiben dekodierbar;
-- keine Rundung, Einheitenänderung oder Auslassung von Nicht-Defaultwerten;
-- Defaults-Version wird mitgeführt, falls nur Abweichungen gespeichert werden;
-- Encoder/Decoder erhalten Roundtrip-, Unicode-, Grenzwert- und
+- [x] alte `version=1.0.0`-Links bleiben dekodierbar;
+- [x] keine Rundung, Einheitenänderung oder Auslassung von Werten;
+- [x] der vollständige Request bleibt unabhängig von später geänderten Defaults;
+- [x] Encoder/Decoder erhalten Roundtrip-, Unicode-, Grenzwert- und
   Migrationsregressionen;
-- Zielgröße für den Default- und typische geänderte Requests: unter 1,800
+- [x] Zielgröße für den Default- und typische geänderte Requests: unter 1,800
   Zeichen einschließlich Pfad und Query;
-- bei unvermeidbar größeren Requests zeigt die UI eine verständliche Warnung,
-  statt einen scheinbar teilbaren defekten Link zu erzeugen.
+- [ ] bei unvermeidbar größeren Requests zeigt die UI eine verständliche
+  Warnung, statt einen scheinbar teilbaren defekten Link zu erzeugen; die
+  aktuelle Codecgrenze verwirft übergroße eingehende Zustände sicher.
 
 Da dies ein persistierter öffentlicher Zustand ist, erfordert die
 Schemaversionierung eine Interface-Dokumentation und bei Breaking Changes ein
@@ -387,15 +389,20 @@ Adapter gekapselt; wissenschaftliche Testlogik bleibt hostneutral.
 
 ### G2 — Entscheidungs- und Codevorbereitung
 
-- [ ] ADR für GitHub+GitLab-Parallelbetrieb beschließen; ADR-0010 gezielt
+- [x] ADR für GitHub+GitLab-Parallelbetrieb beschließen; ADR-0010 gezielt
   aktualisieren/ersetzen.
-- [ ] `AGENTS.md`, Masterplan und Release-Handbuch konsistent aktualisieren.
-- [ ] Hosting-neutralen Vite-Basispfad plus Regressionstests implementieren.
-- [ ] URL-state-Policy beschließen; kurzfristiges Limit und langfristige
+- [x] `AGENTS.md`, Masterplan und Release-Handbuch konsistent aktualisieren.
+- [x] Hosting-neutralen Vite-Basispfad plus Regressionstests implementieren.
+- [x] URL-state-Policy beschließen; kurzfristiges Limit und langfristige
   Kodierung dokumentieren.
-- [ ] `.gitlab-ci.yml` mit vollständigen Qualitätsgates implementieren.
+- [x] Gemeinsames Pages-Artefaktgate für Basispfad, Größen-/Dateigrenzen,
+  unerlaubte Quellformate/-tokens und Runtime-Manifest-Hashes implementieren.
+- [x] Produktionsnahe Chromium-Smokes unter dem GitHub-Projektpfad und einem
+  verschachtelten GitLab-Namespacepfad ausführen.
+- [ ] `.gitlab-ci.yml` mit vollständigen Qualitätsgates implementieren — bleibt
+  bis zum Abschluss von G1 absichtlich gesperrt.
 - [ ] CI-Lint gegen exakt GitLab 19.1.2 ausführen.
-- [ ] Keine Änderungen an `.github/workflows/pages.yml`, außer ein Test weist
+- [x] Keine Änderungen an `.github/workflows/pages.yml`, außer ein Test weist
   einen echten hostneutralen Bedarf nach.
 
 ### G3 — GitLab Canary
@@ -627,6 +634,8 @@ Repositoryinterne Prüfbasis:
 | 2026-07-13 | Anwendung als grundsätzlich GitLab-Pages-kompatibel bewertet. GitHub-Live-Smoke bestand; Artefakt mit 25 Dateien, 33.18 MiB roh und 14.64 MiB ZIP vermessen. |
 | 2026-07-13 | Zwei konkrete Migrationsgates identifiziert: hostneutraler Vite-Basispfad und GitLab-URI-Limit für den derzeit etwa 4.3-KiB-langen URL state. |
 | 2026-07-13 | Stufenplan für Adminfreischaltung, ADR, Canary, Parallelbetrieb und optionalen Authority-Cutover erstellt. GitHub Pages bleibt ausdrücklich unverändert. |
+| 2026-07-13 | ADR-0012/0013 akzeptiert; hostneutraler Vite-Basispfad, verschachtelter Production-Preview-Smoke, deterministisches Pages-Artefaktgate und verlustfreier URL state v2 mit v1-Reader implementiert. Der Standardrequest sank von 4.312 auf 1.173 State-Zeichen; eine aktive `.gitlab-ci.yml` bleibt bis G1 gesperrt. |
+| 2026-07-13 | Repository-Readiness validiert: 72 Frontend- und 58 Python-Tests, Ruff, Mypy, TypeScript, Format-, Contract-, Prohibited-File- und Release-Gates bestanden. Produktionsbuilds und Chromium-Smokes liefen erfolgreich unter `/MicrotubeDesignExplorer/` und `/phdoeble/MicrotubeDesignExplorer/`; beide Artefakte enthielten 25 Dateien bei rund 34,9 MB und bestanden Basispfad-, Hash- und Source-Leak-Prüfung. |
 
 ## Final commits
 

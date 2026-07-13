@@ -44,8 +44,9 @@ nicht den UI-Thread.
 - numerische Regression gegen unveränderliche MATLAB-Golden-Daten;
 - vollständige Herkunftsinformationen mit Request-Hash und Versionsständen;
 - papergetreue, SVG-kompatible Plotly-Abbildungen;
-- statische Bereitstellung über GitHub Pages ohne Übertragung der
-  wissenschaftlichen Eingaben an einen Rechenserver.
+- verpflichtende statische Bereitstellung über GitHub Pages und vorbereitete
+  Portabilität für eine spätere parallele, zugriffsgeschützte GitLab Page, ohne
+  Übertragung der wissenschaftlichen Eingaben an einen Rechenserver.
 
 ## 2. Rolle gegenüber dem Paper
 
@@ -288,7 +289,8 @@ mäßig zwischen Referenz und Vergleich verknüpft; die Materialien sind getrenn
 
 ### 6.1 Feste Architekturentscheidung
 
-- **Deployment:** ausschließlich statische GitHub Pages;
+- **Deployment:** statische GitHub Pages bleiben verpflichtend und produktiv;
+  eine statische GitLab Page darf nach externer Freischaltung parallel laufen;
 - **Frontend:** React, TypeScript und Vite;
 - **Zustand:** Zustand Store plus versionierter URL-State;
 - **Scientific Core:** reines Python-Paket `microtubes_core`;
@@ -359,7 +361,7 @@ SimulationResult = JSON-Metadaten + Tupel referenzierter float64-Arrays
 Fehlende Pyodide-Pakete werden nur während der Buildvorbereitung aus dem
 versionierten Pyodide-CDN geladen und gegen den Lockfile-Hash geprüft. Die
 ausgelieferte Anwendung lädt zur Laufzeit alle Python-Artefakte vom selben
-GitHub-Pages-Ursprung. Es gibt keinen externen Rechen-API-Aufruf.
+jeweiligen Pages-Ursprung. Es gibt keinen externen Rechen-API-Aufruf.
 
 ### 6.5 Workerprotokoll, Fortschritt und Abbruch
 
@@ -385,7 +387,7 @@ Hash validierter Inputs wiederverwenden.
 | SimulationRequest/Result | 1.0.0 | Pydantic-Vertrag |
 | Paper-Defaults | 1.0.0 | `microtubes_core.defaults` |
 | Workerprotokoll | 1.0.0 | `src/workers/protocol.ts` |
-| URL-State | 1.0.0 | `src/state/urlState.ts` |
+| URL-State | 2.0.0 (Reader weiterhin 1.0.0) | `src/state/urlState.ts` |
 | Reportpayload | 1.0.0 | Python- und TypeScript-Exportadapter |
 | Pyodide | 314.0.2 | `package.json`/Assetmanifest |
 
@@ -472,10 +474,13 @@ Slider, Anzeigeeinheit, Einzel-Reset und Validierungstext.
 ### 8.3 URL-State
 
 Jede wissenschaftliche Konfigurationsänderung wird als versioniertes,
-Base64URL-kodiertes JSON im Queryparameter `state` gespeichert. Damit ist eine
-Konfiguration durch Kopieren der URL teilbar und reproduzierbar. Der Zustand
-enthält den `SimulationRequest`, nicht die Ergebnisarrays. Transiente
-Plotauswahl und Workerzustände bleiben lokal.
+verlustfrei komprimiertes und Base64URL-kodiertes JSON im Queryparameter
+`state` gespeichert. Version 2 verwendet das Präfix `v2.` und Zlib/DEFLATE;
+unpräfixierte Links der Version 1 bleiben lesbar. Damit ist eine Konfiguration
+durch Kopieren der URL teilbar und reproduzierbar, ohne GitLabs
+2.048-Zeichen-Standardlimit bereits beim Paper-Default zu überschreiten. Der
+Zustand enthält den vollständigen `SimulationRequest`, nicht die
+Ergebnisarrays. Transiente Plotauswahl und Workerzustände bleiben lokal.
 
 Unbekannte oder beschädigte URL-State-Versionen werden verworfen; die App
 fällt auf die Paper-Defaults zurück. **Reset to paper defaults** stellt die
@@ -766,6 +771,11 @@ GitHub Actions trennt:
 - manuell auslösbares strenges Release-Gate;
 - GitHub-Pages-Build, Deployment und Smoke-Test der bereitgestellten Seite.
 
+Jeder Produktionsbuild prüft zusätzlich Dateianzahl, Artefaktgröße,
+verbotene Quellformate, Vite-Basispfad sowie SHA-256-Manifeste von Pyodide und
+Python-Wheel. Ein lokaler Production-Preview-Smoke deckt den verschachtelten
+GitLab-Single-Domain-Pfad ab, aktiviert aber keine GitLab-Pipeline.
+
 Der Build darf keine proprietären Paper-PDFs, MATLAB-Quellen, Secrets oder
 unerwartet großen Artefakte in `dist/` ausliefern.
 
@@ -853,9 +863,12 @@ Filter.
 
 ## 15. Statische Bereitstellung
 
-Die Vite-Basis wird in GitHub Actions aus dem Repositorynamen abgeleitet,
-sodass lokale Entwicklung unter `/` und GitHub Pages unter
-`/<repository>/` funktioniert.
+Die Vite-Basis wird hostneutral aufgelöst: ein expliziter
+`VITE_PUBLIC_BASE_PATH` hat Vorrang, danach folgt der Pfad von
+`CI_PAGES_URL`, anschließend die unveränderte GitHub-Actions-Ableitung aus dem
+Repositorynamen und zuletzt `/` für lokale Entwicklung. Damit bleibt GitHub
+Pages unter `/<repository>/` unverändert funktionsfähig; gleichzeitig sind
+GitLab Unique Domains, Projektpfade und Single-Domain-Pfade vorbereitet.
 
 Bei einem Push auf `main`:
 
@@ -863,14 +876,18 @@ Bei einem Push auf `main`:
 2. werden Abhängigkeiten aus Lockfiles installiert;
 3. laufen Typprüfung und Tests;
 4. werden Pyodide und das Core-Wheel vorbereitet;
-5. wird `dist/` gebaut;
+5. wird `dist/` gebaut und mit dem Pages-Artefaktgate geprüft;
 6. wird das Artefakt mit GitHub Pages bereitgestellt;
 7. prüft ein Chromium-Smoke-Test die öffentlich bereitgestellte URL.
 
-GitHub ist das kanonische öffentliche Repository und die einzige Quelle für
-Pages/CI. Eine interne GitLab-Kopie existiert als Downstream-Mirror; sie ist
-nicht die Quelle für unabhängige Entwicklung oder Deployment. Details stehen
-in [ADR-0010](decisions/ADR-0010-github-canonical-gitlab-internal-mirror.md).
+GitHub ist weiterhin das kanonische öffentliche Repository und die einzige
+aktive Quelle für Pages/CI. Eine interne GitLab-Kopie existiert als
+Downstream-Mirror; die Anwendung und Tests sind für eine spätere parallele
+GitLab Page vorbereitet, aber `.gitlab-ci.yml` und GitLab Pages sind noch nicht
+aktiv. Details stehen in
+[ADR-0010](decisions/ADR-0010-github-canonical-gitlab-internal-mirror.md),
+[ADR-0012](decisions/ADR-0012-github-preserving-pages-portability.md) und dem
+[GitLab-Migrationsplan](../plans/260713-gitlab-pages-migration.md).
 
 ## 16. Repositorystruktur
 

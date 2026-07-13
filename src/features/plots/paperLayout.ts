@@ -1,5 +1,5 @@
-// Paper figure geometry replicated from the approved MATLAB reference
-// (source_materials/Waermedurchgang_V10_physical.m, params block l. 61-318).
+// Paper figure geometry replicated from the approved MATLAB reference;
+// provenance is recorded in wiki/decisions/ADR-0011 (parameter block l. 61-318).
 // All positions are absolute centimeters in MATLAB; the web renders the same
 // geometry at any container width by scaling every pixel quantity with one
 // zoom factor, so the plot-area aspect ratio (and therefore the roundness of

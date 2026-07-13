@@ -14,5 +14,7 @@ Numbering is sequential and never reused.
 | [ADR-0007](ADR-0007-plot-display-fidelity-policy.md) | Plot display fidelity policy | accepted |
 | [ADR-0008](ADR-0008-consolidated-model-setup-navigation.md) | Consolidated model-setup navigation | superseded by ADR-0009 |
 | [ADR-0009](ADR-0009-category-tabs-and-comparison-switches.md) | Model-setup category tabs and comparison switches | accepted |
-| [ADR-0010](ADR-0010-github-canonical-gitlab-internal-mirror.md) | GitHub canonical repository with internal GitLab mirror | accepted with external limitation |
+| [ADR-0010](ADR-0010-github-canonical-gitlab-internal-mirror.md) | GitHub canonical repository with internal GitLab mirror | accepted with external limitation; amended by ADR-0012 |
 | [ADR-0011](ADR-0011-scientific-plot-audit-and-navigation.md) | Scientific plot audit, boundary rendering, and navigation | accepted |
+| [ADR-0012](ADR-0012-github-preserving-pages-portability.md) | GitHub-preserving static Pages portability | accepted |
+| [ADR-0013](ADR-0013-compressed-url-state-v2.md) | Lossless compressed URL state v2 | accepted |
