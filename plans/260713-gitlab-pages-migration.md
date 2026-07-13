@@ -639,6 +639,8 @@ Repositoryinterne Prüfbasis:
 
 ## Final commits
 
+- `aa47849` — `feat(deploy): prepare GitLab Pages without weakening GitHub`
+
 Dieser Living Plan bleibt bis zum Abschluss von G5 oder einer dokumentierten
 Entscheidung, GitLab nur dauerhaft als sekundären Pages-Host zu nutzen, aktiv.
 Implementierungscommits werden milestoneweise ergänzt; die Erstellung des Plans

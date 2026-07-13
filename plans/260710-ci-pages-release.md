@@ -110,4 +110,4 @@ operating model.
 
 ## Final commits
 
-—
+- `aa47849` — `feat(deploy): prepare GitLab Pages without weakening GitHub`
