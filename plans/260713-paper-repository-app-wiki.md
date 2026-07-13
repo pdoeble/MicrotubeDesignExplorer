@@ -80,5 +80,5 @@ Validation completed on 2026-07-13:
 
 ## Commits
 
-- Documentation implementation: commit containing this completed plan; the
-  exact hash is recorded after creation.
+- `c2c1fdd7aba193f8b068ab1324a502eec1f7f816` — detailed paper-companion wiki
+  overview, wiki-index link, completed plan and validation evidence.
