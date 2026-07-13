@@ -141,7 +141,8 @@ describe("plot spec", () => {
     expect(trace.zmin).toBe(-7);
     expect(trace.zmax).toBe(7);
     expect(trace.zmid).toBe(0);
-    expect(spec.data).toHaveLength(2);
+    expect(spec.data[1]).toMatchObject({ type: "contour" });
+    expect(spec.data.at(-1)).toMatchObject({ type: "scatter" });
     expect(spec.layout.annotations?.[0]).toMatchObject({
       text: "contract 1.0.0 | core 0.1.0 | request abcdef012345 | generated 2026-07-10T12:00:00Z | golden 0123456789ab",
     });
@@ -276,7 +277,7 @@ describe("plot spec", () => {
     }
   });
 
-  it("separates the Figure 22 colorbar title and places every available inline percent label", () => {
+  it("separates the Figure 22 colorbar title and keeps dense contours without colliding labels", () => {
     const spec = createPlotSpec({
       cooler: "cooler_left",
       field,
@@ -298,10 +299,10 @@ describe("plot spec", () => {
         "Δ(<i>k</i><sub>o</sub><i>A</i><sub>o</sub>)<sub>feas</sub>",
         "-25 %",
         "0 %",
-        "+25 %",
         "+50 %",
       ]),
     );
+    expect(annotationText).not.toContain("+25 %");
     for (const level of [-25, 0, 25, 50]) {
       const contour = spec.data.find((trace) => trace.name === `${level} %`);
       expect(contour?.contours?.showlabels).toBe(false);
@@ -326,6 +327,62 @@ describe("plot spec", () => {
     expect(spec.layout.annotations?.map((annotation) => annotation.text)).toContain("0 %");
     const zeroContour = spec.data.find((trace) => trace.name === "0 %");
     expect(zeroContour?.contours?.showlabels).toBe(false);
+  });
+
+  it("adds adaptive isolines and collision-limited ticks to diagnostics without legacy levels", () => {
+    const spec = createPlotSpec({
+      cooler: "cooler_left",
+      field,
+      plot: plotById("tube-count-map"),
+      provenance,
+      titleScope: "Aluminum",
+      xValues: [0.1, 0.3, 1, 3, 10],
+      yValues: [0, 4],
+      zValues: [
+        [1, 100, 10_000, 1_000_000, 100_000_000],
+        [2, 200, 20_000, 2_000_000, 200_000_000],
+      ],
+    });
+
+    const tickValues = spec.data[0]?.colorbar?.tickvals as number[] | undefined;
+    expect(tickValues?.length).toBeGreaterThan(2);
+    expect(tickValues?.length).toBeLessThanOrEqual(9);
+    expect(spec.data.some((trace) => trace.type === "contour")).toBe(true);
+    const labels = spec.layout.annotations?.filter((annotation) => annotation.bgcolor);
+    expect(labels?.length).toBeGreaterThan(0);
+    for (const label of labels ?? []) {
+      expect(label.bgcolor).toBe("rgba(255,255,255,0.9)");
+      expect(Number(label.textangle ?? 0)).toBeGreaterThanOrEqual(-90);
+      expect(Number(label.textangle ?? 0)).toBeLessThanOrEqual(90);
+    }
+  });
+
+  it("clips every comparison raster to the exported PA feasibility boundary", () => {
+    const spec = createPlotSpec({
+      comparisonBoundary: {
+        diameterMillimeters: [1, 1],
+        wallRatioPercent: [0, 40],
+      },
+      cooler: "cooler_left",
+      field,
+      plot: plotById("same-geometry-ratio-value"),
+      provenance,
+      titleScope: "Comparison",
+      xValues: [0.1, 1, 10],
+      yValues: [0, 4],
+      zValues: [
+        [0.5, 1, 1.5],
+        [0.6, 1.1, 1.6],
+      ],
+    });
+
+    const displayed = spec.data[0]?.z as number[][];
+    expect(displayed[0]?.[0]).toBeNaN();
+    expect(displayed[0]?.[1]).toBe(1);
+    expect(displayed[0]?.[2]).toBe(1.5);
+    expect(
+      spec.data.some((trace) => trace.fill === "toself" && trace.fillcolor === "#ffffff"),
+    ).toBe(true);
   });
 
   it("creates boundary, minimum-wall, and design-point overlays from SimulationResult", () => {
@@ -376,6 +433,7 @@ describe("plot spec", () => {
     };
     const boundaryPayload: SimulationResultPayload = {
       ...payload,
+      wall_thickness_axis: [0.000001, 0.0001],
       cooler_left: {
         ...payload.cooler_left,
         masks: [maskRef],
@@ -390,9 +448,9 @@ describe("plot spec", () => {
       "cooler_left",
     );
 
-    expect(traces[0]).toMatchObject({
+    expect(traces.find((trace) => trace.name === "Burst pressure")).toMatchObject({
       name: "Burst pressure",
-      type: "contour",
+      type: "scatter",
     });
   });
 

@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type Plotly from "plotly.js-dist-min";
+import type { SimulationRequest } from "../../contracts/generated/simulation-request";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import {
   compositeGeometry,
@@ -14,7 +15,9 @@ import { useContainerWidth } from "./PlotFigure";
 export function CompositePlotFigure({
   result,
   plotId,
+  request,
 }: {
+  request: SimulationRequest;
   result: SimulationWorkerResult;
   plotId: PlotId;
 }) {
@@ -27,9 +30,9 @@ export function CompositePlotFigure({
   const spec = useMemo(
     () =>
       containerWidth
-        ? createCompositePlotSpec(result, plotId, Math.min(containerWidth, 1400))
+        ? createCompositePlotSpec(result, plotId, Math.min(containerWidth, 1400), request)
         : undefined,
-    [containerWidth, plotId, result],
+    [containerWidth, plotId, request, result],
   );
 
   useEffect(() => {
@@ -49,7 +52,7 @@ export function CompositePlotFigure({
 
   async function exportImage(format: ImageFormat) {
     const geometry = compositeGeometry(plotId);
-    const exportSpec = createCompositePlotSpec(result, plotId);
+    const exportSpec = createCompositePlotSpec(result, plotId, undefined, request);
     if (!exportSpec || !geometry) return;
     const { default: Plotly } = await import("plotly.js-dist-min");
     await Plotly.downloadImage(

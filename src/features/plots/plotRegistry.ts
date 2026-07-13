@@ -106,15 +106,6 @@ export const plotRegistry = [
     description: "VDI G1 internal-flow Reynolds field.",
   },
   {
-    id: "reynolds-air-simple-map",
-    title: "Air-side simple Reynolds number",
-    family: "log-map",
-    field: "re_outer_simple",
-    unit: "-",
-    source: "cooler",
-    description: "Inlet-velocity and outer-diameter convention.",
-  },
-  {
     id: "reynolds-air-vdi-map",
     title: "Air-side VDI G7 Reynolds number",
     family: "log-map",
@@ -387,6 +378,103 @@ export const plotRegistry = [
 ] as const satisfies readonly PlotDefinition[];
 
 export type PlotId = (typeof plotRegistry)[number]["id"];
+
+export type PlotTopic =
+  | "feasibility-comparison"
+  | "flow-hydraulics"
+  | "geometry-packing"
+  | "manufacturing-cost"
+  | "mechanical-integrity"
+  | "resistance-attribution"
+  | "thermal-performance";
+
+export type PlotTopicGroup = {
+  id: PlotTopic;
+  label: string;
+  plotIds: readonly PlotId[];
+};
+
+/**
+ * Scientific navigation order. Rendering families remain adapter metadata;
+ * users choose figures by the physical question that each figure answers.
+ */
+export const plotTopicGroups = [
+  {
+    id: "thermal-performance",
+    label: "Thermal performance",
+    plotIds: [
+      "overall-coefficient-map",
+      "bundle-conductance-map",
+      "inner-heat-transfer-map",
+      "outer-heat-transfer-map",
+    ],
+  },
+  {
+    id: "resistance-attribution",
+    label: "Thermal resistance attribution",
+    plotIds: [
+      "resistance-shares-grid",
+      "resistance-inner-map",
+      "resistance-wall-map",
+      "resistance-outer-map",
+    ],
+  },
+  {
+    id: "geometry-packing",
+    label: "Geometry and tube packing",
+    plotIds: [
+      "tube-count-map",
+      "bundle-area-map",
+      "tube-spacing-longitudinal-map",
+      "tube-spacing-transverse-map",
+      "tube-spacing-closest-inline-map",
+      "tube-spacing-closest-staggered-map",
+    ],
+  },
+  {
+    id: "flow-hydraulics",
+    label: "Flow regimes and hydraulics",
+    plotIds: [
+      "coolant-throughput-map",
+      "coolant-mass-flow-map",
+      "friction-pressure-drop-map",
+      "hydraulic-power-map",
+      "reynolds-tube-side-map",
+      "reynolds-air-vdi-map",
+    ],
+  },
+  {
+    id: "mechanical-integrity",
+    label: "Mechanical integrity",
+    plotIds: ["burst-tolerance-grid", "burst-pressure-map", "burst-pressure-medical-map"],
+  },
+  {
+    id: "manufacturing-cost",
+    label: "Manufacturing limits and cost",
+    plotIds: [
+      "capillary-rise-grid",
+      "capillary-rise-map",
+      "capillary-rise-1g-map",
+      "capillary-rise-5g-map",
+      "capillary-rise-10g-map",
+      "tube-supply-cost-map",
+    ],
+  },
+  {
+    id: "feasibility-comparison",
+    label: "Feasibility and material comparison",
+    plotIds: [
+      "design-boundary-lines",
+      "feasibility-mask-map",
+      "tech-adjusted-delta-k",
+      "tech-adjusted-ratio-k",
+      "tech-adjusted-delta-ka",
+      "tech-adjusted-ratio-ka",
+      "same-geometry-ratio",
+      "same-geometry-ratio-value",
+    ],
+  },
+] as const satisfies readonly PlotTopicGroup[];
 
 export function plotById(id: PlotId): PlotDefinition {
   const found = plotRegistry.find((plot) => plot.id === id);

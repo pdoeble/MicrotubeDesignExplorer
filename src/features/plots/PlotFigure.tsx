@@ -1,10 +1,12 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type Plotly from "plotly.js-dist-min";
+import type { SimulationRequest } from "../../contracts/generated/simulation-request";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import { plotById, type PlotId } from "./plotRegistry";
 import {
   axisMillimeters,
   colorDomainForPlot,
+  comparisonBoundaryForResult,
   type ColorDomain,
   createPlotSpec,
   fieldForPlot,
@@ -52,10 +54,11 @@ type PlotFigureProps = {
   colorDomain?: ColorDomain | undefined;
   result: SimulationWorkerResult;
   plotId: PlotId;
+  request: SimulationRequest;
   cooler: CoolerKey;
 };
 
-export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigureProps) {
+export function PlotFigure({ colorDomain, result, plotId, cooler, request }: PlotFigureProps) {
   const elementRef = useRef<HTMLDivElement | null>(null);
   const [containerRef, containerWidth] = useContainerWidth();
   const detailsId = useId();
@@ -75,6 +78,13 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
   );
   const titleScope = titleScopeForPlot(result.payload, plot, cooler);
   const presentation = presentationForPlot(plot);
+  const comparisonBoundary = useMemo(
+    () =>
+      plot.source === "comparison"
+        ? comparisonBoundaryForResult(result.payload, result.arrays)
+        : undefined,
+    [plot.source, result.arrays, result.payload],
+  );
   // Robust/fixed color limits apply in single mode too (MATLAB shares k, kA
   // and burst limits across Al+PA regardless of display mode).
   const effectiveColorDomain = useMemo(
@@ -109,14 +119,15 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     [containerWidth, geometry],
   );
   const paperOverlays = useMemo(
-    () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler, paper),
-    [cooler, paper, plot, result.arrays, result.payload],
+    () => overlayTracesForPlot(result.payload, result.arrays, plot, cooler, paper, request),
+    [cooler, paper, plot, request, result.arrays, result.payload],
   );
   const plotSpec = useMemo(
     () =>
       field && zValues && containerWidth
         ? createPlotSpec({
             colorDomain: effectiveColorDomain,
+            comparisonBoundary,
             cooler,
             field,
             overlays: paperOverlays,
@@ -132,6 +143,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
         : undefined,
     [
       containerWidth,
+      comparisonBoundary,
       cooler,
       effectiveColorDomain,
       field,
@@ -173,9 +185,17 @@ export function PlotFigure({ colorDomain, result, plotId, cooler }: PlotFigurePr
     // keeps the paper geometry regardless of the on-screen zoom.
     const exportSpec = createPlotSpec({
       colorDomain: effectiveColorDomain,
+      comparisonBoundary,
       cooler,
       field,
-      overlays: overlayTracesForPlot(result.payload, result.arrays, plot, cooler),
+      overlays: overlayTracesForPlot(
+        result.payload,
+        result.arrays,
+        plot,
+        cooler,
+        undefined,
+        request,
+      ),
       plot,
       provenance: result.payload.provenance,
       statusValues,

@@ -1,8 +1,8 @@
 # Plot catalog — approved plot families and stable IDs
 
-Binding registry of every scientifically approved MATLAB plot and its web
-equivalent (M1). Web plot IDs are stable kebab-case identifiers; the frontend
-plot registry (M6) may only render IDs listed here. Display metadata
+Binding registry of every paper-approved plot and its approved web companion
+(M1). Web plot IDs are stable kebab-case identifiers; the frontend plot
+registry (M6) may only render IDs listed here. Display metadata
 (contour levels, color limits) originates from the MATLAB `params` block and
 is snapshotted in `reference/default_case/scalars.json`.
 
@@ -22,7 +22,6 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `burst-pressure-medical-map` | log-map | 15 data companion | p_b,tol,med (bar) | log color | medical tolerance sensitivity companion |
 | `burst-tolerance-grid` | log-map-grid | 15 | p_b,tol (bar) | log color | rows = tolerance {standard, medical} |
 | `reynolds-tube-side-map` | log-map | 05 | Re_i (–) | log color | Re=2300 transition contour highlighted |
-| `reynolds-air-simple-map` | log-map | 07 | Re_a,d (–) | log color | inlet/d_o convention |
 | `reynolds-air-vdi-map` | log-map | 08 | Re_c,l (–) | log color | VDI G7 convention (l=π·d_o/2, void factor) |
 | `friction-pressure-drop-map` | log-map | 18 | Δp_i (bar) | log color, reversed | straight-tube diagnostic; PA min-wall clip |
 | `hydraulic-power-map` | log-map | diagnostic companion | P_hyd (W) | log color | Δp_i · V̇ diagnostic |
@@ -55,6 +54,7 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 
 | MATLAB item | Reason |
 |---|---|
+| Figure 07 simple inlet-diameter air Reynolds map | superseded by the current paper's VDI G7 convention; the compatible core field remains but the diagnostic is not public (ADR-0011) |
 | single-share maps (`share Ri/Rw/Ro`) | superseded by `resistance-shares-grid` (same data) |
 | `same geometry change` map export | same data as `same-geometry-ratio`; kept as web plot, MATLAB export was disabled |
 | k_o slices (`plotSlices2D_from3D`) | disabled in reference; presentation variant of `overall-coefficient-map` |
@@ -73,11 +73,14 @@ container changes width. Single-map exports use the paper geometry 16.5×13.2
 cm, rendered as 624×499 px at 96 dpi; other families use their own recorded
 MATLAB geometry.
 
-Plotly's automatic contour placement is retained where it reproduces the
-reference. Where short or steep segments prevent required labels, the adapter
-interpolates the requested level crossing in the displayed data and derives
-the text angle from the local contour tangent. These annotations select label
-positions only; they do not alter, smooth or fit the scientific field.
+Every continuous plot has isolines; the categorical feasibility mask is the
+only exception. Plotly's automatic contour labels are disabled because they
+can flip adjacent labels by 180 degrees. The adapter interpolates label
+positions on the displayed contour, derives an upright angle from the local
+tangent, adds an opaque clearance, and avoids other labels, axes, markers and
+cross-section sketches. Dense plots label a readable representative subset
+while retaining every contour line. These annotations select label positions
+only; they do not alter, smooth or fit the scientific field.
 
 ## Non-negotiable rendering rules (from AGENTS §8)
 
@@ -89,9 +92,13 @@ positions only; they do not alter, smooth or fit the scientific field.
 - Native `(t, d_o)` results are transformed for display only to a regular τ
   grid under ADR-0007. The adapter never interpolates across non-finite cells;
   masks use nearest-neighbour display resampling.
-- The design-boundary summary alone resamples screen contours to a 0.05 % τ
-  display grid to avoid stair-step linework. The feasible fill, values and
-  exported scientific masks remain the original nearest-neighbour data.
+- Design-screen lines are marching-squares contours of continuous exported
+  fields at the thresholds in the active request. Their hatches start on the
+  contour and extend at a local 45-degree angle into the rejected side. The
+  feasible fill, values and exported scientific masks remain unchanged.
+- Comparison rasters close only the sub-cell gap to the dense exported PA
+  boundary and are then cut by an exact display mask. Scientific comparison
+  arrays are never mutated or exported from this presentation operation.
 - Horizontal shared colorbars use an invisible carrier trace to reproduce
   MATLAB's reversed top-bar direction. Their titles and tick labels are
-  positioned as figure annotations; this is a presentation-only workaround.
+  positioned as figure annotations with collision-tested physical spacing.

@@ -1,4 +1,5 @@
 import type { PlotlyConfig, PlotlyData, PlotlyLayout } from "plotly.js-dist-min";
+import type { SimulationRequest } from "../../contracts/generated/simulation-request";
 import type { SimulationWorkerResult } from "../../workers/protocol";
 import type { EmbeddedReportFigure } from "./reportExport";
 import { createCompositePlotSpec, isCompositePlot } from "../plots/compositePlotSpec";
@@ -6,6 +7,7 @@ import { plotById, type PlotId } from "../plots/plotRegistry";
 import {
   axisMillimeters,
   colorDomainForPlot,
+  comparisonBoundaryForResult,
   createPlotSpec,
   fieldForPlot,
   maskMatrixForPlot,
@@ -44,6 +46,7 @@ export const defaultReportFigureSelections = [
 export async function captureReportFigures(
   result: SimulationWorkerResult,
   selections: readonly ReportFigureSelection[] = defaultReportFigureSelections,
+  request?: SimulationRequest,
 ): Promise<EmbeddedReportFigure[]> {
   const { default: Plotly } = await import("plotly.js-dist-min");
   const element = document.createElement("div");
@@ -54,7 +57,7 @@ export async function captureReportFigures(
 
   try {
     for (const selection of selections) {
-      const reportSpec = createReportFigureSpec(result, selection);
+      const reportSpec = createReportFigureSpec(result, selection, request);
       if (!reportSpec) continue;
       await Plotly.newPlot(element, reportSpec.spec.data, reportSpec.spec.layout, {
         ...reportSpec.spec.config,
@@ -84,9 +87,10 @@ export async function captureReportFigures(
 export function createReportFigureSpec(
   result: SimulationWorkerResult,
   selection: ReportFigureSelection,
+  request?: SimulationRequest,
 ): ReportFigureSpec | undefined {
   const plot = plotById(selection.plotId);
-  const composite = createCompositePlotSpec(result, selection.plotId);
+  const composite = createCompositePlotSpec(result, selection.plotId, undefined, request);
   if (
     composite &&
     (isCompositePlot(selection.plotId) || selection.plotId === "bundle-conductance-map")
@@ -125,9 +129,20 @@ export function createReportFigureSpec(
   const statusValues = statusMatrixForPlot(result.payload, result.arrays, plot, selection.cooler);
   const spec = createPlotSpec({
     colorDomain: sharedColorDomain,
+    comparisonBoundary:
+      plot.source === "comparison"
+        ? comparisonBoundaryForResult(result.payload, result.arrays)
+        : undefined,
     cooler: selection.cooler,
     field,
-    overlays: overlayTracesForPlot(result.payload, result.arrays, plot, selection.cooler),
+    overlays: overlayTracesForPlot(
+      result.payload,
+      result.arrays,
+      plot,
+      selection.cooler,
+      undefined,
+      request,
+    ),
     plot,
     provenance: result.payload.provenance,
     statusValues,

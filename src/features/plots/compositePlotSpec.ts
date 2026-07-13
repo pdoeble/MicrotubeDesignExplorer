@@ -1,4 +1,5 @@
 import type { SimulationWorkerResult } from "../../workers/protocol";
+import type { SimulationRequest } from "../../contracts/generated/simulation-request";
 import type { PlotlyData, PlotlyLayout } from "plotly.js-dist-min";
 import { projectSpectral, projectSpectralReversed } from "./colormap";
 import { plotById, type PlotId } from "./plotRegistry";
@@ -38,13 +39,10 @@ type CompositeDefinition = {
   panels: readonly PanelDefinition[];
   /** MATLAB reverseColorbarScale on the shared top bar. */
   reversedColorbar: boolean;
-  /** Explicit shared-colorbar tick values for log scales. */
-  colorbarTicks?: readonly number[];
 };
 
 const COMPOSITE_DEFINITIONS: Partial<Record<string, CompositeDefinition>> = {
   "bundle-conductance-map": {
-    colorbarTicks: [5, 10, 20, 50, 100, 200, 500, 1000, 2000],
     geometry: BUNDLE_KA_PORTRAIT,
     panels: [
       { cooler: "cooler_left", field: "bundle_conductance", title: "Aluminum" },
@@ -95,7 +93,6 @@ const COMPOSITE_DEFINITIONS: Partial<Record<string, CompositeDefinition>> = {
     reversedColorbar: false,
   },
   "design-boundary-lines": {
-    colorbarTicks: [50, 75, 100, 150, 200, 300, 500],
     geometry: DESIGN_BOUNDARY,
     panels: [
       { cooler: "cooler_left", field: "bundle_conductance", title: "Aluminum" },
@@ -122,6 +119,7 @@ export function createCompositePlotSpec(
   result: SimulationWorkerResult,
   plotId: PlotId,
   widthPx?: number,
+  request?: SimulationRequest,
 ): PlotSpec | undefined {
   const definition = COMPOSITE_DEFINITIONS[plotId];
   if (!definition) return undefined;
@@ -179,7 +177,14 @@ export function createCompositePlotSpec(
       colorDomain,
       cooler: panel.cooler,
       field,
-      overlays: overlayTracesForPlot(result.payload, result.arrays, plot, panel.cooler, paper),
+      overlays: overlayTracesForPlot(
+        result.payload,
+        result.arrays,
+        plot,
+        panel.cooler,
+        paper,
+        request,
+      ),
       paper,
       plot,
       provenance: result.payload.provenance,
@@ -254,15 +259,6 @@ export function createCompositePlotSpec(
   // Shared colorbar owned by an invisible carrier trace.
   if (colorDomain) {
     const bar = colorbarSpec(plot, colorDomain, paper);
-    if (definition.colorbarTicks && presentation.colorScaleType === "log") {
-      const ticks = definition.colorbarTicks.filter(
-        (value) =>
-          value >= 10 ** colorDomain.zmin * (1 - 1e-10) &&
-          value <= 10 ** colorDomain.zmax * (1 + 1e-10),
-      );
-      bar.tickvals = ticks.map(Math.log10);
-      bar.ticktext = ticks.map((value) => `${value}`);
-    }
     bar.title = { ...bar.title, text: "" };
     const scale = presentation.colormapReversed ? projectSpectralReversed : projectSpectral;
     data.push(colorbarCarrierTrace(colorDomain, scale, bar, definition.reversedColorbar));
@@ -291,7 +287,7 @@ export function createCompositePlotSpec(
         text: presentation.colorbarLabel,
         x: paperX(colorbarCm[0] + colorbarCm[2] / 2),
         xref: "paper",
-        y: paperY(colorbarCm[1] + colorbarCm[3] + 0.75),
+        y: paperY(colorbarCm[1] + colorbarCm[3] + 0.9),
         yanchor: "bottom",
         yref: "paper",
       });

@@ -38,7 +38,7 @@ export type PlotPresentation = {
   robustShared?: boolean;
   /**
    * MATLAB makeSparseShareContourLevels: pick a step from candidates so the
-   * data range yields ~8-15 levels; label 4 evenly spread ones.
+   * data range yields ~8-15 levels; label two collision-free interior levels.
    */
   shareSparseLevels?: boolean;
   /** Show the validated aluminum reference marker even without Al tech line. */
@@ -52,6 +52,7 @@ const DEFAULT: PlotPresentation = {
   clipMask: "own-material",
   colorScaleType: "log",
   colorbarLabel: "Value [-]",
+  contourLabelMode: "plain",
   displayFactor: 1,
   displayUnit: "-",
   techLines: "own",
@@ -114,14 +115,6 @@ const presentationById: Record<string, Partial<PlotPresentation>> = {
     colorLimits: [10, 5000],
     colorbarLabel: "<i>Re</i><sub>i</sub> [-]",
     contourLevels: [10, 20, 50, 100, 200, 500, 1000, 2300, 4000],
-    techLines: "both",
-    transitionLevel: 2300,
-  },
-  "reynolds-air-simple-map": {
-    clipMask: "pa-min-wall",
-    colorLimits: [10, 5000],
-    colorbarLabel: "<i>Re</i><sub>a,d</sub> [-]",
-    contourLevels: [20, 50, 100, 200, 500, 1000, 2300, 5000, 10000],
     techLines: "both",
     transitionLevel: 2300,
   },

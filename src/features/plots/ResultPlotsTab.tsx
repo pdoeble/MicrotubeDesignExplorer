@@ -10,39 +10,18 @@ import {
   openPrintableReport,
   reportFilename,
 } from "../export/reportExport";
-import { captureReportFigures } from "../export/reportFigures";
+import { captureReportFigures, defaultReportFigureSelections } from "../export/reportFigures";
 import { PlotFigure } from "./PlotFigure";
 import { CompositePlotFigure } from "./CompositePlotFigure";
 import { isCompositePlot } from "./compositePlotSpec";
 import {
   plotById,
-  plotRegistry,
+  plotTopicGroups,
   variantPlot,
-  type PlotFamily,
   type PlotId,
   type PlotVariantKind,
 } from "./plotRegistry";
 import { colorDomainForPlot } from "./plotSpec";
-
-const plotFamilyLabels: Record<PlotFamily, string> = {
-  "boundary-summary": "Boundaries",
-  "linear-map": "Linear maps",
-  "log-map": "Log maps",
-  "log-map-grid": "Log-map grids",
-  "percent-delta": "Comparison deltas",
-  "ratio-map": "Comparison ratios",
-  "share-grid": "Resistance shares",
-};
-
-const plotFamilyOrder: PlotFamily[] = [
-  "log-map",
-  "linear-map",
-  "percent-delta",
-  "ratio-map",
-  "boundary-summary",
-  "log-map-grid",
-  "share-grid",
-];
 
 export function ResultPlotsTab() {
   const request = useSimulationStore((state) => state.request);
@@ -122,7 +101,7 @@ export function ResultPlotsTab() {
         setReportStatus("Exported JSON sidecar.");
       } else {
         setReportStatus("Capturing report figures.");
-        const figures = await captureReportFigures(result);
+        const figures = await captureReportFigures(result, defaultReportFigureSelections, request);
         const html = buildStandaloneHtmlReport(payload, { figures });
         if (format === "html") {
           downloadTextFile(reportFilename(payload, "html"), html, "text/html;charset=utf-8");
@@ -162,11 +141,10 @@ export function ResultPlotsTab() {
                 value={selectedPlot}
                 onChange={(event) => setSelectedPlot(event.target.value as PlotId)}
               >
-                {plotFamilyOrder.map((family) => {
-                  const plots = plotRegistry.filter((plot) => plot.family === family);
-                  if (plots.length === 0) return null;
+                {plotTopicGroups.map((group) => {
+                  const plots = group.plotIds.map((plotId) => plotById(plotId));
                   return (
-                    <optgroup label={plotFamilyLabels[family]} key={family}>
+                    <optgroup label={group.label} key={group.id}>
                       {plots.map((plot) => (
                         <option value={plot.id} key={plot.id}>
                           {plot.title}
@@ -225,24 +203,31 @@ export function ResultPlotsTab() {
           </fieldset>
           {isComposite ||
           (selectedPlot === "bundle-conductance-map" && displayMode === "tandem") ? (
-            <CompositePlotFigure result={result} plotId={selectedPlot} />
+            <CompositePlotFigure request={request} result={result} plotId={selectedPlot} />
           ) : !isComparisonPlot && displayMode === "tandem" ? (
             <div className="plot-tandem-grid" aria-label={`${selectedDefinition.title} tandem`}>
               <PlotFigure
                 colorDomain={tandemColorDomain}
                 result={result}
+                request={request}
                 plotId={selectedPlot}
                 cooler="cooler_left"
               />
               <PlotFigure
                 colorDomain={tandemColorDomain}
                 result={result}
+                request={request}
                 plotId={selectedPlot}
                 cooler="cooler_right"
               />
             </div>
           ) : (
-            <PlotFigure result={result} plotId={selectedPlot} cooler={selectedCooler} />
+            <PlotFigure
+              request={request}
+              result={result}
+              plotId={selectedPlot}
+              cooler={selectedCooler}
+            />
           )}
           <p className="placeholder-note" role="status">
             {status}

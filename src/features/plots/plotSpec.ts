@@ -3,7 +3,15 @@ import type {
   Provenance,
   SimulationResultPayload,
 } from "../../contracts/generated/simulation-result";
+import type { SimulationRequest } from "../../contracts/generated/simulation-request";
 import type { PlotlyConfig, PlotlyData, PlotlyLayout } from "plotly.js-dist-min";
+import {
+  bilinearGridValue,
+  localBoundaryHatches,
+  marchingSquaresPaths,
+  type BoundaryPath,
+  type BoundaryPoint,
+} from "./boundaryGeometry";
 import { projectSpectral, projectSpectralReversed, type PlotlyColorScale } from "./colormap";
 import { plotById, type PlotDefinition, type PlotId } from "./plotRegistry";
 import { presentationForPlot, type PlotPresentation } from "./plotPresentation";
@@ -43,6 +51,10 @@ export type PreparedPlotData = {
   statusValues?: string[][];
   tauValues: number[];
 };
+export type ComparisonBoundary = {
+  diameterMillimeters: number[];
+  wallRatioPercent: number[];
+};
 
 /**
  * Rendering context tying trace/layout pixel quantities to one MATLAB paper
@@ -56,6 +68,7 @@ export type PaperContext = {
 
 type PlotSpecInput = {
   colorDomain?: ColorDomain | undefined;
+  comparisonBoundary?: ComparisonBoundary | undefined;
   cooler: CoolerKey;
   field: GridFieldRef;
   overlays?: PlotlyData[];
@@ -233,6 +246,7 @@ export function preparePlotData(
 export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   const {
     colorDomain,
+    comparisonBoundary,
     cooler,
     overlays = [],
     plot,
@@ -244,7 +258,11 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   } = input;
   const paper = input.paper ?? paperContext(paperGeometryForPlot(plot));
   const presentation = presentationForPlot(plot);
-  const prepared = preparePlotData(xValues, yValues, zValues, plot, statusValues);
+  const preparedRaw = preparePlotData(xValues, yValues, zValues, plot, statusValues);
+  const prepared =
+    plot.source === "comparison" && comparisonBoundary
+      ? clipComparisonToBoundary(preparedRaw, xValues, comparisonBoundary, presentation)
+      : preparedRaw;
   const customdata = prepared.displayValues.map((row, rowIndex) =>
     row.map((value, columnIndex) => [
       value,
@@ -281,6 +299,9 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   // mapping. Plotly cannot reverse a colorbar, so the visible bar comes from
   // an invisible carrier trace with negated domain and mirrored ticks.
   const traces: PlotlyData[] = [heatmap];
+  if (plot.source === "comparison" && comparisonBoundary) {
+    traces.push(...comparisonBoundaryMaskTraces(comparisonBoundary));
+  }
   if (presentation.colorbarReversed && domain && presentation.colorScaleType !== "binary") {
     heatmap.showscale = false;
     traces.push(
@@ -296,66 +317,20 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
     ...isoContourTraces(plot, cooler, xValues, prepared.tauValues, prepared.displayValues, paper),
   );
   traces.push(...overlays);
-  const layout = scientificLayout(provenance, plot, paper);
+  const layout = scientificLayout(provenance, plot, paper, domain);
+  layout.annotations?.push(
+    ...contourLabelAnnotationsForPlot(
+      plot,
+      cooler,
+      xValues,
+      prepared.tauValues,
+      prepared.displayValues,
+      paper,
+    ),
+  );
   if (presentation.paperVariant === "tech-ka-delta") {
     layout.annotations?.push(
-      ...inlineContourAnnotations(
-        xValues,
-        prepared.tauValues,
-        prepared.displayValues,
-        TECH_KA_INLINE_LABEL_TARGETS,
-        paper,
-        true,
-      ),
       ...percentCalloutAnnotations(xValues, prepared.tauValues, prepared.displayValues, paper),
-    );
-  }
-  if (plot.id === "tech-adjusted-delta-k") {
-    layout.annotations?.push(
-      ...inlineContourAnnotations(
-        xValues,
-        prepared.tauValues,
-        prepared.displayValues,
-        TECH_K_INLINE_LABEL_TARGETS,
-        paper,
-        true,
-      ),
-    );
-  }
-  if (plot.id === "overall-coefficient-map" && cooler === "cooler_left") {
-    layout.annotations?.push(
-      ...inlineContourAnnotations(
-        xValues,
-        prepared.tauValues,
-        prepared.displayValues,
-        OVERALL_AL_INLINE_LABEL_TARGETS,
-        paper,
-        false,
-      ),
-    );
-  }
-  if (plot.id === "bundle-conductance-map" && cooler === "cooler_left") {
-    layout.annotations?.push(
-      ...inlineContourAnnotations(
-        xValues,
-        prepared.tauValues,
-        prepared.displayValues,
-        BUNDLE_AL_INLINE_LABEL_TARGETS,
-        paper,
-        false,
-      ),
-    );
-  }
-  if (plot.id === "design-boundary-lines" && cooler === "cooler_left") {
-    layout.annotations?.push(
-      ...inlineContourAnnotations(
-        xValues,
-        prepared.tauValues,
-        prepared.displayValues,
-        DESIGN_AL_INLINE_LABEL_TARGETS,
-        paper,
-        false,
-      ),
     );
   }
   return {
@@ -380,13 +355,27 @@ type ContourCrossing = {
   tau: number;
 };
 
+type ContourLabelBox = {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+};
+
+type PositionedContourLabel = {
+  angle: number;
+  box: ContourLabelBox;
+  crossing: ContourCrossing;
+};
+
 // MATLAB params_kA_delta.ratio_pct_label_* (V10 l. 918-920). The +100 %
-// and +150 % contours use callouts instead and are configured below.
+// and +150 % contours use callouts below. The +25 % path remains drawn but is
+// intentionally not labelled because four inline texts cannot fit in the
+// narrow default feasible band without collision (ADR-0011).
 const TECH_KA_INLINE_LABEL_TARGETS: readonly ContourLabelTarget[] = [
   { level: -25, targetTau: 15.5, targetXNorm: 0.7 },
   { level: 0, targetTau: 12.6 },
-  { level: 25, targetTau: 16.2 },
-  { level: 50, targetTau: 13.7 },
+  { level: 50, targetTau: 17.4 },
 ];
 
 // Figure 09's narrow comparison band requires an explicit 0 % label; the
@@ -475,10 +464,112 @@ function nearestContourCrossing(
     const yDistance = Math.abs(crossing.tau - target.targetTau) / 40;
     const xDistance =
       target.targetXNorm === undefined ? 0 : Math.abs((crossing.logX + 1) / 2 - target.targetXNorm);
-    const score = yDistance + xDistance;
+    const xNorm = (crossing.logX + 1) / 2;
+    const yNorm = crossing.tau / 40;
+    const edgeDistance = Math.min(xNorm, 1 - xNorm, yNorm, 1 - yNorm);
+    const edgePenalty = edgeDistance < 0.055 ? 4 + (0.055 - edgeDistance) * 30 : 0;
+    const score = yDistance + xDistance + edgePenalty;
     if (!best || score < best.score) best = { crossing, score };
   }
   return best?.crossing;
+}
+
+function boxesIntersect(left: ContourLabelBox, right: ContourLabelBox, gap = 0): boolean {
+  return !(
+    left.right + gap <= right.left ||
+    right.right + gap <= left.left ||
+    left.top + gap <= right.bottom ||
+    right.top + gap <= left.bottom
+  );
+}
+
+function contourLabelBox(
+  crossing: ContourCrossing,
+  angle: number,
+  text: string,
+  paper: PaperContext,
+  percent: boolean,
+): ContourLabelBox {
+  const { plotAreaCm } = paperMargins(paper.geometry);
+  const fontPt = paper.geometry.baseFontPt - (percent ? 3 : 2);
+  const fontHeightCm = (fontPt * 2.54) / 72;
+  const textWidthCm = Math.max(fontHeightCm, plainText(text).length * fontHeightCm * 0.52);
+  const angleRadians = (Math.abs(angle) * Math.PI) / 180;
+  const rotatedWidthCm =
+    Math.abs(Math.cos(angleRadians)) * textWidthCm +
+    Math.abs(Math.sin(angleRadians)) * fontHeightCm;
+  const rotatedHeightCm =
+    Math.abs(Math.sin(angleRadians)) * textWidthCm +
+    Math.abs(Math.cos(angleRadians)) * fontHeightCm;
+  const halfWidth = (rotatedWidthCm / plotAreaCm[0]) * 0.56 + 0.004;
+  const halfHeight = (rotatedHeightCm / plotAreaCm[1]) * 0.56 + 0.004;
+  const centerX = (crossing.logX + 1) / 2;
+  const centerY = crossing.tau / 40;
+  return {
+    bottom: centerY - halfHeight,
+    left: centerX - halfWidth,
+    right: centerX + halfWidth,
+    top: centerY + halfHeight,
+  };
+}
+
+function crossSectionProtectionBoxes(paper: PaperContext): ContourLabelBox[] {
+  const axesRef = paper.geometry.axesCm[0] ?? SINGLE_MAP.axesCm[0];
+  const aspect = (axesRef?.[3] ?? 8.75) / (axesRef?.[2] ?? 9.7);
+  const boxes: ContourLabelBox[] = [];
+  for (const tau of [7.5, 20, 32.5]) {
+    for (const diameter of [0.25, 1, 6]) {
+      const rY = 1.2 * diameter;
+      const rLog = rY * (2 / 40) * aspect;
+      const centerX = (Math.log10(diameter) + 1) / 2;
+      const centerY = tau / 40;
+      boxes.push({
+        bottom: centerY - rY / 40 - 0.009,
+        left: centerX - rLog / 2 - 0.009,
+        right: centerX + rLog / 2 + 0.009,
+        top: centerY + rY / 40 + 0.009,
+      });
+    }
+  }
+  return boxes;
+}
+
+function positionedContourLabel(
+  crossings: readonly ContourCrossing[],
+  target: ContourLabelTarget,
+  text: string,
+  paper: PaperContext,
+  percent: boolean,
+  occupied: readonly ContourLabelBox[],
+  protectedBoxes: readonly ContourLabelBox[],
+): PositionedContourLabel | undefined {
+  let best: { position: PositionedContourLabel; score: number } | undefined;
+  for (const crossing of crossings) {
+    const angle = contourTextAngle(crossing, crossings, paper);
+    const box = contourLabelBox(crossing, angle, text, paper, percent);
+    const xNorm = (crossing.logX + 1) / 2;
+    const yDistance = Math.abs(crossing.tau - target.targetTau) / 40;
+    const xDistance = target.targetXNorm === undefined ? 0 : Math.abs(xNorm - target.targetXNorm);
+    const edgeDistance = Math.min(box.left, 1 - box.right, box.bottom, 1 - box.top);
+    const edgePenalty = edgeDistance < 0.045 ? 8 + Math.max(0, 0.045 - edgeDistance) * 80 : 0;
+    const labelCollisionPenalty = occupied.reduce(
+      (penalty, other) => penalty + (boxesIntersect(box, other, 0.006) ? 40 : 0),
+      0,
+    );
+    const overlayCollisionPenalty = protectedBoxes.reduce(
+      (penalty, other) => penalty + (boxesIntersect(box, other, 0.004) ? 12 : 0),
+      0,
+    );
+    const score =
+      yDistance +
+      xDistance +
+      edgePenalty +
+      labelCollisionPenalty +
+      overlayCollisionPenalty +
+      Math.abs(angle) / 900;
+    if (!best || score < best.score) best = { position: { angle, box, crossing }, score };
+  }
+  return best?.position;
 }
 
 function contourTextAngle(
@@ -515,29 +606,110 @@ function inlineContourAnnotations(
   targets: readonly ContourLabelTarget[],
   paper: PaperContext,
   percent: boolean,
+  signedPercent = false,
+  protectCrossSections = true,
 ): Array<Record<string, unknown>> {
   const annotations: Array<Record<string, unknown>> = [];
+  const occupied: ContourLabelBox[] = [];
+  const protectedBoxes = protectCrossSections ? crossSectionProtectionBoxes(paper) : [];
   for (const target of targets) {
     const crossings = contourCrossings(xValues, tauValues, displayValues, target.level);
-    const crossing = nearestContourCrossing(crossings, target);
-    if (!crossing) continue;
+    const text = percent
+      ? signedPercent
+        ? formatSignedPercent(target.level)
+        : `${formatPlainNumber(target.level)} %`
+      : formatPlainNumber(target.level);
+    const position = positionedContourLabel(
+      crossings,
+      target,
+      text,
+      paper,
+      percent,
+      occupied,
+      protectedBoxes,
+    );
+    if (!position) continue;
+    occupied.push(position.box);
     annotations.push({
+      bgcolor: "rgba(255,255,255,0.9)",
+      borderpad: Math.max(0.5, paper.zoom.pt(0.35)),
       font: {
         color: "#1f1f1f",
         family: PLOT_FONT,
         size: paper.zoom.pt(paper.geometry.baseFontPt - (percent ? 3 : 2)),
       },
       showarrow: false,
-      text: percent ? formatSignedPercent(target.level) : formatPlainNumber(target.level),
-      textangle: contourTextAngle(crossing, crossings, paper),
+      text,
+      textangle: position.angle,
       // Plotly layout annotations on log axes use log10 axis coordinates.
-      x: crossing.logX,
+      x: position.crossing.logX,
       xref: "x",
-      y: crossing.tau,
+      y: position.crossing.tau,
       yref: "y",
     });
   }
   return annotations;
+}
+
+function contourLabelAnnotationsForPlot(
+  plot: PlotDefinition,
+  cooler: CoolerKey,
+  xValues: number[],
+  tauValues: number[],
+  displayValues: number[][],
+  paper: PaperContext,
+): Array<Record<string, unknown>> {
+  const presentation = presentationForPlot(plot);
+  if (presentation.colorScaleType === "binary") return [];
+  const levels = contourLevelsForData(presentation, cooler, displayValues);
+  const initiallyLabelled = labelledContourLevels(presentation, levels);
+  const labelled =
+    plot.source === "comparison" && initiallyLabelled.length > 2
+      ? spreadInteriorSelection(initiallyLabelled, 2)
+      : initiallyLabelled;
+  if (!labelled.length) return [];
+
+  const explicit = new Map<number, ContourLabelTarget>();
+  const addExplicit = (targets: readonly ContourLabelTarget[]) => {
+    for (const target of targets) explicit.set(target.level, target);
+  };
+  if (presentation.paperVariant === "tech-ka-delta") addExplicit(TECH_KA_INLINE_LABEL_TARGETS);
+  if (plot.id === "tech-adjusted-delta-k") addExplicit(TECH_K_INLINE_LABEL_TARGETS);
+  if (cooler === "cooler_left" && plot.id === "overall-coefficient-map")
+    addExplicit(OVERALL_AL_INLINE_LABEL_TARGETS);
+  if (cooler === "cooler_left" && plot.id === "bundle-conductance-map")
+    addExplicit(BUNDLE_AL_INLINE_LABEL_TARGETS);
+  if (cooler === "cooler_left" && plot.id === "design-boundary-lines")
+    addExplicit(DESIGN_AL_INLINE_LABEL_TARGETS);
+
+  const targetTauSequence = [13, 27, 20, 33, 8, 24, 16, 30, 11, 36] as const;
+  const targetXSequence = [0.58, 0.42, 0.68, 0.32, 0.52, 0.75, 0.25] as const;
+  const labelLevels = [...new Set([...labelled, ...levels.filter((level) => explicit.has(level))])];
+  const targets = labelLevels
+    .filter(
+      (level) =>
+        !(presentation.paperVariant === "tech-ka-delta" && (level === 100 || level === 150)),
+    )
+    .map(
+      (level, index): ContourLabelTarget =>
+        explicit.get(level) ?? {
+          level,
+          targetTau: targetTauSequence[index % targetTauSequence.length] ?? 20,
+          targetXNorm: targetXSequence[index % targetXSequence.length] ?? 0.5,
+        },
+    );
+  const percent = presentation.displayUnit === "%";
+  const signedPercent = levels.some((level) => level < 0);
+  return inlineContourAnnotations(
+    xValues,
+    tauValues,
+    displayValues,
+    targets,
+    paper,
+    percent,
+    signedPercent,
+    plot.family !== "boundary-summary",
+  );
 }
 
 // MATLAB Fig. 22 callout labels (+100 %, +150 %): the label sits at a fixed
@@ -591,11 +763,12 @@ export function overlayTracesForPlot(
   plot: PlotDefinition,
   cooler: CoolerKey,
   paper: PaperContext = DEFAULT_PAPER,
+  request?: SimulationRequest,
 ): PlotlyData[] {
   const presentation = presentationForPlot(plot);
   const traces: PlotlyData[] = [];
   if (plot.family === "boundary-summary") {
-    traces.push(...screenBoundaryTraces(payload, arrays, cooler, paper));
+    traces.push(...screenBoundaryTraces(payload, arrays, cooler, paper, request));
     traces.push(...designPointTraces(payload, cooler, paper));
     if (cooler === "cooler_left") traces.push(validatedReferenceTrace(paper));
     return traces;
@@ -698,6 +871,25 @@ export function colorDomainForPlot(
     ? [percentile(filtered, 1), percentile(filtered, 99)]
     : [filtered[0] ?? 0, filtered.at(-1) ?? 1];
   return transformedDomain(bounds, presentation.colorScaleType);
+}
+
+export function comparisonBoundaryForResult(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+): ComparisonBoundary | undefined {
+  const wallRatioPercent = vectorForField(payload.comparison.fields, arrays, "boundary_wall_ratio");
+  const diameterMeters = vectorForField(
+    payload.comparison.fields,
+    arrays,
+    "boundary_right_diameter",
+  );
+  if (!wallRatioPercent || !diameterMeters) return undefined;
+  return {
+    diameterMillimeters: Array.from(diameterMeters, (value) =>
+      Number.isFinite(value) ? value * 1000 : Number.NaN,
+    ),
+    wallRatioPercent: Array.from(wallRatioPercent),
+  };
 }
 
 export function summarizePlotData(zValues: number[][], statusValues?: string[][]): PlotDataSummary {
@@ -821,6 +1013,125 @@ function resampleStatusToTau(
   );
 }
 
+function clipComparisonToBoundary(
+  prepared: PreparedPlotData,
+  xValues: number[],
+  boundary: ComparisonBoundary,
+  presentation: PlotPresentation,
+): PreparedPlotData {
+  const displayValues = prepared.displayValues.map((row, rowIndex) => {
+    const tau = prepared.tauValues[rowIndex];
+    const minimumDiameter =
+      tau === undefined ? Number.NaN : interpolateComparisonBoundary(boundary, tau);
+    const firstFiniteIndex = row.findIndex(
+      (value, column) =>
+        Number.isFinite(value) && (xValues[column] ?? Number.NEGATIVE_INFINITY) >= minimumDiameter,
+    );
+    const boundaryValue =
+      firstFiniteIndex >= 0 ? (row[firstFiniteIndex] ?? Number.NaN) : Number.NaN;
+    return row.map((value, column) => {
+      const diameter = xValues[column];
+      if (diameter === undefined || !Number.isFinite(minimumDiameter) || diameter < minimumDiameter)
+        return Number.NaN;
+      // The composite boundary is evaluated on the core's denser query grid.
+      // Close only the sub-cell display band up to the first finite native
+      // comparison sample with nearest-neighbour edge extension; the white
+      // boundary mask below then cuts the raster at the exact exported curve.
+      if (Number.isFinite(value)) return value;
+      return firstFiniteIndex >= 0 && column < firstFiniteIndex ? boundaryValue : Number.NaN;
+    });
+  });
+  const plotValues = displayValues.map((row) =>
+    row.map((value) =>
+      presentation.colorScaleType === "log" && value > 0
+        ? Math.log10(value)
+        : presentation.colorScaleType === "log"
+          ? Number.NaN
+          : value,
+    ),
+  );
+  return { ...prepared, displayValues, plotValues };
+}
+
+function interpolateComparisonBoundary(boundary: ComparisonBoundary, tau: number): number {
+  const y = boundary.wallRatioPercent;
+  const x = boundary.diameterMillimeters;
+  if (
+    y.length < 2 ||
+    x.length !== y.length ||
+    tau < (y[0] ?? Infinity) ||
+    tau > (y.at(-1) ?? -Infinity)
+  )
+    return Number.NaN;
+  let lower = 0;
+  let upper = y.length - 1;
+  while (upper - lower > 1) {
+    const middle = Math.floor((lower + upper) / 2);
+    if ((y[middle] ?? tau) <= tau) lower = middle;
+    else upper = middle;
+  }
+  const y0 = y[lower];
+  const y1 = y[upper];
+  const x0 = x[lower];
+  const x1 = x[upper];
+  if (
+    y0 === undefined ||
+    y1 === undefined ||
+    x0 === undefined ||
+    x1 === undefined ||
+    ![y0, y1, x0, x1].every(Number.isFinite)
+  )
+    return Number.NaN;
+  if (y1 === y0) return x0;
+  return x0 + ((tau - y0) / (y1 - y0)) * (x1 - x0);
+}
+
+function comparisonBoundaryMaskTraces(boundary: ComparisonBoundary): PlotlyData[] {
+  const traces: PlotlyData[] = [];
+  let x: number[] = [];
+  let y: number[] = [];
+  const flush = () => {
+    if (x.length < 2 || y.length < 2) {
+      x = [];
+      y = [];
+      return;
+    }
+    traces.push({
+      fill: "toself",
+      fillcolor: "#ffffff",
+      hoverinfo: "skip",
+      line: { color: "#ffffff", width: 0 },
+      mode: "lines",
+      name: "",
+      showlegend: false,
+      type: "scatter",
+      x: [0.1, ...x, 0.1],
+      y: [y[0] ?? 0, ...y, y.at(-1) ?? 0],
+    });
+    x = [];
+    y = [];
+  };
+  for (let index = 0; index < boundary.wallRatioPercent.length; index += 1) {
+    const tau = boundary.wallRatioPercent[index];
+    const diameter = boundary.diameterMillimeters[index];
+    if (
+      tau === undefined ||
+      diameter === undefined ||
+      !Number.isFinite(tau) ||
+      !Number.isFinite(diameter) ||
+      tau < TAU_MIN ||
+      tau > TAU_MAX
+    ) {
+      flush();
+      continue;
+    }
+    x.push(diameter);
+    y.push(tau);
+  }
+  flush();
+  return traces;
+}
+
 function defaultColorDomain(plot: PlotDefinition, values: number[][]): ColorDomain | undefined {
   const presentation = presentationForPlot(plot);
   if (presentation.colorLimits)
@@ -904,23 +1215,109 @@ export function colorbarSpec(
             value >= 10 ** domain.zmin * (1 - 1e-10) && value <= 10 ** domain.zmax * (1 + 1e-10),
         )
       : logTicks(10 ** domain.zmin, 10 ** domain.zmax);
-    spec.tickvals = ticks.map(Math.log10);
-    spec.ticktext = ticks.map(formatPlainNumber);
+    const selected = collisionFreeColorbarTicks(
+      ticks.map(Math.log10),
+      ticks.map(formatPlainNumber),
+      domain,
+      paper,
+    );
+    spec.tickvals = selected.values;
+    spec.ticktext = selected.labels;
   } else if (presentation.colorbarTickValues && presentation.colorScaleType === "linear") {
     const ticks = [...presentation.colorbarTickValues];
     // Delta maps sign their percent ticks ("+50 %"); share-style maps with a
     // non-negative caxis label plainly ("50 %"), matching MATLAB.
     const signed = (presentation.colorLimits?.[0] ?? 0) < 0;
-    spec.tickvals = ticks;
-    spec.ticktext = ticks.map((value) =>
+    const labels = ticks.map((value) =>
       presentation.displayUnit === "%"
         ? signed
           ? formatSignedPercent(value)
           : `${formatPlainNumber(value)} %`
         : formatPlainNumber(value),
     );
+    const selected = domain
+      ? collisionFreeColorbarTicks(ticks, labels, domain, paper)
+      : { labels, values: ticks };
+    spec.tickvals = selected.values;
+    spec.ticktext = selected.labels;
+  } else if (domain && presentation.colorScaleType === "binary") {
+    spec.tickvals = [0, 1];
+    spec.ticktext = ["0", "1"];
+  } else if (domain) {
+    const ticks = niceLinearTicks(domain.zmin, domain.zmax, 7);
+    const labels = ticks.map(formatPlainNumber);
+    const selected = collisionFreeColorbarTicks(ticks, labels, domain, paper);
+    spec.tickvals = selected.values;
+    spec.ticktext = selected.labels;
+  }
+  if (
+    geometry.colorbarOrientation === "v" &&
+    (spec.ticktext as string[] | undefined)?.some((label) => plainText(label).length >= 6)
+  ) {
+    spec.tickfont = {
+      color: AXIS_COLOR,
+      family: PLOT_FONT,
+      size: zoom.pt(geometry.baseFontPt - 1.5),
+    };
   }
   return spec;
+}
+
+function collisionFreeColorbarTicks(
+  values: readonly number[],
+  labels: readonly string[],
+  domain: ColorDomain,
+  paper: PaperContext,
+): { labels: string[]; values: number[] } {
+  const colorbar = paper.geometry.colorbarCm;
+  if (!colorbar || values.length <= 2 || !(domain.zmax > domain.zmin)) {
+    return { labels: [...labels], values: [...values] };
+  }
+  const horizontal = paper.geometry.colorbarOrientation === "h";
+  const lengthPx = paper.zoom.cm(horizontal ? colorbar[2] : colorbar[3]);
+  const fontPx = paper.zoom.pt(paper.geometry.baseFontPt);
+  const candidates = values
+    .map((value, index) => {
+      const label = labels[index] ?? formatPlainNumber(value);
+      const center = ((value - domain.zmin) / (domain.zmax - domain.zmin)) * lengthPx;
+      const extent = horizontal
+        ? Math.max(fontPx * 0.8, plainText(label).length * fontPx * 0.54)
+        : fontPx * 1.18;
+      return { center, extent, label, value };
+    })
+    .filter((candidate) => candidate.center >= -1e-8 && candidate.center <= lengthPx + 1e-8)
+    .sort((left, right) => left.center - right.center);
+  if (candidates.length <= 2)
+    return {
+      labels: candidates.map((candidate) => candidate.label),
+      values: candidates.map((candidate) => candidate.value),
+    };
+
+  const gapPx = Math.max(2, fontPx * (horizontal ? 0.18 : 0.32));
+  const selected = [candidates[0]!];
+  const last = candidates.at(-1)!;
+  for (const candidate of candidates.slice(1, -1)) {
+    const previous = selected.at(-1)!;
+    const previousEnd = previous.center + previous.extent / 2;
+    const candidateStart = candidate.center - candidate.extent / 2;
+    const candidateEnd = candidate.center + candidate.extent / 2;
+    const lastStart = last.center - last.extent / 2;
+    if (candidateStart >= previousEnd + gapPx && candidateEnd + gapPx <= lastStart)
+      selected.push(candidate);
+  }
+  while (selected.length > 1) {
+    const previous = selected.at(-1)!;
+    if (last.center - last.extent / 2 >= previous.center + previous.extent / 2 + gapPx) break;
+    selected.pop();
+  }
+  selected.push(last);
+  const selectedByInputOrder = selected.sort(
+    (left, right) => values.indexOf(left.value) - values.indexOf(right.value),
+  );
+  return {
+    labels: selectedByInputOrder.map((candidate) => candidate.label),
+    values: selectedByInputOrder.map((candidate) => candidate.value),
+  };
 }
 
 /**
@@ -1000,7 +1397,7 @@ export function horizontalBarTickAnnotations(
       x: (cbLeft + cbWidth * tick.fraction - margin.l) / plotAreaCm[0],
       xanchor: "center",
       xref: "paper",
-      y: (cbBottom + cbHeight + 0.1 - margin.b) / plotAreaCm[1],
+      y: (cbBottom + cbHeight + 0.3 - margin.b) / plotAreaCm[1],
       yanchor: "bottom",
       yref: "paper",
     }));
@@ -1053,44 +1450,22 @@ function isoContourTraces(
   // Contours are drawn on the linear display values so plotly's inline
   // labels show the physical level (MATLAB labels), not a log10 transform.
   const levels = contourLevelsForData(presentation, cooler, z);
-  const labelled = new Set(labelledContourLevels(presentation, levels));
-  const annotationTargets =
-    presentation.paperVariant === "tech-ka-delta"
-      ? levels.map((level) => ({ level }))
-      : plot.id === "tech-adjusted-delta-k"
-        ? TECH_K_INLINE_LABEL_TARGETS
-        : cooler !== "cooler_left"
-          ? []
-          : plot.id === "overall-coefficient-map"
-            ? OVERALL_AL_INLINE_LABEL_TARGETS
-            : plot.id === "bundle-conductance-map"
-              ? BUNDLE_AL_INLINE_LABEL_TARGETS
-              : plot.id === "design-boundary-lines"
-                ? DESIGN_AL_INLINE_LABEL_TARGETS
-                : [];
-  const annotationOnlyLevels = new Set(annotationTargets.map((target) => target.level));
-  // Percent maps label like MATLAB ("+25 %"/"25 %"): plotly contour labels
-  // only support d3 formats, so the label trace carries value/100 and signs
-  // the format only when negative levels exist (delta maps).
-  const percentLabels =
-    presentation.displayUnit === "%" && presentation.colorScaleType === "linear";
-  const percentFormat = levels.some((level) => level < 0) ? "+.0%" : ".0%";
-  const zPercent = percentLabels ? z.map((row) => row.map((value) => value / 100)) : undefined;
   for (const level of levels) {
-    const transformed = percentLabels ? level / 100 : level;
     traces.push({
       contours: {
         coloring: "none",
-        end: transformed,
+        end: level,
         labelfont: {
           color: "#1f1f1f",
           family: PLOT_FONT,
           size: zoom.pt(geometry.baseFontPt - 2),
         },
-        ...(percentLabels ? { labelformat: percentFormat } : {}),
-        showlabels: labelled.has(level) && !annotationOnlyLevels.has(level),
+        // All labels are deterministic layout annotations. Plotly's automatic
+        // path direction can rotate neighboring labels by 180 degrees and it
+        // offers no reliable cross-trace collision policy.
+        showlabels: false,
         size: 1,
-        start: transformed,
+        start: level,
       },
       hoverinfo: "skip",
       line: { color: "#1f1f1f", width: zoom.pt(presentation.contourWidthPt ?? 0.75) },
@@ -1100,7 +1475,7 @@ function isoContourTraces(
       type: "contour",
       x,
       y,
-      z: zPercent ?? z,
+      z,
     });
   }
   if (presentation.transitionLevel) {
@@ -1140,7 +1515,11 @@ function contourLevelsForData(
     return presentation.contourLevels.filter((level) => level > minimum && level < maximum);
   const step = presentation.contourStepByCooler?.[cooler] ?? presentation.contourStep;
   if (step) return steppedLevels(minimum, maximum, step);
-  return [];
+  if (presentation.colorScaleType === "log") {
+    const levels = logTicks(Math.max(minimum, Number.MIN_VALUE), maximum);
+    return spreadSelection(levels, 11);
+  }
+  return niceLinearTicks(minimum, maximum, 9).filter((level) => level > minimum && level < maximum);
 }
 
 function steppedLevels(minimum: number, maximum: number, step: number): number[] {
@@ -1180,12 +1559,12 @@ function sparseShareLevels(minimum: number, maximum: number): number[] {
 // selectCostContourLabels; reynolds/mm/pressuredrop label every drawn level.
 function labelledContourLevels(presentation: PlotPresentation, levels: number[]): number[] {
   if (!levels.length) return [];
-  if (presentation.shareSparseLevels) return spreadSelection(levels, 4);
+  if (presentation.shareSparseLevels) return spreadInteriorSelection(levels, 2);
   const mode = presentation.contourLabelMode ?? "all";
   if (mode === "all") return levels;
   if (mode === "plain") {
     const preferred = levels.filter((level) => level >= 100 && level % 100 === 0);
-    return preferred.length ? preferred : spreadSelection(levels, 6);
+    return preferred.length ? spreadSelection(preferred, 4) : spreadSelection(levels, 4);
   }
   if (mode === "bar") {
     const preferred =
@@ -1210,10 +1589,16 @@ function spreadSelection(levels: number[], count: number): number[] {
   return [...indices].map((index) => levels[index] ?? 0);
 }
 
+function spreadInteriorSelection(levels: number[], count: number): number[] {
+  const pool = levels.length > count + 2 ? levels.slice(1, -1) : levels;
+  return spreadSelection(pool, count);
+}
+
 function scientificLayout(
   provenance: Provenance,
   plot: PlotDefinition,
   paper: PaperContext,
+  colorDomain?: ColorDomain,
 ): PlotlyLayout {
   const presentation = presentationForPlot(plot);
   const { geometry, zoom } = paper;
@@ -1247,7 +1632,20 @@ function scientificLayout(
   if (geometry.colorbarOrientation === "v" && geometry.colorbarCm) {
     // MATLAB colorbar label: rotated, reading bottom-up, right of the ticks.
     const { plotAreaCm } = paperMargins(geometry);
-    const labelXCm = geometry.colorbarCm[0] + geometry.colorbarCm[2] + 1.85;
+    const tickLabels = colorbarSpec(plot, colorDomain, paper).ticktext as string[] | undefined;
+    const maxTickCharacters = Math.max(
+      1,
+      ...(tickLabels ?? []).map((text) => plainText(text).length),
+    );
+    const fontHeightCm = geometry.baseFontPt * (2.54 / 72);
+    const estimatedTickWidthCm = maxTickCharacters * fontHeightCm * 0.52;
+    const colorbarRightCm = geometry.colorbarCm[0] + geometry.colorbarCm[2];
+    const maximumOffsetCm = geometry.figureCm[0] - colorbarRightCm - fontHeightCm / 2 - 0.1;
+    const labelOffsetCm = Math.min(
+      maximumOffsetCm,
+      Math.max(1.85, 0.58 + estimatedTickWidthCm + fontHeightCm / 2),
+    );
+    const labelXCm = colorbarRightCm + labelOffsetCm;
     annotations.push({
       font: { color: AXIS_COLOR, family: PLOT_FONT, size: zoom.pt(geometry.baseFontPt) },
       showarrow: false,
@@ -1475,81 +1873,258 @@ function boundaryTraces(
 // MATLAB design-boundary screen-line colors and legend wording
 // (params.design_boundary_color_*, addDesignBoundaryLegend).
 export const screenBoundaryDefinitions = [
-  { color: "#000000", label: "Minimum wall", mask: "mask_screen_min_wall" },
-  { color: "#0052bd", label: "Coolant throughput", mask: "mask_screen_coolant_flow" },
-  { color: "#e68c00", label: "Pressure drop", mask: "mask_screen_pressure_drop" },
-  { color: "#9400d4", label: "Tube cost", mask: "mask_screen_cost" },
-  { color: "#009433", label: "Burst pressure", mask: "mask_screen_burst_pressure" },
-  { color: "#cc0000", label: "Capillary rise", mask: "mask_screen_capillary" },
+  {
+    color: "#000000",
+    field: null,
+    label: "Minimum wall",
+    mask: "mask_screen_min_wall",
+    threshold: "min-wall",
+    violation: "less",
+  },
+  {
+    color: "#0052bd",
+    field: "coolant_volume_flow",
+    label: "Coolant throughput",
+    mask: "mask_screen_coolant_flow",
+    threshold: "min_coolant_volume_flow",
+    violation: "less",
+  },
+  {
+    color: "#e68c00",
+    field: "tube_pressure_drop",
+    label: "Pressure drop",
+    mask: "mask_screen_pressure_drop",
+    threshold: "max_tube_pressure_drop",
+    violation: "greater",
+  },
+  {
+    color: "#9400d4",
+    field: "cost_index",
+    label: "Tube cost",
+    mask: "mask_screen_cost",
+    threshold: "max_cost_index",
+    violation: "greater-equal",
+  },
+  {
+    color: "#009433",
+    field: "burst_pressure",
+    label: "Burst pressure",
+    mask: "mask_screen_burst_pressure",
+    threshold: "min_burst_pressure",
+    violation: "less",
+  },
+  {
+    color: "#cc0000",
+    field: "capillary_rise",
+    label: "Capillary rise",
+    mask: "mask_screen_capillary",
+    threshold: "max_capillary_rise",
+    violation: "greater",
+  },
 ] as const;
+
+type ScreenBoundaryDefinition = (typeof screenBoundaryDefinitions)[number];
+type BoundaryViolation = ScreenBoundaryDefinition["violation"];
 
 function screenBoundaryTraces(
   payload: SimulationResultPayload,
   arrays: readonly Float64Array[],
   cooler: CoolerKey,
   paper: PaperContext,
+  request?: SimulationRequest,
 ): PlotlyData[] {
-  const x = axisMillimeters(payload.outer_diameter_axis);
-  const t = axisMillimeters(payload.wall_thickness_axis);
-  // A finer display-only tau grid keeps the screen boundary lines smooth
-  // (MATLAB contours the masks on the native curvilinear grid).
-  const fineStep = 0.05;
-  const tau = Array.from(
-    { length: Math.round((TAU_MAX - TAU_MIN) / fineStep) + 1 },
-    (_, index) => TAU_MIN + index * fineStep,
-  );
+  const xAxis = axisMillimeters(payload.outer_diameter_axis);
+  const tAxis = axisMillimeters(payload.wall_thickness_axis);
   const traces: PlotlyData[] = [];
   for (const boundary of screenBoundaryDefinitions) {
-    const matrix = matrixForField(payload[cooler].masks, arrays, boundary.mask);
-    if (!matrix || !hasBinaryTransition(matrix)) continue;
-    const resampled = resampleNumericToTau(x, t, matrix, tau, true);
-    traces.push({
-      contours: { coloring: "none", end: 0.5, showlabels: false, size: 1, start: 0.5 },
-      hoverinfo: "skip",
-      line: { color: boundary.color, width: paper.zoom.pt(1.45) },
-      name: boundary.label,
-      showlegend: false,
-      showscale: false,
-      type: "contour",
-      x,
-      y: tau,
-      z: resampled,
-    });
-    const hatch = screenHatchTrace(x, tau, resampled, boundary.color, paper);
+    const geometry = designBoundaryGeometry(
+      payload,
+      arrays,
+      cooler,
+      boundary,
+      xAxis,
+      tAxis,
+      request,
+    );
+    if (!geometry || geometry.paths.length === 0) continue;
+    traces.push(boundaryLineTrace(geometry.paths, boundary.color, boundary.label, paper));
+    const hatch = screenHatchTrace(geometry.paths, geometry.isRejected, boundary.color, paper);
     if (hatch) traces.push(hatch);
   }
   return traces;
 }
 
+function designBoundaryGeometry(
+  payload: SimulationResultPayload,
+  arrays: readonly Float64Array[],
+  cooler: CoolerKey,
+  boundary: ScreenBoundaryDefinition,
+  xAxis: number[],
+  tAxis: number[],
+  request?: SimulationRequest,
+): { isRejected: (point: BoundaryPoint) => boolean; paths: BoundaryPath[] } | undefined {
+  if (boundary.field === null) {
+    const thresholdMeters =
+      request?.[cooler].material.min_wall_thickness ??
+      finiteSummaryValue(payload, cooler, "material_min_wall_thickness");
+    if (thresholdMeters !== undefined && thresholdMeters > 0) {
+      const thresholdMillimeters = thresholdMeters * 1000;
+      const path = Array.from({ length: 500 }, (_, index) => {
+        const fraction = index / 499;
+        const x = 10 ** (-1 + 2 * fraction);
+        return { x, y: (100 * thresholdMillimeters) / x };
+      });
+      return {
+        isRejected: (point) => (point.x * point.y) / 100 < thresholdMillimeters,
+        paths: clipBoundaryPaths([path]),
+      };
+    }
+  }
+
+  const threshold = request ? screenBoundaryThreshold(request, cooler, boundary) : undefined;
+  const continuous =
+    boundary.field === null
+      ? undefined
+      : matrixForField(payload[cooler].fields, arrays, boundary.field);
+  if (continuous && threshold !== undefined && Number.isFinite(threshold)) {
+    const paths = marchingSquaresPaths(xAxis, tAxis, continuous, threshold).map((path) =>
+      path.map((point) => ({ x: point.x, y: (100 * point.y) / point.x })),
+    );
+    return {
+      isRejected: (point) => {
+        const value = bilinearGridValue(
+          xAxis,
+          tAxis,
+          continuous,
+          point.x,
+          (point.x * point.y) / 100,
+        );
+        return !Number.isFinite(value) || violatesThreshold(value, threshold, boundary.violation);
+      },
+      paths: clipBoundaryPaths(paths),
+    };
+  }
+
+  // Backward-compatible fallback for result fixtures without a request. It
+  // still contours the native mask grid directly; production rendering uses
+  // the continuous field and active request threshold above.
+  const mask = matrixForField(payload[cooler].masks, arrays, boundary.mask);
+  if (!mask) return undefined;
+  const paths = marchingSquaresPaths(xAxis, tAxis, mask, 0.5).map((path) =>
+    path.map((point) => ({ x: point.x, y: (100 * point.y) / point.x })),
+  );
+  return {
+    isRejected: (point) => {
+      const value = bilinearGridValue(xAxis, tAxis, mask, point.x, (point.x * point.y) / 100);
+      return !Number.isFinite(value) || value > 0.5;
+    },
+    paths: clipBoundaryPaths(paths),
+  };
+}
+
+function screenBoundaryThreshold(
+  request: SimulationRequest,
+  cooler: CoolerKey,
+  boundary: ScreenBoundaryDefinition,
+): number | undefined {
+  const configuration = request[cooler];
+  const screens = configuration.boundary_conditions.screens;
+  switch (boundary.threshold) {
+    case "min-wall":
+      return configuration.material.min_wall_thickness;
+    case "min_coolant_volume_flow":
+      return screens.min_coolant_volume_flow;
+    case "max_tube_pressure_drop":
+      return screens.max_tube_pressure_drop;
+    case "max_cost_index":
+      return screens.max_cost_index;
+    case "min_burst_pressure":
+      return screens.min_burst_pressure;
+    case "max_capillary_rise":
+      return screens.max_capillary_rise;
+  }
+}
+
+function violatesThreshold(
+  value: number,
+  threshold: number,
+  violation: BoundaryViolation,
+): boolean {
+  if (violation === "less") return value < threshold;
+  if (violation === "greater") return value > threshold;
+  return value >= threshold;
+}
+
+function clipBoundaryPaths(paths: readonly BoundaryPath[]): BoundaryPath[] {
+  const clipped: BoundaryPath[] = [];
+  for (const path of paths) {
+    let current: BoundaryPath = [];
+    for (const point of path) {
+      const visible =
+        Number.isFinite(point.x) &&
+        Number.isFinite(point.y) &&
+        point.x >= 0.1 &&
+        point.x <= 10 &&
+        point.y >= TAU_MIN &&
+        point.y <= TAU_MAX;
+      if (visible) current.push(point);
+      else if (current.length) {
+        if (current.length >= 2) clipped.push(current);
+        current = [];
+      }
+    }
+    if (current.length >= 2) clipped.push(current);
+  }
+  return clipped;
+}
+
+function boundaryLineTrace(
+  paths: readonly BoundaryPath[],
+  color: string,
+  label: string,
+  paper: PaperContext,
+): PlotlyData {
+  const x: Array<number | null> = [];
+  const y: Array<number | null> = [];
+  for (const path of paths) {
+    for (const point of path) {
+      x.push(point.x);
+      y.push(point.y);
+    }
+    x.push(null);
+    y.push(null);
+  }
+  return {
+    hoverinfo: "skip",
+    line: { color, width: paper.zoom.pt(1.45) },
+    mode: "lines",
+    name: label,
+    showlegend: false,
+    type: "scatter",
+    x,
+    y,
+  };
+}
+
 function screenHatchTrace(
-  xValues: number[],
-  tauValues: number[],
-  mask: number[][],
+  paths: readonly BoundaryPath[],
+  isRejected: (point: BoundaryPoint) => boolean,
   color: string,
   paper: PaperContext,
 ): PlotlyData | undefined {
+  const hatches = localBoundaryHatches(paths, {
+    angleDegrees: 45,
+    isRejected,
+    length: 0.026,
+    spacing: 0.055,
+    xLogRange: [-1, 1],
+    yRange: [TAU_MIN, TAU_MAX],
+  });
   const x: Array<number | null> = [];
   const y: Array<number | null> = [];
-  let candidateIndex = 0;
-  for (let row = 1; row < mask.length - 1; row += 1) {
-    for (let column = 1; column < (mask[row]?.length ?? 0) - 1; column += 1) {
-      const value = mask[row]?.[column];
-      if (!(value !== undefined && value > 0.5)) continue;
-      const neighbours = [
-        mask[row - 1]?.[column],
-        mask[row + 1]?.[column],
-        mask[row]?.[column - 1],
-        mask[row]?.[column + 1],
-      ];
-      if (!neighbours.some((neighbour) => neighbour !== undefined && neighbour <= 0.5)) continue;
-      candidateIndex += 1;
-      if (candidateIndex % 29 !== 0) continue;
-      const centerX = xValues[column];
-      const centerY = tauValues[row];
-      if (centerX === undefined || centerY === undefined) continue;
-      x.push(centerX / 10 ** 0.012, centerX * 10 ** 0.012, null);
-      y.push(centerY - 0.45, centerY + 0.45, null);
-    }
+  for (const hatch of hatches) {
+    x.push(hatch.start.x, hatch.end.x, null);
+    y.push(hatch.start.y, hatch.end.y, null);
   }
   return x.length
     ? {
@@ -1777,10 +2352,39 @@ function logTicks(minimum: number, maximum: number): number[] {
   return ticks;
 }
 
+function niceLinearTicks(minimum: number, maximum: number, targetCount: number): number[] {
+  if (!Number.isFinite(minimum) || !Number.isFinite(maximum) || !(maximum > minimum)) return [];
+  const roughStep = (maximum - minimum) / Math.max(1, targetCount - 1);
+  const power = 10 ** Math.floor(Math.log10(roughStep));
+  const error = roughStep / power;
+  const multiple = error >= 7.5 ? 10 : error >= 3.5 ? 5 : error >= 1.5 ? 2 : 1;
+  const step = multiple * power;
+  const first = Math.ceil((minimum - Math.abs(step) * 1e-10) / step) * step;
+  const last = Math.floor((maximum + Math.abs(step) * 1e-10) / step) * step;
+  const ticks: number[] = [];
+  for (let value = first; value <= last + Math.abs(step) * 1e-10; value += step) {
+    ticks.push(Number(value.toPrecision(12)));
+    if (ticks.length > 100) break;
+  }
+  return ticks;
+}
+
 function formatPlainNumber(value: number): string {
-  return Math.abs(value) >= 1
-    ? value.toFixed(0)
+  const magnitude = Math.abs(value);
+  if (magnitude !== 0 && (magnitude >= 10_000 || magnitude < 0.001)) {
+    const exponent = Math.floor(Math.log10(magnitude));
+    const coefficient = value / 10 ** exponent;
+    const coefficientText =
+      Math.abs(coefficient - 1) < 1e-10 ? "" : `${Number(coefficient.toPrecision(2))}×`;
+    return `${coefficientText}10<sup>${exponent < 0 ? "−" : ""}${Math.abs(exponent)}</sup>`;
+  }
+  return magnitude >= 1
+    ? Number(value.toPrecision(6)).toString()
     : value.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function plainText(value: string): string {
+  return value.replace(/<[^>]*>/g, "");
 }
 
 function formatSignedPercent(value: number): string {
@@ -1815,18 +2419,6 @@ function finiteSummaryValue(
 ): number | undefined {
   const value = payload[cooler].summary.values[key];
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-function hasBinaryTransition(matrix: number[][]): boolean {
-  let zero = false;
-  let one = false;
-  for (const row of matrix)
-    for (const value of row) {
-      if (!Number.isFinite(value)) continue;
-      if (value > 0.5) one = true;
-      else zero = true;
-      if (zero && one) return true;
-    }
-  return false;
 }
 // MATLAB tech-limit styles: Al dark blue dashed, Poly dark green dotted,
 // width 2.6 pt with white underlay.
