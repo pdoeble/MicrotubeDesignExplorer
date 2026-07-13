@@ -33,6 +33,29 @@ test("runs a reduced paper-default workflow and exports figures plus JSON/HTML r
   await expect(page.getByRole("heading", { name: "Design-point summary" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Report exports" })).toBeVisible();
   await expect(page.locator(".plot-figure__canvas")).toBeVisible();
+  const resultsAreInPrimaryWorkflowOrder = await page.evaluate(() => {
+    const runButton = Array.from(document.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "Run simulation",
+    );
+    const nodes = [
+      runButton,
+      document.querySelector("#plot-id")?.closest("fieldset"),
+      document.querySelector(".plot-figure"),
+      document.querySelector(".placeholder-note"),
+      document.querySelector("#kpi-heading")?.closest("section"),
+      document.querySelector("#report-export-heading")?.closest("section"),
+    ];
+    return nodes.every(
+      (node, index) =>
+        node !== null &&
+        node !== undefined &&
+        (index === 0 ||
+          Boolean(
+            nodes[index - 1]?.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING,
+          )),
+    );
+  });
+  expect(resultsAreInPrimaryWorkflowOrder).toBe(true);
   await expect(
     page.getByRole("img", {
       name: "VDI G1/G7 plus wall-conduction resistance aggregation.",

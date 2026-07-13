@@ -151,52 +151,8 @@ export function ResultPlotsTab() {
         </button>
       </div>
 
-      <p className="placeholder-note" role="status">
-        {status}
-      </p>
-      {error ? <p className="field-error">{error}</p> : null}
-
       {result ? (
         <>
-          <KpiSummary result={result} />
-          <section className="full-width-panel" aria-labelledby="report-export-heading">
-            <div className="report-export-row">
-              <div>
-                <h3 id="report-export-heading">Report exports</h3>
-                <p className="section-kicker">
-                  Reports use the current immutable `SimulationResult` and request hash.
-                </p>
-              </div>
-              <div className="report-export-actions" aria-label="Report export controls">
-                <button
-                  className="text-button"
-                  onClick={() => void exportReport("json")}
-                  type="button"
-                >
-                  JSON
-                </button>
-                <button
-                  className="text-button"
-                  onClick={() => void exportReport("html")}
-                  type="button"
-                >
-                  HTML
-                </button>
-                <button
-                  className="text-button"
-                  onClick={() => void exportReport("pdf")}
-                  type="button"
-                >
-                  Print / PDF
-                </button>
-              </div>
-            </div>
-            {reportStatus ? (
-              <p className="plot-figure__status" role="status">
-                {reportStatus}
-              </p>
-            ) : null}
-          </section>
           <fieldset className="link-controls">
             <legend>Plot selection</legend>
             <label className="text-field" htmlFor="plot-id">
@@ -288,8 +244,58 @@ export function ResultPlotsTab() {
           ) : (
             <PlotFigure result={result} plotId={selectedPlot} cooler={selectedCooler} />
           )}
+          <p className="placeholder-note" role="status">
+            {status}
+          </p>
+          {error ? <p className="field-error">{error}</p> : null}
+          <KpiSummary result={result} />
+          <section className="full-width-panel" aria-labelledby="report-export-heading">
+            <div className="report-export-row">
+              <div>
+                <h3 id="report-export-heading">Report exports</h3>
+                <p className="section-kicker">
+                  Reports use the current immutable `SimulationResult` and request hash.
+                </p>
+              </div>
+              <div className="report-export-actions" aria-label="Report export controls">
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("json")}
+                  type="button"
+                >
+                  JSON
+                </button>
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("html")}
+                  type="button"
+                >
+                  HTML
+                </button>
+                <button
+                  className="text-button"
+                  onClick={() => void exportReport("pdf")}
+                  type="button"
+                >
+                  Print / PDF
+                </button>
+              </div>
+            </div>
+            {reportStatus ? (
+              <p className="plot-figure__status" role="status">
+                {reportStatus}
+              </p>
+            ) : null}
+          </section>
         </>
-      ) : null}
+      ) : (
+        <>
+          <p className="placeholder-note" role="status">
+            {status}
+          </p>
+          {error ? <p className="field-error">{error}</p> : null}
+        </>
+      )}
     </section>
   );
 }

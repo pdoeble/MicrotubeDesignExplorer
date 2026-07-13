@@ -111,4 +111,25 @@ describe("App shell", () => {
     );
     await waitFor(() => expect(window.location.hash).toBe("#/input"));
   });
+
+  it("shows explicit authorship, citation, and license scope in Settings", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(screen.getByRole("tab", { name: "Settings" }));
+
+    expect(screen.getByRole("heading", { name: "Authorship, citation & license" })).toBeVisible();
+    expect(
+      screen.getByText("Philip Döbler, Esslingen University of Applied Sciences"),
+    ).toBeVisible();
+    expect(screen.getByText(/not licensed for reuse outside this project/)).toBeVisible();
+    expect(screen.getByText(/provided “as is”, without warranty/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "MIT License" })).toHaveAttribute(
+      "href",
+      "https://github.com/pdoeble/MicrotubeDesignExplorer/blob/main/LICENSE",
+    );
+    expect(screen.getByRole("link", { name: "CITATION.cff" })).toHaveAttribute(
+      "href",
+      "https://github.com/pdoeble/MicrotubeDesignExplorer/blob/main/CITATION.cff",
+    );
+  });
 });

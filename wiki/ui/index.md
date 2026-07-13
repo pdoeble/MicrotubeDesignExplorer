@@ -20,6 +20,12 @@ restrained Springer-like scientific visual language.
   set. The single global sweep editor appears in Screens & boundaries and is
   labelled as shared by both designs.
 - Legacy `#/materials` URLs normalize to `#/input` so saved links remain usable.
+- Results presents the primary workflow first: Run simulation, plot selection,
+  and the selected plot. Computation status, design-point summary, and report
+  exports follow below the plot in both visual and DOM order.
+- Settings exposes the software/build identity, author and copyright holder,
+  MIT application-source scope, excluded scientific-material scope, warranty
+  summary, accompanying-paper authors, and canonical LICENSE/CITATION links.
 - Main and Model Setup tab navigation implement the WAI-ARIA Tabs pattern with
   roving tabindex, arrow keys, Home/End, and automatic activation
   (`src/components/Tabs.tsx`); panels are preloaded so activation is
