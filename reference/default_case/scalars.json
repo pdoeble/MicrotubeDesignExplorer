@@ -671,7 +671,8 @@
     "export_svg_renderer": "-painters",
     "export_png": false,
     "export_pdf": true,
-    "export_png_resolution": 300
+    "export_png_resolution": 300,
+    "close_figures_without_export": true
   },
   "fluid": {
     "air": {

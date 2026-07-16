@@ -1,10 +1,11 @@
 """Tube pressure-drop and Lamé burst-pressure submodels.
 
 Equations are ported from ``Waermedurchgang_V10_physical.m`` local functions
-``calcTubeFrictionPressureDropBar`` (line 3898),
-``calcDarcyFrictionFactorSmoothTube`` (line 3933),
-``calcEffectiveInnerDiameterForBurst`` (line 3880), and ``calcPburstBar``
-(line 3887). SI inputs and outputs are used throughout.
+``calcTubeFrictionPressureDropBar`` (currently line 4135),
+``calcDarcyFrictionFactorSmoothTube`` (currently line 4170),
+``calcEffectiveInnerDiameterForBurst`` (currently line 4117), and
+``calcPburstBar`` (currently line 4124). SI inputs and outputs are used
+throughout.
 """
 
 from __future__ import annotations
@@ -58,7 +59,8 @@ def lame_burst_pressure(
 def darcy_friction_factor_smooth_tube(reynolds: ArrayLike) -> FloatArray:
     """Return Darcy friction factor for smooth circular tubes.
 
-    Laminar, transition and turbulent branches match MATLAB line 3933.
+    Laminar, transition and turbulent branches match MATLAB function
+    ``calcDarcyFrictionFactorSmoothTube``.
     """
     re = np.asarray(reynolds, dtype=np.float64)
     friction = nan_array(re.shape)

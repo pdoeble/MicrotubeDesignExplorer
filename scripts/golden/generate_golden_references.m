@@ -40,6 +40,7 @@ setenv('WAERME_SKIP_BURST_GRID', '1');
 setenv('WAERME_SKIP_SHARE_GRID', '1');
 setenv('WAERME_SKIP_CAPILLARY_GRID', '1');
 setenv('WAERME_SKIP_DESIGN_BOUNDARY', '1');
+setenv('WAERME_CLOSE_FIGURES', '1');
 
 fprintf('== Running authoritative reference script ==\n');
 run(g_ref_script);
@@ -69,6 +70,10 @@ g_write_f64(g_case_dir, 'alpha_i', alpha_i);
 g_write_f64(g_case_dir, 'Re_i_raw', Re_i_raw);
 g_write_f64(g_case_dir, 'Re_o_simple_raw', Re_o_simple_raw);
 g_write_f64(g_case_dir, 'Re_o_vdi_raw', Re_o_vdi_raw);
+g_write_f64(g_case_dir, 'Gz_raw', Gz_raw);
+g_write_f64(g_case_dir, 's_field', s_field);
+g_write_f64(g_case_dir, 'Bi_Al_raw', Bi_Al_raw);
+g_write_f64(g_case_dir, 'Bi_PA_raw', Bi_PA_raw);
 g_write_f64(g_case_dir, 'dp_i_fric_bar_raw', dp_i_fric_bar_raw);
 g_write_f64(g_case_dir, 'N_tubes_raw', N_tubes_raw);
 g_write_f64(g_case_dir, 'coolant_Vdot_Lmin_raw', coolant_Vdot_Lmin_raw);

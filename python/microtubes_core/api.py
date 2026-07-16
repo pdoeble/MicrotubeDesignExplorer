@@ -189,6 +189,8 @@ def _cooler_payload(
         ("re_inner", "-", result.re_inner),
         ("re_outer_simple", "-", result.re_outer_simple),
         ("re_outer_vdi", "-", result.re_outer_vdi),
+        ("graetz_inner", "-", result.graetz_inner),
+        ("g1_diameter_sensitivity", "-", result.g1_diameter_sensitivity),
         ("tube_pressure_drop", "Pa", result.tube_pressure_drop),
         ("hydraulic_power", "W", result.hydraulic_power),
         ("coolant_volume_flow", "m^3/s", result.coolant_volume_flow),
@@ -196,6 +198,7 @@ def _cooler_payload(
         ("tube_count_continuous", "-", result.tube_count_continuous),
         ("bundle_outer_area", "m^2", result.bundle_outer_area),
         ("overall_coefficient", "W/(m^2 K)", result.overall_coefficient),
+        ("wall_biot", "-", result.wall_biot),
         ("bundle_conductance", "W/K", result.bundle_conductance),
         ("burst_pressure", "Pa", result.burst_pressure),
         (

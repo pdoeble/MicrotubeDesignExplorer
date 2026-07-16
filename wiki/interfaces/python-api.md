@@ -69,6 +69,11 @@ bundle area, overall coefficient, bundle conductance, configured-screen burst
 pressure, fixed standard/medical burst-tolerance sensitivity fields,
 spacings, configured-screen capillary rise, fixed `1g`/`5g`/`10g`
 capillary-rise sensitivity fields, cost index, and thermal resistance parts.
+The additive dimensionless diagnostic fields are `graetz_inner`,
+`wall_biot`, and `g1_diameter_sensitivity`, each with unit `"-"`. They use the
+same float64 grid, masks, transfer, export, and provenance path as established
+cooler fields. `SimulationRequest`, its schema, and contract version `1.0.0`
+remain unchanged because named result fields are an additive registry.
 
 Comparison exports same-geometry ratio and percent delta, nearest
 left-reference diameter, tech-adjusted ratios and percent deltas, and

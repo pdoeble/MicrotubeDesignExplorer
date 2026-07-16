@@ -20,10 +20,13 @@ def test_default_grid_and_common_sweep_fields_match_goldens() -> None:
     grid = build_design_grid(request.sweep)
     left = evaluate_cooler_sweep(request.sweep, request.cooler_left, grid=grid)
 
-    assert_float_matches_golden(grid.outer_diameter * M_TO_MM, read_f64(case_dir / "da_mm"))
+    assert_float_matches_golden(
+        grid.outer_diameter * M_TO_MM, read_f64(case_dir / "da_mm")
+    )
     assert_float_matches_golden(grid.wall_ratio_pct, read_f64(case_dir / "Y_pct"))
     np.testing.assert_array_equal(
-        grid.mask_invalid_geometry.astype(np.uint8), read_u8(case_dir / "mask_invalid_di")
+        grid.mask_invalid_geometry.astype(np.uint8),
+        read_u8(case_dir / "mask_invalid_di"),
     )
     np.testing.assert_array_equal(
         grid.mask_wall_ratio_range.astype(np.uint8), read_u8(case_dir / "mask_y_calc")
@@ -35,13 +38,18 @@ def test_default_grid_and_common_sweep_fields_match_goldens() -> None:
         (left.re_inner, "Re_i_raw", 1.0),
         (left.re_outer_simple, "Re_o_simple_raw", 1.0),
         (left.re_outer_vdi, "Re_o_vdi_raw", 1.0),
+        (left.graetz_inner, "Gz_raw", 1.0),
         (left.tube_pressure_drop, "dp_i_fric_bar_raw", PA_TO_BAR),
         (left.coolant_volume_flow, "coolant_Vdot_Lmin_raw", M3S_TO_LMIN),
         (left.coolant_mass_flow, "coolant_mdot_kg_s_raw", 1.0),
         (left.tube_count_continuous, "N_tubes_raw", 1.0),
         (left.clear_spacing_transverse, "clearSpacingTrans_mm_raw", M_TO_MM),
         (left.clear_spacing_longitudinal, "clearSpacingLong_mm_raw", M_TO_MM),
-        (left.clear_spacing_closest_inline, "clearSpacingClosestInline_mm_raw", M_TO_MM),
+        (
+            left.clear_spacing_closest_inline,
+            "clearSpacingClosestInline_mm_raw",
+            M_TO_MM,
+        ),
         (
             left.clear_spacing_closest_staggered,
             "clearSpacingClosestStaggered_mm_raw",
@@ -80,6 +88,7 @@ def test_default_material_sweep_fields_and_masks_match_goldens(
 
     for actual, golden_name, scale in (
         (result.overall_coefficient, f"k_{prefix}_raw", 1.0),
+        (result.wall_biot, f"Bi_{prefix if prefix == 'Al' else 'PA'}_raw", 1.0),
         (result.bundle_conductance, f"kA_{prefix}_raw_WK", 1.0),
         (result.burst_pressure, f"pB_{prefix}_bar_raw", PA_TO_BAR),
         (
@@ -99,6 +108,23 @@ def test_default_material_sweep_fields_and_masks_match_goldens(
     ):
         assert_float_matches_golden(actual * scale, read_f64(case_dir / golden_name))
 
+    sensitivity_expected = read_f64(case_dir / "s_field")
+    reynolds = result.re_inner
+    laminar = np.isfinite(reynolds) & (reynolds <= 2200.0)
+    transition = np.isfinite(reynolds) & (reynolds >= 2310.0) & (reynolds <= 9990.0)
+    np.testing.assert_allclose(
+        result.g1_diameter_sensitivity[laminar],
+        sensitivity_expected[laminar],
+        rtol=0.0,
+        atol=1.0e-6,
+    )
+    np.testing.assert_allclose(
+        result.g1_diameter_sensitivity[transition],
+        sensitivity_expected[transition],
+        rtol=0.0,
+        atol=4.0e-4,
+    )
+
     capillary_name = (
         "capillaryRiseAl_raw_g10_mm" if prefix == "Al" else "capillaryRisePA_raw_g10_mm"
     )
@@ -114,7 +140,9 @@ def test_default_material_sweep_fields_and_masks_match_goldens(
     ):
         assert_float_matches_golden(
             actual * M_TO_MM,
-            read_f64(case_dir / f"capillaryRise{capillary_prefix}_raw_{acceleration}_mm"),
+            read_f64(
+                case_dir / f"capillaryRise{capillary_prefix}_raw_{acceleration}_mm"
+            ),
         )
 
 

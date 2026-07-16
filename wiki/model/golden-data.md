@@ -39,6 +39,14 @@ screens. Technology masks and design-feasibility masks are stored
 separately, so masked plot states are reconstructable. See
 [matlab-inventory.md](matlab-inventory.md) §5.
 
+The 2026-07-16 extension additionally harvests `Gz_raw`, `s_field`,
+`Bi_Al_raw`, and `Bi_PA_raw`. Graetz and Biot are asserted at the standard
+`rtol=1e-8`, `atol=1e-10`. The web core intentionally evaluates G1
+sensitivity with a pointwise logarithmic stencil rather than MATLAB's fixed
+4000-point interpolation: laminar cells use `atol=1e-6`, transition cells
+outside ±10 Reynolds around the correlation anchors use `atol=4e-4`, and the
+anchor bands have dedicated branch/convergence tests.
+
 ## Function-level coverage (why these cases exist)
 
 The fixed-parameter script never visits e.g. turbulent coolant flow or the
@@ -80,3 +88,4 @@ that contains only golden changes.
 | Date | MATLAB | Script SHA-256 | Reason |
 |---|---|---|---|
 | 2026-07-10 | R2024b Update 1 | `e521b0b7…7527fc` | Initial generation (M1) |
+| 2026-07-16 | R2024b Update 1 | `3418d69b…541e` | Current MATLAB diagnostics harvested; all 276 pre-existing artifact hashes verified unchanged |

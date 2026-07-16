@@ -37,9 +37,9 @@ scope. The existing resistance-share grid remains the public morphology view.
   without editing them.
 - [x] Thread adaptive diameter/τ domains through single and composite plot
   preparation, axes, overlays, comparison clipping, labels, and hatching.
-- [ ] Implement the three pure float64 diagnostic quantities and expose them
+- [x] Implement the three pure float64 diagnostic quantities and expose them
   through `SimulationResult`.
-- [ ] Extend MATLAB golden harvesting, regenerate provenance/manifest, and
+- [x] Extend MATLAB golden harvesting, regenerate provenance/manifest, and
   verify all pre-existing numerical arrays remain unchanged.
 - [ ] Register and render the three plots with dynamic `Re_i = 2300`, `Bi = 1`,
   and `S_i = 2/3` reference contours.
@@ -76,6 +76,7 @@ scope. The existing resistance-share grid remains the public morphology view.
 | 2026-07-16 | Plan accepted; both remote `main` tips verified at `5d6b3ee`; historical MATLAB blob verified identical to the prior master. |
 | 2026-07-16 | Supplied source material committed unchanged as `55f2922`. |
 | 2026-07-16 | Adaptive domain threaded through single/composite specs, resampling, labels, comparison masks, screen contours, hatches, and exports; scoped frontend checks passed. |
+| 2026-07-16 | Added pure pointwise Graetz, effective wall-Biot, and fixed-local-velocity G1 sensitivity fields; MATLAB R2024b regenerated four diagnostic goldens and all 276 pre-existing hashes remained unchanged. |
 
 ## Final commits
 

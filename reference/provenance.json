@@ -4,8 +4,8 @@
   "matlab_version": "24.2.0.2740171 (R2024b) Update 1",
   "matlab_release": "2024b",
   "reference_script": "source_materials/Waermedurchgang_V10_physical.m",
-  "reference_script_sha256": "e521b0b7113a2ae34b904bd59cdeaba120a3d296e5d081a2a64445a2057527fc",
-  "generated_utc": "2026-07-10T17:20:50Z",
+  "reference_script_sha256": "3418d69b890366e161f607f4a009c65a58a9547a5c14e002752a63ff7082541e",
+  "generated_utc": "2026-07-16T11:46:33Z",
   "data_layout": {
     "binary": "little-endian float64 (*.f64) / uint8 (*.u8), column-major (order F)",
     "meta": "sibling <name>.meta.json files carry dtype/shape/order"

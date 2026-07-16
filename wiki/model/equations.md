@@ -7,7 +7,8 @@ and display boundaries.
 ## VDI G7 inline tube bank
 
 Implemented in `models.correlations.vdi_g7_inline_tube_bank_alpha`, ported
-from `Waermedurchgang_V10_physical.m` line 3691. Source: VDI-Wärmeatlas,
+from `Waermedurchgang_V10_physical.m` function `vdiG7InlineTubeBankAlpha`
+(currently line 3928). Source: VDI-Wärmeatlas,
 12th edition (2019), chapter G7; see ADR-0014 for the resolved legacy citation
 conflict.
 
@@ -32,7 +33,8 @@ The API marks VDI G7 values outside `10 <= Re_c,l <= 1e6` or
 ## VDI G1 internal tube flow
 
 Implemented in `models.correlations.vdi_g1_internal_tube_alpha`, ported from
-MATLAB line 3756. Source: VDI-Wärmeatlas, 12th edition (2019), chapter G1;
+MATLAB function `vdiG1InternalTubeAlpha` (currently line 3993). Source:
+VDI-Wärmeatlas, 12th edition (2019), chapter G1;
 see ADR-0014 for the resolved legacy citation conflict.
 
 - Reynolds number: `Re_i = v_i d_i / nu`
@@ -49,9 +51,36 @@ the laminar all-Re expression at `Re=2300`, matching the MATLAB reference.
 The API marks VDI G1 values outside `Re_i <= 1e6` or
 `0.1 <= Pr <= 1e3` with `W_OUTSIDE_VALIDITY`.
 
+## Dimensionless diagnostics
+
+Implemented in `models.diagnostics` from the diagnostic definitions in the
+current MATLAB master and the supplied morphology derivation. These are
+algebraic diagnostics of accepted fields, not additional correlations or
+calibration factors.
+
+- tube-side Graetz number: `Gz_i = Re_i Pr_i d_i / L`;
+- effective wall Biot number: `Bi_w = k_o d_o / lambda_w`, where `k_o` is the
+  overall coefficient on the outside-area basis, explicitly not `alpha_o`;
+- local G1 diameter sensitivity:
+  `S_i = partial ln(Nu_i) / partial ln(d_i)` at fixed local `v_i`, fluid
+  properties, tube length, and G1 thermal boundary condition.
+
+`S_i` is evaluated independently at every valid grid point with the central
+logarithmic stencil
+`[ln Nu(d_i exp(h)) - ln Nu(d_i exp(-h))] / (2h)`, `h = 1e-5`. It is not
+interpolated from a fixed diameter range and is not clipped. A stencil that
+straddles the G1 correlation anchors can expose the branch discontinuity;
+golden parity therefore uses separate anchor tests and excludes a ±10-Re band
+from the transition-field tolerance assertion.
+
+`Bi_w = 1` is a useful scale reference but does not imply a 50 % wall
+resistance share because `k_o` already aggregates all three resistances and
+the cylindrical wall term also depends on `ln(d_o/d_i)`.
+
 ## Pressure and burst integrity
 
-Implemented in `models.pressure`, ported from MATLAB lines 3880-3933.
+Implemented in `models.pressure`, ported from MATLAB functions currently at
+lines 4117–4195.
 
 - effective burst diameter:
   `d_i,eff = d_o - 2 (t_nom - tolerance)`, NaN when `t_nom - tolerance <= 0`
@@ -74,7 +103,7 @@ heat-exchanger pressure loss.
 ## Geometry, area, and count
 
 Implemented in `models.geometry`, ported from MATLAB lines 489-575 and
-3999-4037.
+4236–4274.
 
 - inner diameter: `d_i = d_o - 2t`
 - wall ratio: `tau = 100 t / d_o`
@@ -92,7 +121,7 @@ Implemented in `models.geometry`, ported from MATLAB lines 489-575 and
 ## Cost index
 
 Implemented in `models.cost.tube_supply_cost_index`, ported from MATLAB line
-3966.
+4203.
 
 - effective raw length:
   `L_raw = N_tubes (active_length + overhang_total) scrap_factor`

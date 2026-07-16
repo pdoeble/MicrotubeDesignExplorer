@@ -39,5 +39,5 @@ introducing undocumented empirical models.
 
 - `source_materials/Waermedurchgang_V10_physical.m` contains no air-side pressure
   drop: the only pressure-drop function is
-  `calcTubeFrictionPressureDropBar` (line ~3898), documented as
+  `calcTubeFrictionPressureDropBar` (currently line 4135), documented as
   "coolant-side … straight-tube friction".

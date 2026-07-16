@@ -30,6 +30,11 @@ from microtubes_core.models.correlations import (
     vdi_g7_inline_tube_bank_alpha,
 )
 from microtubes_core.models.cost import tube_supply_cost_index
+from microtubes_core.models.diagnostics import (
+    g1_diameter_sensitivity,
+    graetz_number,
+    wall_biot_number,
+)
 from microtubes_core.models.geometry import (
     TubeArrangementName,
     bundle_outer_area,
@@ -96,6 +101,8 @@ class CoolerSweepResult:
     re_inner: FloatArray
     re_outer_simple: FloatArray
     re_outer_vdi: FloatArray
+    graetz_inner: FloatArray
+    g1_diameter_sensitivity: FloatArray
     tube_pressure_drop: FloatArray
     hydraulic_power: FloatArray
     coolant_volume_flow: FloatArray
@@ -103,6 +110,7 @@ class CoolerSweepResult:
     tube_count_continuous: FloatArray
     bundle_outer_area: FloatArray
     overall_coefficient: FloatArray
+    wall_biot: FloatArray
     bundle_conductance: FloatArray
     burst_pressure: FloatArray
     burst_pressure_tolerance_standard: FloatArray
@@ -252,6 +260,23 @@ def evaluate_cooler_sweep(
         re_outer_simple = (
             air_velocity * design_grid.outer_diameter / cooler.air_side.fluid.kinematic_viscosity
         )
+    graetz_inner = graetz_number(
+        re_inner,
+        cooler.coolant_side.fluid.prandtl,
+        inner,
+        dimensions.tube_length,
+    )
+    diameter_sensitivity = g1_diameter_sensitivity(
+        coolant_velocity,
+        inner,
+        length=dimensions.tube_length,
+        boundary_condition=_inner_boundary_name(
+            cooler.boundary_conditions.inner_boundary_condition
+        ),
+        kinematic_viscosity=cooler.coolant_side.fluid.kinematic_viscosity,
+        prandtl=cooler.coolant_side.fluid.prandtl,
+        thermal_conductivity=cooler.coolant_side.fluid.thermal_conductivity,
+    )
     pressure_drop = tube_friction_pressure_drop(
         coolant_velocity,
         inner,
@@ -274,6 +299,11 @@ def evaluate_cooler_sweep(
         wall_thermal_conductivity=cooler.material.thermal_conductivity,
     )
     overall[design_grid.mask_invalid_geometry] = np.nan
+    wall_biot = wall_biot_number(
+        overall,
+        design_grid.outer_diameter,
+        cooler.material.thermal_conductivity,
+    )
     conductance = overall * bundle_area
 
     burst_inner = effective_inner_diameter_for_burst(
@@ -305,6 +335,7 @@ def evaluate_cooler_sweep(
     masked_tube_count = _masked(tube_count, design_grid.mask_wall_ratio_range)
     masked_bundle_area = _masked(bundle_area, design_grid.mask_wall_ratio_range)
     masked_overall = _masked(overall, design_grid.mask_wall_ratio_range)
+    masked_wall_biot = _masked(wall_biot, design_grid.mask_wall_ratio_range)
     masked_conductance = _masked(conductance, design_grid.mask_wall_ratio_range)
     masked_burst = _masked(burst, design_grid.mask_wall_ratio_range)
     masked_burst_standard = _masked(burst_standard, design_grid.mask_wall_ratio_range)
@@ -312,6 +343,8 @@ def evaluate_cooler_sweep(
     masked_re_inner = _masked(re_inner, design_grid.mask_wall_ratio_range)
     masked_re_outer_simple = _masked(re_outer_simple, design_grid.mask_wall_ratio_range)
     masked_re_outer_vdi = _masked(re_outer_vdi, design_grid.mask_wall_ratio_range)
+    masked_graetz = _masked(graetz_inner, design_grid.mask_wall_ratio_range)
+    masked_sensitivity = _masked(diameter_sensitivity, design_grid.mask_wall_ratio_range)
     masked_pressure_drop = _masked(pressure_drop, design_grid.mask_wall_ratio_range)
     masked_volume_flow = _masked(volume_flow, design_grid.mask_wall_ratio_range)
     hydraulic_power = masked_pressure_drop * masked_volume_flow
@@ -394,6 +427,8 @@ def evaluate_cooler_sweep(
         re_inner=masked_re_inner,
         re_outer_simple=masked_re_outer_simple,
         re_outer_vdi=masked_re_outer_vdi,
+        graetz_inner=masked_graetz,
+        g1_diameter_sensitivity=masked_sensitivity,
         tube_pressure_drop=masked_pressure_drop,
         hydraulic_power=hydraulic_power,
         coolant_volume_flow=masked_volume_flow,
@@ -401,6 +436,7 @@ def evaluate_cooler_sweep(
         tube_count_continuous=masked_tube_count,
         bundle_outer_area=masked_bundle_area,
         overall_coefficient=masked_overall,
+        wall_biot=masked_wall_biot,
         bundle_conductance=masked_conductance,
         burst_pressure=masked_burst,
         burst_pressure_tolerance_standard=masked_burst_standard,

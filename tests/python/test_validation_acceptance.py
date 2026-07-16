@@ -183,10 +183,13 @@ def _assert_named_arrays_equal(left: SimulationResult, right: SimulationResult) 
         (ref.name, ref.shape, ref.unit) for ref in right_refs
     ]
     for left_ref, right_ref in zip(left_refs, right_refs, strict=True):
+        # The h=1e-5 central log stencil amplifies sub-ULP differences in the
+        # mathematically equivalent reconstructed tube lengths by 1/h.
+        atol = 5.0e-11 if left_ref.name == "g1_diameter_sensitivity" else 1.0e-14
         np.testing.assert_allclose(
             left.arrays[left_ref.buffer_index],
             right.arrays[right_ref.buffer_index],
             rtol=1.0e-12,
-            atol=1.0e-14,
+            atol=atol,
             equal_nan=True,
         )

@@ -2,8 +2,9 @@
 
 The implemented equations are ported from
 ``source_materials/Waermedurchgang_V10_physical.m`` local functions
-``vdiG7InlineTubeBankAlpha`` (line 3691) and ``vdiG1InternalTubeAlpha``
-(line 3756). Source: VDI-Wärmeatlas, 12th edition (2019), chapters G7 and G1.
+``vdiG7InlineTubeBankAlpha`` (currently line 3928) and
+``vdiG1InternalTubeAlpha`` (currently line 3993). Source: VDI-Wärmeatlas,
+12th edition (2019), chapters G7 and G1.
 """
 
 from __future__ import annotations
@@ -38,7 +39,7 @@ def vdi_g7_inline_tube_bank_alpha(
 
     SI inputs and outputs. ``alpha_o`` is referenced to the outer tube surface.
     The void-fraction branch, many-row/finite-row factor and gas property
-    correction match MATLAB line 3691.
+    correction match MATLAB function ``vdiG7InlineTubeBankAlpha``.
     """
     velocity, diameter = broadcast_float_arrays(air_velocity, d_o)
     alpha = nan_array(diameter.shape)
@@ -91,7 +92,8 @@ def vdi_g1_internal_tube_alpha(
     """Return tube-side ``alpha_i`` for circular internal flow.
 
     SI inputs and outputs. Laminar, transition and turbulent branches match
-    VDI-Wärmeatlas, 12th edition (2019), G1 as ported in MATLAB line 3756.
+    VDI-Wärmeatlas, 12th edition (2019), G1 as ported in MATLAB function
+    ``vdiG1InternalTubeAlpha``.
     """
     velocity, diameter = broadcast_float_arrays(coolant_velocity, d_i)
     alpha = nan_array(diameter.shape)

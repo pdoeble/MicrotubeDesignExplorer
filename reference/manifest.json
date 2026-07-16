@@ -6,14 +6,14 @@
     "matlab_version": "24.2.0.2740171 (R2024b) Update 1",
     "matlab_release": "2024b",
     "reference_script": "source_materials/Waermedurchgang_V10_physical.m",
-    "reference_script_sha256": "e521b0b7113a2ae34b904bd59cdeaba120a3d296e5d081a2a64445a2057527fc",
-    "generated_utc": "2026-07-10T17:20:50Z",
+    "reference_script_sha256": "3418d69b890366e161f607f4a009c65a58a9547a5c14e002752a63ff7082541e",
+    "generated_utc": "2026-07-16T11:46:33Z",
     "data_layout": {
       "binary": "little-endian float64 (*.f64) / uint8 (*.u8), column-major (order F)",
       "meta": "sibling <name>.meta.json files carry dtype/shape/order"
     }
   },
-  "file_count": 278,
+  "file_count": 286,
   "files": {
     "default_case/alpha_a.f64": {
       "sha256": "020312cb1ed20c71912ef815235273e95747ea18f5c25f886fbe7a170025d50d",
@@ -28,6 +28,22 @@
       "bytes": 500000
     },
     "default_case/alpha_i.meta.json": {
+      "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
+      "bytes": 97
+    },
+    "default_case/Bi_Al_raw.f64": {
+      "sha256": "54ddcbcd6366bfd7aad8e58459dc2e87d3ff3ad8600305772b784c8ebdf06326",
+      "bytes": 500000
+    },
+    "default_case/Bi_Al_raw.meta.json": {
+      "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
+      "bytes": 97
+    },
+    "default_case/Bi_PA_raw.f64": {
+      "sha256": "dab9dbdafab7c0b609d8f89177bb3cd78008fa9dc9188cd66d799785a02752c7",
+      "bytes": 500000
+    },
+    "default_case/Bi_PA_raw.meta.json": {
       "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
       "bytes": 97
     },
@@ -196,6 +212,14 @@
       "bytes": 500000
     },
     "default_case/dp_i_fric_bar_raw.meta.json": {
+      "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
+      "bytes": 97
+    },
+    "default_case/Gz_raw.f64": {
+      "sha256": "a0ec0fb2e43b0eb838fd1e23e243b644a0086f56cc000aef5af7adb554ef4f1f",
+      "bytes": 500000
+    },
+    "default_case/Gz_raw.meta.json": {
       "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
       "bytes": 97
     },
@@ -431,9 +455,17 @@
       "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
       "bytes": 97
     },
+    "default_case/s_field.f64": {
+      "sha256": "c9b4cc2645051ba32edcc7286a82ac69b362f03c0a1fac358ef4913e3d0ab5cd",
+      "bytes": 500000
+    },
+    "default_case/s_field.meta.json": {
+      "sha256": "dab1ffbebfc1c330e5ca5bf7760fa23989f6be6ecc73f174c5511285f867e016",
+      "bytes": 97
+    },
     "default_case/scalars.json": {
-      "sha256": "87c097f2db6762690e47a783f5299ec325fc2ee7cf5edaaa8a275b9d4142c94d",
-      "bytes": 12482
+      "sha256": "9e9851b6550709a708dc4c2926efe92cf216acbc30e689a7943bf60633ed1b93",
+      "bytes": 12524
     },
     "default_case/t_mm.f64": {
       "sha256": "c964063b2905dc3b119e79d1a93b18b4efd22c9e8bdbba3fa8a50fb542c9e530",
@@ -1124,8 +1156,8 @@
       "bytes": 95
     },
     "provenance.json": {
-      "sha256": "4067c6f9a688ef87bb130c6563363256092efa738b8db38d5b5b6c5cffa4d90b",
-      "bytes": 627
+      "sha256": "ce8ec7832b8a0011cdc1388347f0b0c6228ec03cf89e97cee43b3f31818df858",
+      "bytes": 626
     }
   }
 }

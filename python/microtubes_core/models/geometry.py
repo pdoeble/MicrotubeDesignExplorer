@@ -2,7 +2,7 @@
 
 The continuous-count and spacing equations are ported from
 ``Waermedurchgang_V10_physical.m`` lines 489-575. The discrete footprint
-count follows ``calcTubeCountInFootprint`` at line 3999.
+count follows ``calcTubeCountInFootprint`` (currently line 4236).
 """
 
 from __future__ import annotations

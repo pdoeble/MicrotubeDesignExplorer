@@ -53,23 +53,24 @@ All in local functions; extracted verbatim for golden generation (ADR-0002).
 
 | Function (line) | Physics | Branches |
 |---|---|---|
-| `vdiG7InlineTubeBankAlpha` (3691) | VDI 2013 G7 inline bank: l=π·d_o/2; c=1−π/(4a) if b≥1 else 1−π/(4ab); Re_c,l=v·l/(c·ν); Nu_lam=0.664·√Re·Pr^⅓; Nu_turb=0.037·Re^0.8·Pr/(1+2.443·Re^−0.1·(Pr^⅔−1)); Nu_l0=0.3+√(Nu_lam²+Nu_turb²); f_A=1+0.7·c^−1.5·(b/a−0.3)/(b/a+0.7)²; α=f_A·Nu_l0·K·λ/l | b≥1 vs b<1; many-row vs finite-row `(1+(n−1)f_A)/n`; K correction |
-| `vdiG1InternalTubeAlpha` (3756) | VDI 2013 G1: Re=v·d_i/ν; α=Nu·λ/d_i | laminar Re<2300; transition 2300–10000 (linear blend of dedicated anchors); turbulent >10000; CWT vs CHF; optional (Pr/Pr_wall)^0.11 |
-| `vdiG1LaminarMeanNu` (3820) | CWT: (3.66³+0.7³+(Nu₂−0.7)³+Nu₃³)^⅓, Nu₂=1.615·X^⅓, Nu₃=(2/(1+22Pr))^⅙·√X, X=Re·Pr·d/L; CHF analog (4.364, 0.6, 1.953, 0.924·Pr^⅓·√(Re·d/L)) | CWT/CHF |
-| `vdiG1LaminarTransitionAnchorNu` (3843) | Re=2300 anchors: CWT (4.9³+…)^⅓; CHF (8.3³+…)^⅓ — **not** identical to the laminar formula at 2300 | CWT/CHF |
-| `vdiG1TurbulentMeanNu` (3869) | Gnielinski: ξ=(1.8·log₁₀Re−1.5)^−2; Nu=(ξ/8)(Re−1000)Pr/(1+12.7√(ξ/8)(Pr^⅔−1))·(1+(d/L)^⅔) | — |
-| `calcEffectiveInnerDiameterForBurst` (3880) | t_loc,min=t_nom−Δt; d_i,eff=d_o−2·t_loc,min; NaN if t_loc≤0 | tolerance rows: standard 0.020 mm, medical 0.005 mm |
-| `calcPburstBar` (3887) | Lamé: p=Rm·(d_o²−d_i²)/(d_o²+d_i²); valid d_o>d_i>0 | — |
-| `calcTubeFrictionPressureDropBar` (3898) | Darcy–Weisbach straight tube: Δp=f_D·(L/d)·½ρv²; diagnostic only (no headers/bends) | via friction factor branches |
-| `calcDarcyFrictionFactorSmoothTube` (3933) | laminar 64/Re; turbulent (1.8·log₁₀Re−1.5)^−2; linear blend 2300–10000 | 3 branches |
-| `calcTubeSupplyCostIndex` (3966) | cost ∝ N_tubes·L_eff, normalized by material reference index at d_ref | material Al/Poly |
-| `calcTubeCountInFootprint` (3999) | footprint 30·a·d_ref × 36·b·d_ref; N_T=floor(fp_T/S_T), N_L=floor(fp_L/S_L) | inline vs staggered (staggered: alternating rows, shifted count) |
+| `vdiG7InlineTubeBankAlpha` (3928) | VDI 2013 G7 inline bank: l=π·d_o/2; c=1−π/(4a) if b≥1 else 1−π/(4ab); Re_c,l=v·l/(c·ν); Nu_lam=0.664·√Re·Pr^⅓; Nu_turb=0.037·Re^0.8·Pr/(1+2.443·Re^−0.1·(Pr^⅔−1)); Nu_l0=0.3+√(Nu_lam²+Nu_turb²); f_A=1+0.7·c^−1.5·(b/a−0.3)/(b/a+0.7)²; α=f_A·Nu_l0·K·λ/l | b≥1 vs b<1; many-row vs finite-row `(1+(n−1)f_A)/n`; K correction |
+| `vdiG1InternalTubeAlpha` (3993) | VDI 2013 G1: Re=v·d_i/ν; α=Nu·λ/d_i | laminar Re<2300; transition 2300–10000 (linear blend of dedicated anchors); turbulent >10000; CWT vs CHF; optional (Pr/Pr_wall)^0.11 |
+| `vdiG1LaminarMeanNu` (4057) | CWT: (3.66³+0.7³+(Nu₂−0.7)³+Nu₃³)^⅓, Nu₂=1.615·X^⅓, Nu₃=(2/(1+22Pr))^⅙·√X, X=Re·Pr·d/L; CHF analog (4.364, 0.6, 1.953, 0.924·Pr^⅓·√(Re·d/L)) | CWT/CHF |
+| `vdiG1LaminarTransitionAnchorNu` (4080) | Re=2300 anchors: CWT (4.9³+…)^⅓; CHF (8.3³+…)^⅓ — **not** identical to the laminar formula at 2300 | CWT/CHF |
+| `vdiG1TurbulentMeanNu` (4106) | Gnielinski: ξ=(1.8·log₁₀Re−1.5)^−2; Nu=(ξ/8)(Re−1000)Pr/(1+12.7√(ξ/8)(Pr^⅔−1))·(1+(d/L)^⅔) | — |
+| `calcEffectiveInnerDiameterForBurst` (4117) | t_loc,min=t_nom−Δt; d_i,eff=d_o−2·t_loc,min; NaN if t_loc≤0 | tolerance rows: standard 0.020 mm, medical 0.005 mm |
+| `calcPburstBar` (4124) | Lamé: p=Rm·(d_o²−d_i²)/(d_o²+d_i²); valid d_o>d_i>0 | — |
+| `calcTubeFrictionPressureDropBar` (4135) | Darcy–Weisbach straight tube: Δp=f_D·(L/d)·½ρv²; diagnostic only (no headers/bends) | via friction factor branches |
+| `calcDarcyFrictionFactorSmoothTube` (4170) | laminar 64/Re; turbulent (1.8·log₁₀Re−1.5)^−2; linear blend 2300–10000 | 3 branches |
+| `calcTubeSupplyCostIndex` (4203) | cost ∝ N_tubes·L_eff, normalized by material reference index at d_ref | material Al/Poly |
+| `calcTubeCountInFootprint` (4236) | footprint 30·a·d_ref × 36·b·d_ref; N_T=floor(fp_T/S_T), N_L=floor(fp_L/S_L) | inline vs staggered (staggered: alternating rows, shifted count) |
 | Overall k (506–509) | k=1/(d_o/(d_i·α_i) + d_o/(2λ)·ln(d_o/d_i) + 1/α_o), outer-surface reference | per material λ |
 | Resistance parts (729–732) | R_i=d_o/(d_i·α_i); R_w=d_o/(2λ)·ln(d_o/d_i); R_o=1/α_o; shares φ=R/(R_i+R_w+R_o) | — |
 | Continuous tube count (489–498) | N=N_ref·(d_ref/d_o)², N_ref=1080 @ d_ref=1 mm; V̇=N·v_i·(π/4)d_i²; ṁ=V̇·ρ | diagnostic (continuous, not floored) |
 | Bundle conductance (516–529) | kA=k·A_o, A_o=N·π·d_o·L (L=0.160 m) | per material |
 | Clear spacings (569–575) | s_T=(a−1)d_o; s_L=(b−1)d_o; s_min,inline=min(s_T,s_L); s_min,stag=min(s_T, √(S_L²+(S_T/2)²)−d_o) | — |
 | Capillary rise (649–669) | h=C_cap/(s_min,inline·G); C_cap,PA=5.4 mm² (process proxy); C_cap,Al=2γcosθ/(ρg)·10⁶ with γ=45.6 mN/m, θ=41.39°, ρ=1110 kg/m³; G∈{1,5,10} | per material C_cap, per acceleration |
+| Diagnostic fields (754–786) | `Gz=Re_i Pr_i d_i/L`; MATLAB G1 sensitivity from a 4000-point 1D log-gradient/interpolation; `Bi=k_o d_o/lambda_w`; morphology helper fields | material-independent Gz/S; material-specific Bi/morphology |
 
 ## 5. Masks and validity (order of application)
 
