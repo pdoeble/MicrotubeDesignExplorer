@@ -31,10 +31,12 @@ native wall-thickness axis and therefore matched numerically but not visually.
    figures retain short panel labels.
 4. The frontend project colormap is a typed snapshot of the exact 256-entry
    `slanCM('spectral')` table dumped from the same MATLAB R2024b installation
-   that produced the approved paper exports (2026-07-13; the earlier snapshot
-   recovered from the exported SVG covered only part of the table). This keeps
-   the static build independent of a MATLAB or third-party runtime colormap
-   package and avoids an undocumented fit.
+   that produced the approved paper exports. Repository history resolves the
+   two dates used by earlier notes: the full table was dumped on 2026-07-12 and
+   integrated and accepted on 2026-07-13; the earlier snapshot recovered from
+   the exported SVG covered only part of the table. This keeps the static build
+   independent of a MATLAB or third-party runtime colormap package and avoids
+   an undocumented fit.
 
 ## Consequences
 

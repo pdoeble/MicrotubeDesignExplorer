@@ -12,6 +12,9 @@ or calibration is implemented in TypeScript.
   `params` block.
 - `colormap.ts` contains the exact provenance-documented 256×3
   `slanCM('spectral')` table dumped from MATLAB R2024b.
+- `scripts/export_project_colormap.py` deterministically derives a standalone
+  Python/CSV/JSON handoff bundle from that same table; `--check` rejects drift
+  between the committed bundle and the application source.
 - `paperLayout.ts` records each MATLAB figure and axes rectangle in
   centimetres and derives one paper-zoom factor from the available width.
 - `plotSpec.ts` converts SI values at the display boundary, applies exported
