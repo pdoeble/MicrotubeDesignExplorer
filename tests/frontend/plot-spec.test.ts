@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import defaultsJson from "../../src/contracts/defaults.json";
+import type { SimulationRequest } from "../../src/contracts/generated/simulation-request";
 import type {
   GridFieldRef,
   Provenance,
@@ -13,6 +15,7 @@ import {
   matrixFromArray,
   maskMatrixForPlot,
   overlayTracesForPlot,
+  plotDomainForRequest,
   preparePlotData,
   provenanceFooter,
   statusMatrixForPlot,
@@ -99,8 +102,62 @@ const overlayArrays = [
   new Float64Array([1, 2, Number.NaN, 4]),
   new Float64Array([3, 6, 8, Number.NaN]),
 ] as const;
+const defaultRequest = defaultsJson.request as SimulationRequest;
 
 describe("plot spec", () => {
+  it("preserves the paper domain for defaults and adapts changed sweep ranges", () => {
+    expect(plotDomainForRequest(defaultRequest)).toEqual({
+      tauPercent: [0, 40],
+      xMillimeters: [0.1, 10],
+    });
+
+    const request = structuredClone(defaultRequest);
+    request.sweep.outer_diameter_min = 0.5e-3;
+    request.sweep.outer_diameter_max = 25e-3;
+    request.sweep.wall_ratio_calc_min_pct = 5;
+    request.sweep.wall_ratio_calc_max_pct = 48;
+    const domain = plotDomainForRequest(request);
+    expect(domain).toEqual({ tauPercent: [5, 48], xMillimeters: [0.5, 25] });
+
+    const spec = createPlotSpec({
+      cooler: "cooler_left",
+      domain,
+      field,
+      plot: plotById("overall-coefficient-map"),
+      provenance,
+      titleScope: "Aluminum",
+      xValues: [0.5, 25],
+      yValues: [0.025, 12],
+      zValues: [
+        [1, 2],
+        [3, 4],
+      ],
+    });
+    expect(spec.layout.xaxis?.range).toEqual([Math.log10(0.5), Math.log10(25)]);
+    expect(spec.layout.yaxis?.range).toEqual([5, 48]);
+    expect(spec.data[0]?.y).toHaveLength(161);
+    expect((spec.data[0]?.y as number[])[0]).toBe(5);
+    expect((spec.data[0]?.y as number[]).at(-1)).toBe(48);
+
+    const defaultOverlays = overlayTracesForPlot(
+      payload,
+      overlayArrays,
+      plotById("overall-coefficient-map"),
+      "cooler_left",
+      undefined,
+      defaultRequest,
+    );
+    const adaptiveOverlays = overlayTracesForPlot(
+      payload,
+      overlayArrays,
+      plotById("overall-coefficient-map"),
+      "cooler_left",
+      undefined,
+      request,
+    );
+    expect(defaultOverlays.length - adaptiveOverlays.length).toBe(18);
+  });
+
   it("maps row-major transferable arrays to Plotly matrices", () => {
     expect(matrixFromArray(new Float64Array([1, 2, 3, 4, 5, 6]), field)).toEqual([
       [1, 2, 3],

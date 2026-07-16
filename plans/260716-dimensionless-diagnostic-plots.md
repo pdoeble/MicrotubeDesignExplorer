@@ -33,9 +33,9 @@ scope. The existing resistance-share grid remains the public morphology view.
 
 ## Tasks
 
-- [ ] Commit the supplied source-material archive and diagnostic references
+- [x] Commit the supplied source-material archive and diagnostic references
   without editing them.
-- [ ] Thread adaptive diameter/τ domains through single and composite plot
+- [x] Thread adaptive diameter/τ domains through single and composite plot
   preparation, axes, overlays, comparison clipping, labels, and hatching.
 - [ ] Implement the three pure float64 diagnostic quantities and expose them
   through `SimulationResult`.
@@ -74,6 +74,8 @@ scope. The existing resistance-share grid remains the public morphology view.
 | Date | Change |
 |---|---|
 | 2026-07-16 | Plan accepted; both remote `main` tips verified at `5d6b3ee`; historical MATLAB blob verified identical to the prior master. |
+| 2026-07-16 | Supplied source material committed unchanged as `55f2922`. |
+| 2026-07-16 | Adaptive domain threaded through single/composite specs, resampling, labels, comparison masks, screen contours, hatches, and exports; scoped frontend checks passed. |
 
 ## Final commits
 

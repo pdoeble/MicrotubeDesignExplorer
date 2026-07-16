@@ -23,8 +23,8 @@ import {
   maskMatrixForPlot,
   matrixFromArray,
   overlayTracesForPlot,
-  paperAxisStyle,
   paperContext,
+  plotDomainForRequest,
   PLOT_FONT,
   provenanceFooter,
   screenBoundaryDefinitions,
@@ -126,6 +126,7 @@ export function createCompositePlotSpec(
   const plot = plotById(plotId);
   const presentation = presentationForPlot(plot);
   const paper = paperContext(definition.geometry, widthPx);
+  const plotDomain = plotDomainForRequest(request);
   const { geometry, zoom } = paper;
   const { margin, panelDomains, plotAreaCm } = paperMargins(geometry);
   const columns = new Set(geometry.axesCm.map((rect) => rect[0])).size;
@@ -176,6 +177,7 @@ export function createCompositePlotSpec(
     const panelSpec = createPlotSpec({
       colorDomain,
       cooler: panel.cooler,
+      domain: plotDomain,
       field,
       overlays: overlayTracesForPlot(
         result.payload,
@@ -218,24 +220,19 @@ export function createCompositePlotSpec(
     const column = index % columns;
     const row = Math.floor(index / columns);
     const xAxis = {
-      ...paperAxisStyle(paper, "x", "plain"),
+      ...panelSpec.layout.xaxis,
       anchor: `y${axisSuffix}`,
       domain: [domains.x[0], domains.x[1]],
-      range: [-1, 1] as [number, number],
       showticklabels: row === rows - 1,
-      type: "log" as const,
     };
+    delete xAxis.title;
     const yAxis = {
-      ...paperAxisStyle(paper, "y", "plain"),
+      ...panelSpec.layout.yaxis,
       anchor: `x${axisSuffix}`,
       domain: [domains.y[0], domains.y[1]],
-      dtick: presentation.yTickStep ?? 10,
-      range: [0, 40] as [number, number],
       showticklabels: column === 0,
-      tick0: 0,
-      tickmode: "linear" as const,
-      type: "linear" as const,
     };
+    delete yAxis.title;
     if (axisNumber === 1) {
       layout.xaxis = xAxis;
       layout.yaxis = yAxis;

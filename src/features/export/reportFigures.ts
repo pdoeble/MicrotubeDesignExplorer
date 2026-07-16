@@ -13,6 +13,7 @@ import {
   maskMatrixForPlot,
   matrixFromArray,
   overlayTracesForPlot,
+  plotDomainForRequest,
   statusMatrixForPlot,
   titleScopeForPlot,
   type CoolerKey,
@@ -134,6 +135,7 @@ export function createReportFigureSpec(
         ? comparisonBoundaryForResult(result.payload, result.arrays)
         : undefined,
     cooler: selection.cooler,
+    domain: plotDomainForRequest(request),
     field,
     overlays: overlayTracesForPlot(
       result.payload,

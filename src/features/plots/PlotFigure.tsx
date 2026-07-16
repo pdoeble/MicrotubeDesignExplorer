@@ -16,6 +16,7 @@ import {
   overlayTracesForPlot,
   paperContext,
   paperGeometryForPlot,
+  plotDomainForRequest,
   statusMatrixForPlot,
   preparePlotData,
   summarizePlotData,
@@ -78,6 +79,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
   );
   const titleScope = titleScopeForPlot(result.payload, plot, cooler);
   const presentation = presentationForPlot(plot);
+  const plotDomain = useMemo(() => plotDomainForRequest(request), [request]);
   const comparisonBoundary = useMemo(
     () =>
       plot.source === "comparison"
@@ -103,8 +105,11 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
     [cooler, plot, rawValues, result.arrays, result.payload],
   );
   const preparedData = useMemo(
-    () => (zValues ? preparePlotData(xValues, yValues, zValues, plot, statusValues) : undefined),
-    [plot, statusValues, xValues, yValues, zValues],
+    () =>
+      zValues
+        ? preparePlotData(xValues, yValues, zValues, plot, statusValues, plotDomain)
+        : undefined,
+    [plot, plotDomain, statusValues, xValues, yValues, zValues],
   );
   const dataSummary = useMemo(
     () =>
@@ -129,6 +134,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
             colorDomain: effectiveColorDomain,
             comparisonBoundary,
             cooler,
+            domain: plotDomain,
             field,
             overlays: paperOverlays,
             paper,
@@ -150,6 +156,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
       paper,
       paperOverlays,
       plot,
+      plotDomain,
       result.payload.provenance,
       statusValues,
       titleScope,
@@ -187,6 +194,7 @@ export function PlotFigure({ colorDomain, result, plotId, cooler, request }: Plo
       colorDomain: effectiveColorDomain,
       comparisonBoundary,
       cooler,
+      domain: plotDomain,
       field,
       overlays: overlayTracesForPlot(
         result.payload,

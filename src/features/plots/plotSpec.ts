@@ -55,6 +55,10 @@ export type ComparisonBoundary = {
   diameterMillimeters: number[];
   wallRatioPercent: number[];
 };
+export type PlotDomain = {
+  tauPercent: readonly [number, number];
+  xMillimeters: readonly [number, number];
+};
 
 /**
  * Rendering context tying trace/layout pixel quantities to one MATLAB paper
@@ -70,6 +74,7 @@ type PlotSpecInput = {
   colorDomain?: ColorDomain | undefined;
   comparisonBoundary?: ComparisonBoundary | undefined;
   cooler: CoolerKey;
+  domain?: PlotDomain;
   field: GridFieldRef;
   overlays?: PlotlyData[];
   paper?: PaperContext;
@@ -82,9 +87,11 @@ type PlotSpecInput = {
   zValues: number[][];
 };
 
-const TAU_MIN = 0;
-const TAU_MAX = 40;
-const TAU_STEP = 0.25;
+const DEFAULT_PLOT_DOMAIN: PlotDomain = {
+  tauPercent: [0, 40],
+  xMillimeters: [0.1, 10],
+};
+const TAU_SAMPLE_INTERVALS = 160;
 export const PLOT_FONT = "Times New Roman, STIXGeneral, serif";
 // MATLAB axes/grid appearance: axis color [0.15 0.15 0.15]; major grid
 // alpha 0.15 and minor grid (dotted) alpha 0.25 flattened onto white.
@@ -141,6 +148,35 @@ export function matrixFromArray(
 
 export function axisMillimeters(axisMeters: number[]): number[] {
   return axisMeters.map((value) => value * 1000);
+}
+
+/** Resolve one display domain for every panel, overlay, and export. */
+export function plotDomainForRequest(request?: SimulationRequest): PlotDomain {
+  if (!request) return DEFAULT_PLOT_DOMAIN;
+  const sweep = request.sweep;
+  const calcTau: readonly [number, number] = [
+    Math.max(0, Math.min(50, sweep.wall_ratio_calc_min_pct ?? 0)),
+    Math.max(0, Math.min(50, sweep.wall_ratio_calc_max_pct ?? 45)),
+  ];
+  const keepsPaperTau = Math.abs(calcTau[0] - 0) < 1e-12 && Math.abs(calcTau[1] - 45) < 1e-12;
+  const tauPercent = keepsPaperTau ? DEFAULT_PLOT_DOMAIN.tauPercent : calcTau;
+  return {
+    tauPercent: tauPercent[1] > tauPercent[0] ? tauPercent : DEFAULT_PLOT_DOMAIN.tauPercent,
+    xMillimeters: [sweep.outer_diameter_min * 1000, sweep.outer_diameter_max * 1000],
+  };
+}
+
+function isDefaultPlotDomain(domain: PlotDomain): boolean {
+  return (
+    Math.abs(domain.xMillimeters[0] - DEFAULT_PLOT_DOMAIN.xMillimeters[0]) < 1e-12 &&
+    Math.abs(domain.xMillimeters[1] - DEFAULT_PLOT_DOMAIN.xMillimeters[1]) < 1e-12 &&
+    Math.abs(domain.tauPercent[0] - DEFAULT_PLOT_DOMAIN.tauPercent[0]) < 1e-12 &&
+    Math.abs(domain.tauPercent[1] - DEFAULT_PLOT_DOMAIN.tauPercent[1]) < 1e-12
+  );
+}
+
+function plotLogXRange(domain: PlotDomain): readonly [number, number] {
+  return [Math.log10(domain.xMillimeters[0]), Math.log10(domain.xMillimeters[1])];
 }
 
 export function titleScopeForPlot(
@@ -210,9 +246,10 @@ export function preparePlotData(
   zValues: number[][],
   plot: PlotDefinition,
   statusValues?: string[][],
+  domain: PlotDomain = DEFAULT_PLOT_DOMAIN,
 ): PreparedPlotData {
   const presentation = presentationForPlot(plot);
-  const tauValues = regularTauAxis();
+  const tauValues = regularTauAxis(domain);
   const displayNative = zValues.map((row) =>
     row.map((value) => (Number.isFinite(value) ? value * presentation.displayFactor : Number.NaN)),
   );
@@ -248,6 +285,7 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
     colorDomain,
     comparisonBoundary,
     cooler,
+    domain: plotDomain = DEFAULT_PLOT_DOMAIN,
     overlays = [],
     plot,
     provenance,
@@ -258,7 +296,7 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   } = input;
   const paper = input.paper ?? paperContext(paperGeometryForPlot(plot));
   const presentation = presentationForPlot(plot);
-  const preparedRaw = preparePlotData(xValues, yValues, zValues, plot, statusValues);
+  const preparedRaw = preparePlotData(xValues, yValues, zValues, plot, statusValues, plotDomain);
   const prepared =
     plot.source === "comparison" && comparisonBoundary
       ? clipComparisonToBoundary(preparedRaw, xValues, comparisonBoundary, presentation)
@@ -300,7 +338,7 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
   // an invisible carrier trace with negated domain and mirrored ticks.
   const traces: PlotlyData[] = [heatmap];
   if (plot.source === "comparison" && comparisonBoundary) {
-    traces.push(...comparisonBoundaryMaskTraces(comparisonBoundary));
+    traces.push(...comparisonBoundaryMaskTraces(comparisonBoundary, plotDomain));
   }
   if (presentation.colorbarReversed && domain && presentation.colorScaleType !== "binary") {
     heatmap.showscale = false;
@@ -317,7 +355,7 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
     ...isoContourTraces(plot, cooler, xValues, prepared.tauValues, prepared.displayValues, paper),
   );
   traces.push(...overlays);
-  const layout = scientificLayout(provenance, plot, paper, domain);
+  const layout = scientificLayout(provenance, plot, paper, plotDomain, domain);
   layout.annotations?.push(
     ...contourLabelAnnotationsForPlot(
       plot,
@@ -326,11 +364,18 @@ export function createPlotSpec(input: PlotSpecInput): PlotSpec {
       prepared.tauValues,
       prepared.displayValues,
       paper,
+      plotDomain,
     ),
   );
   if (presentation.paperVariant === "tech-ka-delta") {
     layout.annotations?.push(
-      ...percentCalloutAnnotations(xValues, prepared.tauValues, prepared.displayValues, paper),
+      ...percentCalloutAnnotations(
+        xValues,
+        prepared.tauValues,
+        prepared.displayValues,
+        paper,
+        plotDomain,
+      ),
     );
   }
   return {
@@ -458,14 +503,21 @@ function contourCrossings(
 function nearestContourCrossing(
   crossings: readonly ContourCrossing[],
   target: ContourLabelTarget,
+  domain: PlotDomain,
 ): ContourCrossing | undefined {
+  const [xLogMinimum, xLogMaximum] = plotLogXRange(domain);
+  const [tauMinimum, tauMaximum] = domain.tauPercent;
+  const xSpan = xLogMaximum - xLogMinimum;
+  const tauSpan = tauMaximum - tauMinimum;
   let best: { crossing: ContourCrossing; score: number } | undefined;
   for (const crossing of crossings) {
-    const yDistance = Math.abs(crossing.tau - target.targetTau) / 40;
+    const yDistance = Math.abs(crossing.tau - target.targetTau) / tauSpan;
     const xDistance =
-      target.targetXNorm === undefined ? 0 : Math.abs((crossing.logX + 1) / 2 - target.targetXNorm);
-    const xNorm = (crossing.logX + 1) / 2;
-    const yNorm = crossing.tau / 40;
+      target.targetXNorm === undefined
+        ? 0
+        : Math.abs((crossing.logX - xLogMinimum) / xSpan - target.targetXNorm);
+    const xNorm = (crossing.logX - xLogMinimum) / xSpan;
+    const yNorm = (crossing.tau - tauMinimum) / tauSpan;
     const edgeDistance = Math.min(xNorm, 1 - xNorm, yNorm, 1 - yNorm);
     const edgePenalty = edgeDistance < 0.055 ? 4 + (0.055 - edgeDistance) * 30 : 0;
     const score = yDistance + xDistance + edgePenalty;
@@ -489,6 +541,7 @@ function contourLabelBox(
   text: string,
   paper: PaperContext,
   percent: boolean,
+  domain: PlotDomain,
 ): ContourLabelBox {
   const { plotAreaCm } = paperMargins(paper.geometry);
   const fontPt = paper.geometry.baseFontPt - (percent ? 3 : 2);
@@ -503,8 +556,10 @@ function contourLabelBox(
     Math.abs(Math.cos(angleRadians)) * fontHeightCm;
   const halfWidth = (rotatedWidthCm / plotAreaCm[0]) * 0.56 + 0.004;
   const halfHeight = (rotatedHeightCm / plotAreaCm[1]) * 0.56 + 0.004;
-  const centerX = (crossing.logX + 1) / 2;
-  const centerY = crossing.tau / 40;
+  const [xLogMinimum, xLogMaximum] = plotLogXRange(domain);
+  const [tauMinimum, tauMaximum] = domain.tauPercent;
+  const centerX = (crossing.logX - xLogMinimum) / (xLogMaximum - xLogMinimum);
+  const centerY = (crossing.tau - tauMinimum) / (tauMaximum - tauMinimum);
   return {
     bottom: centerY - halfHeight,
     left: centerX - halfWidth,
@@ -513,7 +568,8 @@ function contourLabelBox(
   };
 }
 
-function crossSectionProtectionBoxes(paper: PaperContext): ContourLabelBox[] {
+function crossSectionProtectionBoxes(paper: PaperContext, domain: PlotDomain): ContourLabelBox[] {
+  if (!isDefaultPlotDomain(domain)) return [];
   const axesRef = paper.geometry.axesCm[0] ?? SINGLE_MAP.axesCm[0];
   const aspect = (axesRef?.[3] ?? 8.75) / (axesRef?.[2] ?? 9.7);
   const boxes: ContourLabelBox[] = [];
@@ -542,13 +598,18 @@ function positionedContourLabel(
   percent: boolean,
   occupied: readonly ContourLabelBox[],
   protectedBoxes: readonly ContourLabelBox[],
+  domain: PlotDomain,
 ): PositionedContourLabel | undefined {
+  const [xLogMinimum, xLogMaximum] = plotLogXRange(domain);
+  const [tauMinimum, tauMaximum] = domain.tauPercent;
+  const xSpan = xLogMaximum - xLogMinimum;
+  const tauSpan = tauMaximum - tauMinimum;
   let best: { position: PositionedContourLabel; score: number } | undefined;
   for (const crossing of crossings) {
-    const angle = contourTextAngle(crossing, crossings, paper);
-    const box = contourLabelBox(crossing, angle, text, paper, percent);
-    const xNorm = (crossing.logX + 1) / 2;
-    const yDistance = Math.abs(crossing.tau - target.targetTau) / 40;
+    const angle = contourTextAngle(crossing, crossings, paper, domain);
+    const box = contourLabelBox(crossing, angle, text, paper, percent, domain);
+    const xNorm = (crossing.logX - xLogMinimum) / xSpan;
+    const yDistance = Math.abs(crossing.tau - target.targetTau) / tauSpan;
     const xDistance = target.targetXNorm === undefined ? 0 : Math.abs(xNorm - target.targetXNorm);
     const edgeDistance = Math.min(box.left, 1 - box.right, box.bottom, 1 - box.top);
     const edgePenalty = edgeDistance < 0.045 ? 8 + Math.max(0, 0.045 - edgeDistance) * 80 : 0;
@@ -576,21 +637,26 @@ function contourTextAngle(
   crossing: ContourCrossing,
   crossings: readonly ContourCrossing[],
   paper: PaperContext,
+  domain: PlotDomain,
 ): number {
   const { plotAreaCm } = paperMargins(paper.geometry);
+  const [xLogMinimum, xLogMaximum] = plotLogXRange(domain);
+  const [tauMinimum, tauMaximum] = domain.tauPercent;
+  const xSpan = xLogMaximum - xLogMinimum;
+  const tauSpan = tauMaximum - tauMinimum;
   let neighbor: { crossing: ContourCrossing; score: number } | undefined;
   for (const candidate of crossings) {
     const deltaTau = candidate.tau - crossing.tau;
     if (Math.abs(deltaTau) < 1e-9) continue;
     const deltaLogX = candidate.logX - crossing.logX;
-    const score = Math.abs(deltaTau) / 40 + Math.abs(deltaLogX) / 2;
+    const score = Math.abs(deltaTau) / tauSpan + Math.abs(deltaLogX) / xSpan;
     if (!neighbor || score < neighbor.score) neighbor = { crossing: candidate, score };
   }
   if (!neighbor) return 0;
   const angle =
     (Math.atan2(
-      ((neighbor.crossing.tau - crossing.tau) / 40) * plotAreaCm[1],
-      ((neighbor.crossing.logX - crossing.logX) / 2) * plotAreaCm[0],
+      ((neighbor.crossing.tau - crossing.tau) / tauSpan) * plotAreaCm[1],
+      ((neighbor.crossing.logX - crossing.logX) / xSpan) * plotAreaCm[0],
     ) *
       180) /
     Math.PI;
@@ -608,10 +674,11 @@ function inlineContourAnnotations(
   percent: boolean,
   signedPercent = false,
   protectCrossSections = true,
+  domain: PlotDomain = DEFAULT_PLOT_DOMAIN,
 ): Array<Record<string, unknown>> {
   const annotations: Array<Record<string, unknown>> = [];
   const occupied: ContourLabelBox[] = [];
-  const protectedBoxes = protectCrossSections ? crossSectionProtectionBoxes(paper) : [];
+  const protectedBoxes = protectCrossSections ? crossSectionProtectionBoxes(paper, domain) : [];
   for (const target of targets) {
     const crossings = contourCrossings(xValues, tauValues, displayValues, target.level);
     const text = percent
@@ -627,6 +694,7 @@ function inlineContourAnnotations(
       percent,
       occupied,
       protectedBoxes,
+      domain,
     );
     if (!position) continue;
     occupied.push(position.box);
@@ -658,6 +726,7 @@ function contourLabelAnnotationsForPlot(
   tauValues: number[],
   displayValues: number[][],
   paper: PaperContext,
+  domain: PlotDomain,
 ): Array<Record<string, unknown>> {
   const presentation = presentationForPlot(plot);
   if (presentation.colorScaleType === "binary") return [];
@@ -673,17 +742,20 @@ function contourLabelAnnotationsForPlot(
   const addExplicit = (targets: readonly ContourLabelTarget[]) => {
     for (const target of targets) explicit.set(target.level, target);
   };
-  if (presentation.paperVariant === "tech-ka-delta") addExplicit(TECH_KA_INLINE_LABEL_TARGETS);
-  if (plot.id === "tech-adjusted-delta-k") addExplicit(TECH_K_INLINE_LABEL_TARGETS);
-  if (cooler === "cooler_left" && plot.id === "overall-coefficient-map")
-    addExplicit(OVERALL_AL_INLINE_LABEL_TARGETS);
-  if (cooler === "cooler_left" && plot.id === "bundle-conductance-map")
-    addExplicit(BUNDLE_AL_INLINE_LABEL_TARGETS);
-  if (cooler === "cooler_left" && plot.id === "design-boundary-lines")
-    addExplicit(DESIGN_AL_INLINE_LABEL_TARGETS);
+  if (isDefaultPlotDomain(domain)) {
+    if (presentation.paperVariant === "tech-ka-delta") addExplicit(TECH_KA_INLINE_LABEL_TARGETS);
+    if (plot.id === "tech-adjusted-delta-k") addExplicit(TECH_K_INLINE_LABEL_TARGETS);
+    if (cooler === "cooler_left" && plot.id === "overall-coefficient-map")
+      addExplicit(OVERALL_AL_INLINE_LABEL_TARGETS);
+    if (cooler === "cooler_left" && plot.id === "bundle-conductance-map")
+      addExplicit(BUNDLE_AL_INLINE_LABEL_TARGETS);
+    if (cooler === "cooler_left" && plot.id === "design-boundary-lines")
+      addExplicit(DESIGN_AL_INLINE_LABEL_TARGETS);
+  }
 
-  const targetTauSequence = [13, 27, 20, 33, 8, 24, 16, 30, 11, 36] as const;
+  const targetTauFractions = [0.325, 0.675, 0.5, 0.825, 0.2, 0.6, 0.4, 0.75, 0.275, 0.9] as const;
   const targetXSequence = [0.58, 0.42, 0.68, 0.32, 0.52, 0.75, 0.25] as const;
+  const [tauMinimum, tauMaximum] = domain.tauPercent;
   const labelLevels = [...new Set([...labelled, ...levels.filter((level) => explicit.has(level))])];
   const targets = labelLevels
     .filter(
@@ -694,7 +766,10 @@ function contourLabelAnnotationsForPlot(
       (level, index): ContourLabelTarget =>
         explicit.get(level) ?? {
           level,
-          targetTau: targetTauSequence[index % targetTauSequence.length] ?? 20,
+          targetTau:
+            tauMinimum +
+            (tauMaximum - tauMinimum) *
+              (targetTauFractions[index % targetTauFractions.length] ?? 0.5),
           targetXNorm: targetXSequence[index % targetXSequence.length] ?? 0.5,
         },
     );
@@ -709,6 +784,7 @@ function contourLabelAnnotationsForPlot(
     percent,
     signedPercent,
     plot.family !== "boundary-summary",
+    domain,
   );
 }
 
@@ -720,7 +796,9 @@ function percentCalloutAnnotations(
   tauValues: number[],
   displayValues: number[][],
   paper: PaperContext,
+  domain: PlotDomain,
 ): Array<Record<string, unknown>> {
+  if (!isDefaultPlotDomain(domain)) return [];
   const { geometry, zoom } = paper;
   const { plotAreaCm } = paperMargins(geometry);
   const plotWidthPx = zoom.cm(plotAreaCm[0]);
@@ -735,6 +813,7 @@ function percentCalloutAnnotations(
     const best = nearestContourCrossing(
       contourCrossings(xValues, tauValues, displayValues, target.level),
       { level: target.level, targetTau: labelTau },
+      domain,
     );
     if (!best) continue;
     const targetXPaper = (best.logX + 1) / 2;
@@ -766,9 +845,10 @@ export function overlayTracesForPlot(
   request?: SimulationRequest,
 ): PlotlyData[] {
   const presentation = presentationForPlot(plot);
+  const domain = plotDomainForRequest(request);
   const traces: PlotlyData[] = [];
   if (plot.family === "boundary-summary") {
-    traces.push(...screenBoundaryTraces(payload, arrays, cooler, paper, request));
+    traces.push(...screenBoundaryTraces(payload, arrays, cooler, paper, domain, request));
     traces.push(...designPointTraces(payload, cooler, paper));
     if (cooler === "cooler_left") traces.push(validatedReferenceTrace(paper));
     return traces;
@@ -791,7 +871,7 @@ export function overlayTracesForPlot(
   const showReference = presentation.showValidatedRef ?? techCoolers.includes("cooler_left");
   if (showReference) traces.push(validatedReferenceTrace(paper));
   traces.push(...designPointTraces(payload, cooler, paper));
-  traces.push(...crossSectionTraces(paper));
+  if (isDefaultPlotDomain(domain)) traces.push(...crossSectionTraces(paper));
   return traces;
 }
 
@@ -946,10 +1026,11 @@ export function provenanceFooter(provenance: Provenance): string {
   ].join(" | ");
 }
 
-function regularTauAxis(): number[] {
+function regularTauAxis(domain: PlotDomain): number[] {
+  const [minimum, maximum] = domain.tauPercent;
   return Array.from(
-    { length: Math.round((TAU_MAX - TAU_MIN) / TAU_STEP) + 1 },
-    (_, index) => TAU_MIN + index * TAU_STEP,
+    { length: TAU_SAMPLE_INTERVALS + 1 },
+    (_, index) => minimum + ((maximum - minimum) * index) / TAU_SAMPLE_INTERVALS,
   );
 }
 
@@ -1083,7 +1164,10 @@ function interpolateComparisonBoundary(boundary: ComparisonBoundary, tau: number
   return x0 + ((tau - y0) / (y1 - y0)) * (x1 - x0);
 }
 
-function comparisonBoundaryMaskTraces(boundary: ComparisonBoundary): PlotlyData[] {
+function comparisonBoundaryMaskTraces(
+  boundary: ComparisonBoundary,
+  domain: PlotDomain,
+): PlotlyData[] {
   const traces: PlotlyData[] = [];
   let x: number[] = [];
   let y: number[] = [];
@@ -1102,7 +1186,7 @@ function comparisonBoundaryMaskTraces(boundary: ComparisonBoundary): PlotlyData[
       name: "",
       showlegend: false,
       type: "scatter",
-      x: [0.1, ...x, 0.1],
+      x: [domain.xMillimeters[0], ...x, domain.xMillimeters[0]],
       y: [y[0] ?? 0, ...y, y.at(-1) ?? 0],
     });
     x = [];
@@ -1116,8 +1200,10 @@ function comparisonBoundaryMaskTraces(boundary: ComparisonBoundary): PlotlyData[
       diameter === undefined ||
       !Number.isFinite(tau) ||
       !Number.isFinite(diameter) ||
-      tau < TAU_MIN ||
-      tau > TAU_MAX
+      tau < domain.tauPercent[0] ||
+      tau > domain.tauPercent[1] ||
+      diameter < domain.xMillimeters[0] ||
+      diameter > domain.xMillimeters[1]
     ) {
       flush();
       continue;
@@ -1595,12 +1681,17 @@ function scientificLayout(
   provenance: Provenance,
   plot: PlotDefinition,
   paper: PaperContext,
+  plotDomain: PlotDomain,
   colorDomain?: ColorDomain,
 ): PlotlyLayout {
   const presentation = presentationForPlot(plot);
   const { geometry, zoom } = paper;
   const { margin } = paperMargins(geometry);
   const yStep = presentation.yTickStep ?? 10;
+  const defaultDomain = isDefaultPlotDomain(plotDomain);
+  const yTicks = defaultDomain
+    ? []
+    : niceLinearTicks(plotDomain.tauPercent[0], plotDomain.tauPercent[1], 6);
   const labelFont = {
     color: AXIS_COLOR,
     family: PLOT_FONT,
@@ -1739,8 +1830,8 @@ function scientificLayout(
     showlegend: false,
     width: Math.round(zoom.width),
     xaxis: {
-      ...paperAxisStyle(paper, "x"),
-      range: [-1, 1],
+      ...paperAxisStyle(paper, "x", "power", plotDomain),
+      range: [...plotLogXRange(plotDomain)],
       title: {
         font: labelFont,
         standoff: zoom.cm(0.18),
@@ -1750,10 +1841,10 @@ function scientificLayout(
     },
     yaxis: {
       ...paperAxisStyle(paper, "y"),
-      dtick: yStep,
-      range: [0, 40],
-      tick0: 0,
-      tickmode: "linear",
+      ...(defaultDomain
+        ? { dtick: yStep, tick0: plotDomain.tauPercent[0], tickmode: "linear" }
+        : { tickmode: "array", tickvals: yTicks, ticktext: yTicks.map(formatPlainNumber) }),
+      range: [...plotDomain.tauPercent],
       title: {
         font: labelFont,
         text: "Wall-thickness ratio, <i>τ</i> = <i>t</i>/<i>d</i><sub>o</sub> [%]",
@@ -1772,6 +1863,7 @@ export function paperAxisStyle(
   paper: PaperContext,
   axis: "x" | "y",
   tickLabelStyle: "plain" | "power" = "power",
+  domain: PlotDomain = DEFAULT_PLOT_DOMAIN,
 ): Record<string, unknown> {
   const { geometry, zoom } = paper;
   const base: Record<string, unknown> = {
@@ -1790,12 +1882,15 @@ export function paperAxisStyle(
     zeroline: false,
   };
   if (axis === "x") {
+    const defaultDomain = isDefaultPlotDomain(domain);
+    const candidates = defaultDomain
+      ? [0.1, 1, 10]
+      : spreadSelection(logTicks(domain.xMillimeters[0], domain.xMillimeters[1]), 6);
     base.tickmode = "array";
-    base.tickvals = [0.1, 1, 10];
-    base.ticktext =
-      tickLabelStyle === "power"
-        ? ["10<sup>−1</sup>", "10<sup>0</sup>", "10<sup>1</sup>"]
-        : ["0.1", "1", "10"];
+    base.tickvals = candidates;
+    base.ticktext = candidates.map((value) =>
+      tickLabelStyle === "power" ? formatLogAxisTick(value) : formatPlainNumber(value),
+    );
     base.minor = {
       // "D1" = log-decade minors at 2..9 (matches MATLAB log minor grid);
       // without it plotly falls back to dense linear minor ticks.
@@ -1811,6 +1906,13 @@ export function paperAxisStyle(
     };
   }
   return base;
+}
+
+function formatLogAxisTick(value: number): string {
+  const exponent = Math.log10(value);
+  const rounded = Math.round(exponent);
+  if (Math.abs(exponent - rounded) > 1e-10) return formatPlainNumber(value);
+  return `10<sup>${rounded < 0 ? "−" : ""}${Math.abs(rounded)}</sup>`;
 }
 
 function boundaryTraces(
@@ -1928,6 +2030,7 @@ function screenBoundaryTraces(
   arrays: readonly Float64Array[],
   cooler: CoolerKey,
   paper: PaperContext,
+  domain: PlotDomain,
   request?: SimulationRequest,
 ): PlotlyData[] {
   const xAxis = axisMillimeters(payload.outer_diameter_axis);
@@ -1941,11 +2044,18 @@ function screenBoundaryTraces(
       boundary,
       xAxis,
       tAxis,
+      domain,
       request,
     );
     if (!geometry || geometry.paths.length === 0) continue;
     traces.push(boundaryLineTrace(geometry.paths, boundary.color, boundary.label, paper));
-    const hatch = screenHatchTrace(geometry.paths, geometry.isRejected, boundary.color, paper);
+    const hatch = screenHatchTrace(
+      geometry.paths,
+      geometry.isRejected,
+      boundary.color,
+      paper,
+      domain,
+    );
     if (hatch) traces.push(hatch);
   }
   return traces;
@@ -1958,6 +2068,7 @@ function designBoundaryGeometry(
   boundary: ScreenBoundaryDefinition,
   xAxis: number[],
   tAxis: number[],
+  domain: PlotDomain,
   request?: SimulationRequest,
 ): { isRejected: (point: BoundaryPoint) => boolean; paths: BoundaryPath[] } | undefined {
   if (boundary.field === null) {
@@ -1968,12 +2079,13 @@ function designBoundaryGeometry(
       const thresholdMillimeters = thresholdMeters * 1000;
       const path = Array.from({ length: 500 }, (_, index) => {
         const fraction = index / 499;
-        const x = 10 ** (-1 + 2 * fraction);
+        const [logMinimum, logMaximum] = plotLogXRange(domain);
+        const x = 10 ** (logMinimum + (logMaximum - logMinimum) * fraction);
         return { x, y: (100 * thresholdMillimeters) / x };
       });
       return {
         isRejected: (point) => (point.x * point.y) / 100 < thresholdMillimeters,
-        paths: clipBoundaryPaths([path]),
+        paths: clipBoundaryPaths([path], domain),
       };
     }
   }
@@ -1998,7 +2110,7 @@ function designBoundaryGeometry(
         );
         return !Number.isFinite(value) || violatesThreshold(value, threshold, boundary.violation);
       },
-      paths: clipBoundaryPaths(paths),
+      paths: clipBoundaryPaths(paths, domain),
     };
   }
 
@@ -2015,7 +2127,7 @@ function designBoundaryGeometry(
       const value = bilinearGridValue(xAxis, tAxis, mask, point.x, (point.x * point.y) / 100);
       return !Number.isFinite(value) || value > 0.5;
     },
-    paths: clipBoundaryPaths(paths),
+    paths: clipBoundaryPaths(paths, domain),
   };
 }
 
@@ -2052,7 +2164,7 @@ function violatesThreshold(
   return value >= threshold;
 }
 
-function clipBoundaryPaths(paths: readonly BoundaryPath[]): BoundaryPath[] {
+function clipBoundaryPaths(paths: readonly BoundaryPath[], domain: PlotDomain): BoundaryPath[] {
   const clipped: BoundaryPath[] = [];
   for (const path of paths) {
     let current: BoundaryPath = [];
@@ -2060,10 +2172,10 @@ function clipBoundaryPaths(paths: readonly BoundaryPath[]): BoundaryPath[] {
       const visible =
         Number.isFinite(point.x) &&
         Number.isFinite(point.y) &&
-        point.x >= 0.1 &&
-        point.x <= 10 &&
-        point.y >= TAU_MIN &&
-        point.y <= TAU_MAX;
+        point.x >= domain.xMillimeters[0] &&
+        point.x <= domain.xMillimeters[1] &&
+        point.y >= domain.tauPercent[0] &&
+        point.y <= domain.tauPercent[1];
       if (visible) current.push(point);
       else if (current.length) {
         if (current.length >= 2) clipped.push(current);
@@ -2108,14 +2220,15 @@ function screenHatchTrace(
   isRejected: (point: BoundaryPoint) => boolean,
   color: string,
   paper: PaperContext,
+  domain: PlotDomain,
 ): PlotlyData | undefined {
   const hatches = localBoundaryHatches(paths, {
     angleDegrees: 45,
     isRejected,
     length: 0.026,
     spacing: 0.055,
-    xLogRange: [-1, 1],
-    yRange: [TAU_MIN, TAU_MAX],
+    xLogRange: plotLogXRange(domain),
+    yRange: domain.tauPercent,
   });
   const x: Array<number | null> = [];
   const y: Array<number | null> = [];

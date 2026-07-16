@@ -28,10 +28,21 @@ limits and cost, and feasibility/material comparison. The simple
 inlet-diameter air Reynolds diagnostic is not public; the current paper's VDI
 G7 Reynolds map is the sole air-side regime plot (ADR-0011).
 
-All design-space maps use `d_o` from 0.1 to 10 mm on a logarithmic x-axis and
-τ from 0 to 40 % on a linear y-axis. Only 0.1, 1 and 10 are labelled on x.
-Map values are interpolated only between adjacent finite native-grid samples;
-binary masks and statuses use nearest-neighbour display placement.
+At the committed paper defaults, all design-space maps use `d_o` from 0.1 to
+10 mm on a logarithmic x-axis and τ from 0 to 40 % on a linear y-axis. This
+paper view remains the presentation of the default 0–45 % calculation window.
+For a changed sweep, every single and composite map instead uses the active
+outer-diameter range and, when changed from the default, the active τ
+calculation window up to the physical 50 % limit. Logarithmic 1/2/5 x ticks
+and linear τ ticks are selected from that domain.
+
+Map values are interpolated only between adjacent finite native-grid samples
+onto 161 τ samples across the active display window; binary masks and statuses
+use nearest-neighbour display placement. The same domain is passed to screen
+boundaries, hatching, comparison clipping, markers, contours, and image/report
+exports. The nine paper-specific tube cross-section sketches are shown only
+for the default paper domain because their fixed explanatory positions do not
+generalize to arbitrary user ranges.
 
 ## Figure semantics
 
