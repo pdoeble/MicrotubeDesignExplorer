@@ -4,7 +4,7 @@
 > **Master plan:** `/plans/260710-master-roadmap.md`
 > **Milestone:** M6/M8 scientific plot extension
 > **Workstream:** W3/W6/W8
-> **Status:** in-progress
+> **Status:** completed
 > **Created:** 2026-07-16
 > **Last updated:** 2026-07-16
 
@@ -45,7 +45,7 @@ scope. The existing resistance-share grid remains the public morphology view.
   and `S_i = 2/3` reference contours.
 - [x] Update model, interface, UI, plot-catalog, decision, and roadmap docs.
 - [x] Complete scientific, frontend, build, browser, visual, and release gates.
-- [ ] Commit coherent slices and fast-forward push `main` to GitHub and GitLab.
+- [x] Commit coherent slices and fast-forward push `main` to GitHub and GitLab.
 
 ## Risks
 
@@ -79,7 +79,11 @@ scope. The existing resistance-share grid remains the public morphology view.
 | 2026-07-16 | Added pure pointwise Graetz, effective wall-Biot, and fixed-local-velocity G1 sensitivity fields; MATLAB R2024b regenerated four diagnostic goldens and all 276 pre-existing hashes remained unchanged. |
 | 2026-07-16 | Registered the three public maps with exact two-cooler color domains and active-result Re/Bi/S reference contours; ADR-0015 records the older-paper conflict and excluded fixed MATLAB morphology annotations. |
 | 2026-07-16 | Final gates passed: 73 pytest and 78 Vitest tests, ruff, mypy, contract drift, TypeScript, ESLint, Prettier, production/Pages-path builds, Chromium worker/app/export suite, all 40 opt-in visual-audit plot IDs with manual contact sheets, release/prohibited-file checks, and `git diff --check`. |
+| 2026-07-16 | GitHub and Hochschule GitLab were fetched at `5d6b3ee`, verified as fast-forward ancestors, pushed without force, and verified at technical delivery commit `59a4e4e`. |
 
 ## Final commits
 
-Pending completion.
+- `55f2922` — `docs(source): archive MATLAB baseline and add diagnostic references`
+- `1103ed7` — `fix(plots): adapt result maps to configured sweep ranges`
+- `1429f9b` — `feat(core): expose dimensionless diagnostic fields`
+- `59a4e4e` — `feat(plots): add Graetz Biot and G1 sensitivity maps`
