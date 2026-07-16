@@ -41,10 +41,10 @@ scope. The existing resistance-share grid remains the public morphology view.
   through `SimulationResult`.
 - [x] Extend MATLAB golden harvesting, regenerate provenance/manifest, and
   verify all pre-existing numerical arrays remain unchanged.
-- [ ] Register and render the three plots with dynamic `Re_i = 2300`, `Bi = 1`,
+- [x] Register and render the three plots with dynamic `Re_i = 2300`, `Bi = 1`,
   and `S_i = 2/3` reference contours.
-- [ ] Update model, interface, UI, plot-catalog, decision, and roadmap docs.
-- [ ] Complete scientific, frontend, build, browser, visual, and release gates.
+- [x] Update model, interface, UI, plot-catalog, decision, and roadmap docs.
+- [x] Complete scientific, frontend, build, browser, visual, and release gates.
 - [ ] Commit coherent slices and fast-forward push `main` to GitHub and GitLab.
 
 ## Risks
@@ -77,6 +77,8 @@ scope. The existing resistance-share grid remains the public morphology view.
 | 2026-07-16 | Supplied source material committed unchanged as `55f2922`. |
 | 2026-07-16 | Adaptive domain threaded through single/composite specs, resampling, labels, comparison masks, screen contours, hatches, and exports; scoped frontend checks passed. |
 | 2026-07-16 | Added pure pointwise Graetz, effective wall-Biot, and fixed-local-velocity G1 sensitivity fields; MATLAB R2024b regenerated four diagnostic goldens and all 276 pre-existing hashes remained unchanged. |
+| 2026-07-16 | Registered the three public maps with exact two-cooler color domains and active-result Re/Bi/S reference contours; ADR-0015 records the older-paper conflict and excluded fixed MATLAB morphology annotations. |
+| 2026-07-16 | Final gates passed: 73 pytest and 78 Vitest tests, ruff, mypy, contract drift, TypeScript, ESLint, Prettier, production/Pages-path builds, Chromium worker/app/export suite, all 40 opt-in visual-audit plot IDs with manual contact sheets, release/prohibited-file checks, and `git diff --check`. |
 
 ## Final commits
 

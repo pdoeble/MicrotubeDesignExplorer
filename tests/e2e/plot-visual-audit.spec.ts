@@ -37,6 +37,9 @@ test("visually audits every plot and material at paper-default resolution", asyn
   for (const plot of plots) {
     await page.locator("#plot-id").selectOption(plot.id);
     await expect(page.locator(".plot-figure__title").first()).toContainText(plot.title);
+    // The title changes before React's Plotly effect has purged the previous
+    // SVG. Let the new scientific spec mount before testing the first cooler.
+    await page.waitForTimeout(350);
     if (plot.source === "comparison" || isCompositePlot(plot.id)) {
       reports.push(await captureVariant(page, testInfo, plot.id, "comparison-or-composite"));
       continue;
@@ -80,7 +83,13 @@ async function captureVariant(
   scope: string,
 ): Promise<VisualReport> {
   const frames = page.locator(".plot-figure__frame");
-  await expect(frames.first().locator(".main-svg").first()).toBeVisible({ timeout: 20_000 });
+  const frame = frames.first();
+  await expect(frame.locator(".main-svg").first()).toBeVisible({ timeout: 20_000 });
+  // Plotly inserts the raster before its SVG axis layers are complete. Wait
+  // for both scientific axes so screenshots never capture that intermediate
+  // paint state on a slower full-resolution run.
+  await expect(frame.locator("g.xaxislayer-above text").first()).toBeVisible({ timeout: 20_000 });
+  await expect(frame.locator("g.yaxislayer-above text").first()).toBeVisible({ timeout: 20_000 });
   // React removes the previous Plotly tree before the new spec is mounted;
   // two animation frames plus a short image-paint allowance make Plotly's
   // rasterized heatmap layer deterministic before capture.
@@ -90,14 +99,14 @@ async function captureVariant(
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
       ),
   );
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(1000);
   const safeScope = scope.replace(/[^a-z0-9-]+/gi, "-");
   if (scope === "tandem" && (await page.locator(".plot-tandem-grid").count()) > 0) {
     await page.locator(".plot-tandem-grid").screenshot({
       path: testInfo.outputPath(`${plotId}--${safeScope}.png`),
     });
   } else {
-    await frames.first().screenshot({ path: testInfo.outputPath(`${plotId}--${safeScope}.png`) });
+    await frame.screenshot({ path: testInfo.outputPath(`${plotId}--${safeScope}.png`) });
   }
 
   const geometry = await frames.evaluateAll((elements) => {

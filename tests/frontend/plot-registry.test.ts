@@ -22,6 +22,10 @@ describe("plot registry", () => {
     expect(ids).toContain("tech-adjusted-ratio-k");
     expect(ids).toContain("same-geometry-ratio");
     expect(ids).toContain("same-geometry-ratio-value");
+    expect(ids).toContain("graetz-tube-side-map");
+    expect(ids).toContain("wall-biot-map");
+    expect(ids).toContain("g1-diameter-sensitivity-map");
+    expect(ids).toHaveLength(40);
   });
 
   it("keeps every registered plot tied to a SimulationResult field", () => {
@@ -65,5 +69,14 @@ describe("plot registry", () => {
   it("exposes only the paper VDI G7 air-side Reynolds convention", () => {
     expect(plotRegistry.some((plot) => plot.id === "reynolds-air-vdi-map")).toBe(true);
     expect(plotRegistry.some((plot) => String(plot.field) === "re_outer_simple")).toBe(false);
+  });
+
+  it("places dimensionless diagnostics with their scientific questions", () => {
+    const thermal = plotTopicGroups.find((group) => group.id === "thermal-performance");
+    const resistance = plotTopicGroups.find((group) => group.id === "resistance-attribution");
+    expect(thermal?.plotIds).toEqual(
+      expect.arrayContaining(["graetz-tube-side-map", "g1-diameter-sensitivity-map"]),
+    );
+    expect(resistance?.plotIds).toContain("wall-biot-map");
   });
 });

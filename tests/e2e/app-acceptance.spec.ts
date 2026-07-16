@@ -16,6 +16,7 @@ test("runs a reduced paper-default workflow and exports figures plus JSON/HTML r
   browserName,
   page,
 }) => {
+  test.setTimeout(360_000);
   test.skip(
     browserName === "firefox" && !process.env.PLAYWRIGHT_BASE_URL,
     "Firefox Pyodide startup hangs under the Vite dev server; production preview smoke passes.",
@@ -87,6 +88,23 @@ test("runs a reduced paper-default workflow and exports figures plus JSON/HTML r
   const svg = readFileSync(svgPath, "utf8");
   expect(svg).toMatch(/<svg[^>]+width="624"[^>]+height="499"/);
 
+  for (const plotId of ["graetz-tube-side-map", "wall-biot-map", "g1-diameter-sensitivity-map"]) {
+    await page.locator("#plot-id").selectOption(plotId);
+    await expect(page.locator(".plot-figure__canvas .main-svg").first()).toBeVisible();
+    const diagnosticFigure = page.locator(".plot-figure").first();
+    await diagnosticFigure.getByLabel("PNG scale").selectOption("1");
+    for (const format of ["PNG", "SVG"] as const) {
+      const [download] = await Promise.all([
+        page.waitForEvent("download"),
+        diagnosticFigure.getByRole("button", { exact: true, name: format }).click(),
+      ]);
+      expect(download.suggestedFilename()).toBe(`${plotId}-cooler_left.${format.toLowerCase()}`);
+      const downloadedPath = await download.path();
+      if (!downloadedPath) throw new Error(`${format} diagnostic download path was unavailable.`);
+      expect(readFileSync(downloadedPath).byteLength).toBeGreaterThan(1000);
+    }
+  }
+
   const [jsonDownload] = await Promise.all([
     page.waitForEvent("download"),
     page.getByRole("button", { name: "JSON" }).click(),
@@ -97,6 +115,12 @@ test("runs a reduced paper-default workflow and exports figures plus JSON/HTML r
   const sidecar = JSON.parse(readFileSync(jsonPath, "utf8")) as Record<string, unknown>;
   expect(sidecar.report_version).toBe("1.0.0");
   expect(Array.isArray(sidecar.array_manifest)).toBe(true);
+  const manifestNames = (sidecar.array_manifest as Array<{ name: string }>).map(
+    (entry) => entry.name,
+  );
+  expect(manifestNames).toEqual(
+    expect.arrayContaining(["graetz_inner", "wall_biot", "g1_diameter_sensitivity"]),
+  );
 
   const [htmlDownload] = await Promise.all([
     page.waitForEvent("download", { timeout: 120_000 }),
@@ -109,6 +133,17 @@ test("runs a reduced paper-default workflow and exports figures plus JSON/HTML r
   expect(html).toContain("<h2>Figures</h2>");
   expect(html).toContain("data:image/svg+xml");
   expect(html).toContain("Canonical sidecar JSON");
+  expect(html).toContain("graetz_inner");
+  expect(html).toContain("wall_biot");
+  expect(html).toContain("g1_diameter_sensitivity");
+
+  const popupPromise = page.waitForEvent("popup", { timeout: 120_000 });
+  await page.getByRole("button", { name: "Print / PDF" }).click();
+  const printView = await popupPromise;
+  await printView.waitForLoadState("domcontentloaded");
+  await expect(printView.locator("body")).toContainText("Microtube design-space report");
+  await expect(printView.locator("body")).toContainText("g1_diameter_sensitivity");
+  await printView.close();
   expect(consoleErrors).toEqual([]);
 });
 

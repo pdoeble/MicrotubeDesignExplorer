@@ -144,6 +144,54 @@ describe("report export", () => {
     expect(spec?.spec.layout.yaxis).toMatchObject({ range: [0, 40] });
   });
 
+  it("builds report figure specs for every dimensionless diagnostic map", () => {
+    const result = minimalResult();
+    result.arrays = [
+      ...result.arrays,
+      new Float64Array([1, 10, 100, 1000]),
+      new Float64Array([0.01, 0.1, 1, 10]),
+      new Float64Array([0.1, 0.4, 2 / 3, 0.8]),
+      new Float64Array([1000, 2000, 3000, 4000]),
+      new Float64Array([2, 20, 200, 2000]),
+      new Float64Array([0.02, 0.2, 2, 20]),
+      new Float64Array([0.2, 0.5, 0.7, 0.9]),
+      new Float64Array([500, 1500, 2500, 3500]),
+    ];
+    for (const [cooler, offset] of [
+      ["cooler_left", 4],
+      ["cooler_right", 8],
+    ] as const) {
+      result.payload[cooler].fields.push(
+        { buffer_index: offset, name: "graetz_inner", shape: [2, 2], unit: "-" },
+        { buffer_index: offset + 1, name: "wall_biot", shape: [2, 2], unit: "-" },
+        {
+          buffer_index: offset + 2,
+          name: "g1_diameter_sensitivity",
+          shape: [2, 2],
+          unit: "-",
+        },
+        { buffer_index: offset + 3, name: "re_inner", shape: [2, 2], unit: "-" },
+      );
+    }
+
+    for (const plotId of [
+      "graetz-tube-side-map",
+      "wall-biot-map",
+      "g1-diameter-sensitivity-map",
+    ] as const) {
+      const spec = createReportFigureSpec(result, { cooler: "cooler_left", plotId }, request);
+      expect(spec?.figure.plot_id).toBe(plotId);
+      expect(spec?.spec.data[0]).toMatchObject({ type: "heatmap" });
+    }
+    expect(defaultReportFigureSelections.map((selection) => selection.plotId)).not.toEqual(
+      expect.arrayContaining([
+        "graetz-tube-side-map",
+        "wall-biot-map",
+        "g1-diameter-sensitivity-map",
+      ]),
+    );
+  });
+
   it("cleans up hidden report figure capture nodes when Plotly export fails", async () => {
     plotlyMock.newPlot.mockResolvedValue(undefined);
     plotlyMock.toImage.mockRejectedValue(new Error("Plotly export failed"));

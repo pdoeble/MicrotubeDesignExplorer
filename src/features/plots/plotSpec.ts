@@ -608,26 +608,21 @@ function positionedContourLabel(
   for (const crossing of crossings) {
     const angle = contourTextAngle(crossing, crossings, paper, domain);
     const box = contourLabelBox(crossing, angle, text, paper, percent, domain);
+    // A label is optional; never accept an overlap with a label that has
+    // already been placed. Penalty-only selection could still choose two
+    // neighboring high-end log contours when every candidate was crowded.
+    if (occupied.some((other) => boxesIntersect(box, other, 0.006))) continue;
     const xNorm = (crossing.logX - xLogMinimum) / xSpan;
     const yDistance = Math.abs(crossing.tau - target.targetTau) / tauSpan;
     const xDistance = target.targetXNorm === undefined ? 0 : Math.abs(xNorm - target.targetXNorm);
     const edgeDistance = Math.min(box.left, 1 - box.right, box.bottom, 1 - box.top);
     const edgePenalty = edgeDistance < 0.045 ? 8 + Math.max(0, 0.045 - edgeDistance) * 80 : 0;
-    const labelCollisionPenalty = occupied.reduce(
-      (penalty, other) => penalty + (boxesIntersect(box, other, 0.006) ? 40 : 0),
-      0,
-    );
     const overlayCollisionPenalty = protectedBoxes.reduce(
       (penalty, other) => penalty + (boxesIntersect(box, other, 0.004) ? 12 : 0),
       0,
     );
     const score =
-      yDistance +
-      xDistance +
-      edgePenalty +
-      labelCollisionPenalty +
-      overlayCollisionPenalty +
-      Math.abs(angle) / 900;
+      yDistance + xDistance + edgePenalty + overlayCollisionPenalty + Math.abs(angle) / 900;
     if (!best || score < best.score) best = { position: { angle, box, crossing }, score };
   }
   return best?.position;
@@ -859,6 +854,30 @@ export function overlayTracesForPlot(
     traces.push(...boundaryTraces(payload, arrays, "cooler_right", paper));
   }
 
+  for (const reference of presentation.referenceFieldContours ?? []) {
+    const matrix = matrixForField(payload[cooler].fields, arrays, reference.field);
+    if (!matrix) continue;
+    const masked = maskMatrixForPlot(payload, arrays, plot, cooler, matrix);
+    const tau = regularTauAxis(domain);
+    const values = resampleNumericToTau(
+      axisMillimeters(payload.outer_diameter_axis),
+      axisMillimeters(payload.wall_thickness_axis),
+      masked,
+      tau,
+      false,
+    );
+    traces.push(
+      emphasisContourTrace(
+        axisMillimeters(payload.outer_diameter_axis),
+        tau,
+        values,
+        reference.level,
+        reference.label,
+        paper,
+      ),
+    );
+  }
+
   const techCoolers: readonly CoolerKey[] =
     presentation.techLines === "both"
       ? ["cooler_left", "cooler_right"]
@@ -916,9 +935,10 @@ export function colorDomainForPlot(
   const presentation = presentationForPlot(plot);
   if (presentation.colorLimits)
     return transformedDomain(presentation.colorLimits, presentation.colorScaleType);
-  const useCoolers = presentation.robustShared
-    ? (["cooler_left", "cooler_right"] as const)
-    : coolers;
+  const useCoolers =
+    presentation.robustShared || presentation.sharedAcrossCoolers
+      ? (["cooler_left", "cooler_right"] as const)
+      : coolers;
   const values: number[] = [];
   if (plot.source === "comparison") {
     const field = fieldForPlot(payload, plotId, "cooler_left");
@@ -1576,7 +1596,32 @@ function isoContourTraces(
       z,
     });
   }
+  for (const emphasis of presentation.emphasisContours ?? []) {
+    traces.push(emphasisContourTrace(x, y, z, emphasis.level, emphasis.label, paper));
+  }
   return traces;
+}
+
+function emphasisContourTrace(
+  x: number[],
+  y: number[],
+  z: number[][],
+  level: number,
+  label: string,
+  paper: PaperContext,
+): PlotlyData {
+  return {
+    contours: { coloring: "none", end: level, showlabels: false, size: 1, start: level },
+    hoverinfo: "skip",
+    line: { color: "#000000", dash: "dash", width: paper.zoom.pt(1.35) },
+    name: label,
+    showlegend: false,
+    showscale: false,
+    type: "contour",
+    x,
+    y,
+    z,
+  };
 }
 
 function contourLevelsForData(

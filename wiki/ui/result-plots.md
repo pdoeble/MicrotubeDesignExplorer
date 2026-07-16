@@ -50,11 +50,22 @@ generalize to arbitrary user ranges.
   colorbar in physical values. NaN and non-positive log cells remain white.
 - k, kA and burst domains are shared across both coolers using the MATLAB
   1/99-percentile robust-limit policy. Fixed paper domains are registry data.
+- Graetz, wall-Biot, and G1-sensitivity domains use all finite values from
+  both coolers without percentile trimming, even in single-panel mode, so
+  single and tandem views remain directly comparable.
 - Ordinary maps show only their approved technology curves, a distinct request
   design point, the validated aluminum X where applicable, labelled iso-lines
   and the nine tube cross-section sketches. Screen contours are restricted to
   the design-boundary summary.
 - Reynolds maps include a black dashed Re = 2300 transition.
+- The Graetz and G1-sensitivity maps derive a black dashed Re_i = 2300
+  contour from the active `re_inner` field. Wall Biot emphasizes `Bi_w = 1`;
+  G1 sensitivity emphasizes `S_i = 2/3`. These are reference contours, not
+  fixed default-case explanation lines. Ridge, flip, and fixed-Graetz
+  annotations are deliberately absent under ADR-0015.
+- Wall Biot is `k_o d_o/lambda_w` with the overall coefficient. Its unit
+  contour does not claim a 50 % wall-resistance share. G1 sensitivity holds
+  the local tube velocity and G1 inputs fixed while perturbing diameter.
 - Design-boundary fill is clipped to all-screen-feasible cells. Active screen
   contours are extracted from continuous exported fields at the current
   request thresholds instead of resampled binary masks. Fixed-color hatch

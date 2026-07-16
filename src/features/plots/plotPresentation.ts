@@ -6,6 +6,8 @@ export type ClipMask =
 export type TechLines = "both" | "none" | "own";
 export type ContourLabelMode = "all" | "bar" | "cost" | "percent" | "plain";
 export type PaperVariant = "single" | "tech-ka-delta";
+export type EmphasisContour = { label: string; level: number };
+export type ReferenceFieldContour = EmphasisContour & { field: string };
 
 export type PlotPresentation = {
   colorLimits?: readonly [number, number];
@@ -35,6 +37,8 @@ export type PlotPresentation = {
   colormapReversed?: boolean;
   /** Figure geometry family; default is the shared single-map panel. */
   paperVariant?: PaperVariant;
+  /** Use every finite value from both cooler fields without percentile trimming. */
+  sharedAcrossCoolers?: boolean;
   robustShared?: boolean;
   /**
    * MATLAB makeSparseShareContourLevels: pick a step from candidates so the
@@ -43,6 +47,10 @@ export type PlotPresentation = {
   shareSparseLevels?: boolean;
   /** Show the validated aluminum reference marker even without Al tech line. */
   showValidatedRef?: boolean;
+  /** Dashed contours drawn from the displayed field. */
+  emphasisContours?: readonly EmphasisContour[];
+  /** Dashed contours drawn from another field on the same cooler grid. */
+  referenceFieldContours?: readonly ReferenceFieldContour[];
   techLines: TechLines;
   transitionLevel?: number;
   yTickStep?: number;
@@ -69,6 +77,22 @@ const presentationById: Record<string, Partial<PlotPresentation>> = {
     colorbarLabel: "<i>α</i><sub>i</sub> [W/(m² K)]",
     contourLabelMode: "plain",
     displayUnit: "W/(m² K)",
+  },
+  "graetz-tube-side-map": {
+    clipMask: "invalid-geometry",
+    colorbarLabel: "Tube-side Graetz number, <i>Gz</i><sub>i</sub> [-]",
+    referenceFieldContours: [{ field: "re_inner", label: "Re_i = 2300 transition", level: 2300 }],
+    sharedAcrossCoolers: true,
+    techLines: "both",
+  },
+  "g1-diameter-sensitivity-map": {
+    clipMask: "invalid-geometry",
+    colorScaleType: "linear",
+    colorbarLabel: "Local G1 diameter sensitivity, <i>S</i><sub>i</sub> [-]",
+    emphasisContours: [{ label: "S_i = 2/3", level: 2 / 3 }],
+    referenceFieldContours: [{ field: "re_inner", label: "Re_i = 2300 transition", level: 2300 }],
+    sharedAcrossCoolers: true,
+    techLines: "both",
   },
   "outer-heat-transfer-map": {
     colorbarLabel: "<i>α</i><sub>o</sub> [W/(m² K)]",
@@ -232,6 +256,11 @@ const presentationById: Record<string, Partial<PlotPresentation>> = {
   "resistance-inner-map": {
     colorbarLabel: "<i>R</i><sub>i</sub> [m² K W⁻¹]",
     displayUnit: "m² K W⁻¹",
+  },
+  "wall-biot-map": {
+    colorbarLabel: "Effective wall Biot number, <i>Bi</i><sub>w</sub> [-]",
+    emphasisContours: [{ label: "Bi_w = 1", level: 1 }],
+    sharedAcrossCoolers: true,
   },
   "resistance-wall-map": {
     colorbarLabel: "<i>R</i><sub>w</sub> [m² K W⁻¹]",

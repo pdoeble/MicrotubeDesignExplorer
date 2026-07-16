@@ -7,12 +7,16 @@ registry (M6) may only render IDs listed here. Display metadata
 is snapshotted in `reference/default_case/scalars.json`.
 
 Axes for all design-space maps: x = outer diameter d_o [mm], log;
-y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
+y = wall-thickness ratio τ = 100·t/d_o [%], linear. The paper defaults retain
+0.1–10 mm and 0–40 %; changed requests use their active sweep and calculation
+window under ADR-0015.
 "Per material" in MATLAB becomes "per cooler" in the app (tandem view).
 
 | Web plot ID | Family | MATLAB export(s) | Field | Scale | Notes / availability |
 |---|---|---|---|---|---|
 | `inner-heat-transfer-map` | log-map | diagnostic companion | α_i (W/m²K) | log color | VDI G1 tube-side coefficient |
+| `graetz-tube-side-map` | log-map | diagnostic companion | Gz_i (–) | log color | exact finite-value domain shared by both coolers; dynamic Re_i=2300 contour |
+| `g1-diameter-sensitivity-map` | linear-map | diagnostic companion | ∂ln(Nu_i)/∂ln(d_i) (–) | linear color | fixed-local-velocity pointwise stencil; dynamic S_i=2/3 and Re_i=2300 contours |
 | `outer-heat-transfer-map` | log-map | diagnostic companion | α_o (W/m²K) | log color | VDI G7 air-side coefficient |
 | `overall-coefficient-map` | log-map | 01, 02 | k (W/m²K) | log color | tandem per cooler; shared color limits across coolers |
 | `tube-count-map` | log-map | diagnostic companion | N_tube (-) | log color | continuous tube count |
@@ -32,6 +36,7 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `tube-spacing-closest-inline-map` | log-map | 11 | s_min,inline (mm) | log color | |
 | `tube-spacing-closest-staggered-map` | log-map | 13 | s_min,stag (mm) | log color | |
 | `resistance-inner-map` | log-map | 12 data companion | R_i (m²K/W) | log color | resistance-share source component |
+| `wall-biot-map` | log-map | diagnostic companion | Bi_w=k_o d_o/λ_w (–) | log color | overall-coefficient definition; dynamic Bi_w=1 scale contour; shared domain |
 | `resistance-wall-map` | log-map | 12 data companion | R_w (m²K/W) | log color | resistance-share source component |
 | `resistance-outer-map` | log-map | 12 data companion | R_o (m²K/W) | log color | resistance-share source component |
 | `resistance-shares-grid` | share-grid | 12 | φ_i, φ_w, φ_o (%) | linear color 0–100 | 3 shares × 2 coolers, shared colorbar |
@@ -59,6 +64,7 @@ y = wall-thickness ratio τ = 100·t/d_o [%], linear, 0–40 %.
 | `same geometry change` map export | same data as `same-geometry-ratio`; kept as web plot, MATLAB export was disabled |
 | k_o slices (`plotSlices2D_from3D`) | disabled in reference; presentation variant of `overall-coefficient-map` |
 | 3D ratio plot | `make_3d_plot=false`; not used by the manuscript |
+| fixed Gz=11.7/33/877, ridge and flip overlays | default-case explanatory values do not generalize to editable requests; dynamic Re/Bi/S references and the resistance-share grid provide the robust web interpretation (ADR-0015) |
 
 Cross-section sketches, labelled iso-contours, technology-limit lines,
 validated-reference markers and design-boundary hatching are required figure
@@ -92,6 +98,9 @@ only; they do not alter, smooth or fit the scientific field.
 - Native `(t, d_o)` results are transformed for display only to a regular τ
   grid under ADR-0007. The adapter never interpolates across non-finite cells;
   masks use nearest-neighbour display resampling.
+- Every transform and overlay uses the active request domain. The default
+  0–45 % calculation window alone keeps the 0–40 % paper view; non-default
+  windows use their own bounds and omit fixed paper cross-section sketches.
 - Design-screen lines are marching-squares contours of continuous exported
   fields at the thresholds in the active request. Their hatches start on the
   contour and extend at a local 45-degree angle into the rejected side. The

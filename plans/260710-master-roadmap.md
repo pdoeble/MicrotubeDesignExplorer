@@ -420,6 +420,8 @@ portable to a later parallel GitLab Pages host without weakening GitHub.
 - [x] Implement approved delta and ratio plots.
 - [x] Cover thermal, resistance, Reynolds, flow, pressure, conductance, burst,
       spacing, capillary, cost, and feasibility plots.
+- [x] Add adaptive Graetz, effective wall-Biot, and local G1-sensitivity
+      diagnostics with dynamic reference contours (ADR-0015).
 - [x] Show screen boundaries, minimum-wall lines, and benchmark markers consistently.
 - [x] Provide hover values with units and validity status.
 - [x] Provide tabular access, alt text, and detailed descriptions.

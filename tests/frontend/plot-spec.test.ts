@@ -245,6 +245,98 @@ describe("plot spec", () => {
     expect(domain?.zmax).toBeCloseTo(Math.log10(7.9));
   });
 
+  it("uses exact shared cooler domains and dynamic diagnostic reference contours", () => {
+    const diagnosticPayload: SimulationResultPayload = {
+      ...payload,
+      cooler_left: {
+        ...payload.cooler_left,
+        fields: [
+          ...payload.cooler_left.fields,
+          { buffer_index: 6, name: "graetz_inner", shape: [2, 2], unit: "-" },
+          {
+            buffer_index: 8,
+            name: "g1_diameter_sensitivity",
+            shape: [2, 2],
+            unit: "-",
+          },
+          { buffer_index: 10, name: "re_inner", shape: [2, 2], unit: "-" },
+          { buffer_index: 12, name: "wall_biot", shape: [2, 2], unit: "-" },
+        ],
+      },
+      cooler_right: {
+        ...payload.cooler_right,
+        fields: [
+          ...payload.cooler_right.fields,
+          { buffer_index: 7, name: "graetz_inner", shape: [2, 2], unit: "-" },
+          {
+            buffer_index: 9,
+            name: "g1_diameter_sensitivity",
+            shape: [2, 2],
+            unit: "-",
+          },
+          { buffer_index: 11, name: "re_inner", shape: [2, 2], unit: "-" },
+          { buffer_index: 13, name: "wall_biot", shape: [2, 2], unit: "-" },
+        ],
+      },
+    };
+    const diagnosticArrays = [
+      ...overlayArrays,
+      new Float64Array([10, 20, 50, 100]),
+      new Float64Array([1, 5, 500, 1000]),
+      new Float64Array([0.1, 0.3, 0.7, 0.8]),
+      new Float64Array([-0.2, 0.2, 0.6, 0.9]),
+      new Float64Array([1000, 2000, 3000, 4000]),
+      new Float64Array([500, 1500, 2500, 3500]),
+      new Float64Array([0.01, 0.1, 1, 10]),
+      new Float64Array([0.001, 0.02, 2, 20]),
+    ] as const;
+
+    expect(
+      colorDomainForPlot(diagnosticPayload, diagnosticArrays, "graetz-tube-side-map", [
+        "cooler_left",
+      ]),
+    ).toEqual({ zmax: 3, zmin: 0 });
+    expect(
+      colorDomainForPlot(diagnosticPayload, diagnosticArrays, "wall-biot-map", ["cooler_left"]),
+    ).toEqual({ zmax: Math.log10(20), zmin: -3 });
+    expect(
+      colorDomainForPlot(diagnosticPayload, diagnosticArrays, "g1-diameter-sensitivity-map", [
+        "cooler_left",
+      ]),
+    ).toEqual({ zmax: 0.9, zmin: -0.2 });
+
+    const graetzOverlays = overlayTracesForPlot(
+      diagnosticPayload,
+      diagnosticArrays,
+      plotById("graetz-tube-side-map"),
+      "cooler_left",
+      undefined,
+      defaultRequest,
+    );
+    expect(graetzOverlays).toContainEqual(
+      expect.objectContaining({ name: "Re_i = 2300 transition", type: "contour" }),
+    );
+
+    const sensitivitySpec = createPlotSpec({
+      cooler: "cooler_left",
+      field: diagnosticPayload.cooler_left.fields.find(
+        (candidate) => candidate.name === "g1_diameter_sensitivity",
+      )!,
+      plot: plotById("g1-diameter-sensitivity-map"),
+      provenance,
+      titleScope: "Aluminum",
+      xValues: [0.1, 10],
+      yValues: [0.001, 4.5],
+      zValues: [
+        [0.1, 0.3],
+        [0.7, 0.8],
+      ],
+    });
+    expect(sensitivitySpec.data).toContainEqual(
+      expect.objectContaining({ name: "S_i = 2/3", type: "contour" }),
+    );
+  });
+
   it("computes non-symmetric domains for comparison ratio maps", () => {
     const ratioField: GridFieldRef = {
       buffer_index: 6,

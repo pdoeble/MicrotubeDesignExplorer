@@ -34,6 +34,26 @@ export const plotRegistry = [
     description: "VDI G1 tube-side heat-transfer coefficient.",
   },
   {
+    id: "graetz-tube-side-map",
+    title: "Tube-side Graetz number",
+    family: "log-map",
+    field: "graetz_inner",
+    unit: "-",
+    source: "cooler",
+    description:
+      "Local Gz = Re_i Pr_i d_i/L with the Re_i = 2300 correlation transition shown as a reference contour.",
+  },
+  {
+    id: "g1-diameter-sensitivity-map",
+    title: "Local G1 diameter sensitivity",
+    family: "linear-map",
+    field: "g1_diameter_sensitivity",
+    unit: "-",
+    source: "cooler",
+    description:
+      "Local ∂ln(Nu_i)/∂ln(d_i) at fixed tube velocity, fluid data, tube length and boundary condition; S_i = 2/3 and Re_i = 2300 are reference contours.",
+  },
+  {
     id: "outer-heat-transfer-map",
     title: "Air-side heat-transfer coefficient",
     family: "log-map",
@@ -241,6 +261,16 @@ export const plotRegistry = [
     description: "Tube-side convective resistance component.",
   },
   {
+    id: "wall-biot-map",
+    title: "Effective wall Biot number",
+    family: "log-map",
+    field: "wall_biot",
+    unit: "-",
+    source: "cooler",
+    description:
+      "Bi_w = k_o d_o/λ_w based on the overall coefficient; Bi_w = 1 is a scale contour, not a 50% wall-resistance boundary.",
+  },
+  {
     id: "resistance-wall-map",
     title: "Wall thermal resistance",
     family: "log-map",
@@ -406,6 +436,8 @@ export const plotTopicGroups = [
       "overall-coefficient-map",
       "bundle-conductance-map",
       "inner-heat-transfer-map",
+      "graetz-tube-side-map",
+      "g1-diameter-sensitivity-map",
       "outer-heat-transfer-map",
     ],
   },
@@ -414,6 +446,7 @@ export const plotTopicGroups = [
     label: "Thermal resistance attribution",
     plotIds: [
       "resistance-shares-grid",
+      "wall-biot-map",
       "resistance-inner-map",
       "resistance-wall-map",
       "resistance-outer-map",

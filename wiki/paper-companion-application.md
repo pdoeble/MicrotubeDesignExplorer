@@ -504,7 +504,7 @@ Kapillarhöhe und Kostenindex für beide Designs.
 
 ## 9. Plotkatalog und wissenschaftliche Darstellung
 
-Die öffentliche Registry enthält 37 stabile Plot-IDs in sieben fachlichen
+Die öffentliche Registry enthält 40 stabile Plot-IDs in sieben fachlichen
 Gruppen. Die interne Plotart ist Adaptermetadata und bestimmt nicht die
 Benutzernavigation.
 
@@ -515,6 +515,8 @@ Benutzernavigation.
 | `overall-coefficient-map` | Gesamtwärmeübergangskoeffizient `k_o` |
 | `bundle-conductance-map` | Bündelleitwert `k_o A_o` |
 | `inner-heat-transfer-map` | VDI-G1-Innenkoeffizient `α_i` |
+| `graetz-tube-side-map` | lokale Graetz-Zahl `Gz_i` |
+| `g1-diameter-sensitivity-map` | lokale G1-Durchmessersensitivität bei festem `v_i` |
 | `outer-heat-transfer-map` | VDI-G7-Außenkoeffizient `α_o` |
 
 ### 9.2 Thermal resistance attribution
@@ -522,6 +524,7 @@ Benutzernavigation.
 | Plot-ID | Aussage |
 | --- | --- |
 | `resistance-shares-grid` | Anteile von Innen-, Wand- und Außenwiderstand für beide Designs |
+| `wall-biot-map` | effektive Wand-Biot-Zahl `k_o d_o/λ_w` |
 | `resistance-inner-map` | absoluter Innenwiderstand |
 | `resistance-wall-map` | absoluter Wandwiderstand |
 | `resistance-outer-map` | absoluter Außenwiderstand |
@@ -757,7 +760,7 @@ Playwright prüft:
 - Referenzbudgets für Workerstart und reduzierten Sweep.
 
 Ein zusätzlicher, bewusst opt-in ausgeführter visueller Audit rendert den
-vollen 250×250-Paper-Request für alle 37 Plot-IDs und 66 Material-/Layout-
+vollen 250×250-Paper-Request für alle 40 Plot-IDs und ihre Material-/Layout-
 varianten. Er prüft Textkollisionen, Colorbar-Abstände und abgeschnittene
 SVG-Texte; die Screenshots werden zusätzlich über Kontaktbögen kontrolliert.
 
