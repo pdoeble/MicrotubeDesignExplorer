@@ -370,8 +370,6 @@ params.export_svg_renderer = '-painters';
 params.export_png     = false;
 params.export_pdf     = true;    % LaTeX includes PDF when compiling with pdfLaTeX
 params.export_png_resolution = 300;
-params.close_figures_without_export = ...
-    strcmpi(getenv('WAERME_CLOSE_FIGURES'), '1');
 
 % (14) Material properties
 mat.Al.lambda_WmK   = 220.0;
@@ -749,56 +747,6 @@ Ri_Poly_plot(techMaskPoly) = NaN;
 Rw_Poly_plot(techMaskPoly) = NaN;
 Ro_Poly_plot(techMaskPoly) = NaN;
 
-%% ---- Diagnostics: Graetz / G1-sensitivity / wall-Biot / morphology fields ----
-% (D1) Graetz number (coolant side, material-independent, function of d_i only)
-Gz_raw = Re_i_raw .* fluid.liquid.Pr .* di_m ./ model_inner.length_m;
-
-% (D2) One-dimensional log sensitivities, interpolated onto the design grid.
-% This avoids noisy two-dimensional gradients: the G1 sensitivity depends
-% only on d_i, whereas the G7 sensitivity depends only on d_o.
-di_1d_mm   = logspace(log10(0.01), log10(10.0), 4000);
-alpha_i_1d = vdiG1InternalTubeAlpha(params.v_i_ms, di_1d_mm, model_inner, fluid.liquid);
-Nu_i_1d    = alpha_i_1d .* (di_1d_mm .* 1e-3) ./ fluid.liquid.lambda_WmK;
-s_1d       = gradient(log(Nu_i_1d)) ./ gradient(log(di_1d_mm));
-s_field    = interp1(di_1d_mm, s_1d, DI_mm_nan);
-
-do_1d_mm   = logspace(log10(params.da_mm_min), log10(params.da_mm_max), 4000);
-alpha_o_1d = vdiG7InlineTubeBankAlpha(params.v_a_ms, do_1d_mm, model_outer, fluid.air);
-Nu_o_1d    = alpha_o_1d .* (pi .* do_1d_mm .* 1e-3 ./ 2) ./ fluid.air.lambda_WmK;
-n_o_1d     = gradient(log(Nu_o_1d)) ./ gradient(log(do_1d_mm));
-n_o_field  = interp1(do_1d_mm, n_o_1d, DA_mm);
-
-% (D3) Wall Biot number based on the raw outside heat-transfer coefficient.
-Bi_Al_raw = k_Al_raw   .* da_m ./ mat.Al.lambda_WmK;
-Bi_PA_raw = k_Poly_raw .* da_m ./ mat.Poly.lambda_WmK;
-
-% (D4) Morphology fields from raw resistance shares (no technology mask).
-RtotAl_raw   = Ri_Al_raw   + Rw_Al_raw   + Ro_Al_raw;
-RtotPoly_raw = Ri_Poly_raw + Rw_Poly_raw + Ro_Poly_raw;
-phiI_Al = Ri_Al_raw   ./ RtotAl_raw;
-phiO_Al = Ro_Al_raw   ./ RtotAl_raw;
-phiI_PA = Ri_Poly_raw ./ RtotPoly_raw;
-phiO_PA = Ro_Poly_raw ./ RtotPoly_raw;
-
-F_Al = n_o_field .* phiO_Al - s_field .* (1 - phiI_Al);  % F=0: ridge (vertex line)
-F_PA = n_o_field .* phiO_PA - s_field .* (1 - phiI_PA);
-D_Al = s_field .* (1 - phiI_Al) - Bi_Al_raw ./ 2;        % D=0: tau-sign flip line
-D_PA = s_field .* (1 - phiI_PA) - Bi_PA_raw ./ 2;
-
-% Plot variants: Gz and G1 sensitivity deliberately retain the area below
-% the technology limits. Biot maps follow the material-specific technology
-% masks, while all morphology overlays remain raw.
-Gz_plot = Gz_raw;
-Gz_plot(invalid | Y_calc_mask) = NaN;
-s_plot = min(max(s_field, 0), 0.9);
-s_plot(invalid | Y_calc_mask) = NaN;
-Bi_Al_plot = applyMask2D(Bi_Al_raw, techMaskAl);
-Bi_PA_plot = applyMask2D(Bi_PA_raw, techMaskPoly);
-
-validateDiagnosticMapReferenceValues(da_mm, t_mm, di_1d_mm, s_1d, ...
-    do_1d_mm, n_o_1d, Gz_raw, k_Al_raw, k_Poly_raw, Bi_Al_raw, Bi_PA_raw, ...
-    F_Al, F_PA, D_PA, params);
-
 ratio_same_geometry = k_Poly_raw ./ k_Al_raw;
 ratio_same_geometry(T_mm < max(params.tmin_Al_mm, params.tmin_Poly_mm)) = NaN;
 
@@ -825,56 +773,44 @@ pLevelsPoly  = makeBurstPressureContourLevels(pB_Poly_bar, params.burst_contour_
 [pGrid_lo, pGrid_hi] = robustLogLimits(params, pB_Al_tol_bar, pB_Poly_tol_bar);
 pGridLogLimits = [log10(pGrid_lo) log10(pGrid_hi)];
 
-% Export and close each completed figure immediately. This bounds MATLAB's
-% graphics memory to one figure instead of retaining the full figure suite.
-prepareGeneratedFigureExport(params);
-
 % 01a  k_o — Aluminum  (contourZ = same data as fill, per-material levels)
 plotSingleLogMap(DA_mm, Y_pct, k_Al_plot, k_Al_plot, ...
     'ko aluminum', kLogLimits, kLevels, "Al", ...
     '{\it k}_{\rm{o}} [W/(m^2 K)]', params, "plain");
-exportGeneratedFigures(params);
 
 % 01b  k_o — Polymer
 plotSingleLogMap(DA_mm, Y_pct, k_Poly_plot, k_Poly_plot, ...
     'ko polymer', kLogLimits, kLevels, "Poly", ...
     '{\it k}_{\rm{o}} [W/(m^2 K)]', params, "plain");
-exportGeneratedFigures(params);
 
 % 01c  Bundle-scale k_o*A_o — Aluminum
 plotSingleLogMap(DA_mm, Y_pct, kA_Al_plot_WK, kA_Al_plot_WK, ...
     'bundle kA aluminum', kALogLimits, kALevels, "Al", ...
     'Conductance, {\it k}_{\rm{o}}{\it A}_{\rm{o}} [W K^{-1}]', params, "plain");
-exportGeneratedFigures(params);
 
 % 01d  Bundle-scale k_o*A_o — Polymer
 plotSingleLogMap(DA_mm, Y_pct, kA_Poly_plot_WK, kA_Poly_plot_WK, ...
     'bundle kA polymer', kALogLimits, kALevels, "Poly", ...
     'Conductance, {\it k}_{\rm{o}}{\it A}_{\rm{o}} [W K^{-1}]', params, "plain");
-exportGeneratedFigures(params);
 
 % 01e  Bundle-scale k_o*A_o — Aluminum/PA shared-colorbar paper figure
 plotBundleKAGridAlPa(DA_mm, Y_pct, kA_Al_plot_WK, kA_Poly_plot_WK, ...
     kALogLimits, kALevels, params);
-exportGeneratedFigures(params);
 
 % 02a  Burst pressure — Aluminum
 plotSingleLogMap(DA_mm, Y_pct, pB_Al_bar, pB_Al_bar, ...
     'burst aluminum', pLogLimits, pLevelsAl, "Al", ...
     'Tolerance-adjusted burst pressure, {\it p}_{\rm{b,tol}} [bar]', params, "bar");
-exportGeneratedFigures(params);
 
 % 02b  Burst pressure — Polymer
 plotSingleLogMap(DA_mm, Y_pct, pB_Poly_bar, pB_Poly_bar, ...
     'burst polymer', pLogLimits, pLevelsPoly, "Poly", ...
     'Tolerance-adjusted burst pressure, {\it p}_{\rm{b,tol}} [bar]', params, "bar");
-exportGeneratedFigures(params);
 
 % 02c  Burst-pressure tolerance grid — columns = Al/PA, rows = production tolerance
 if ~strcmpi(getenv('WAERME_SKIP_BURST_GRID'), '1')
     plotBurstToleranceGridAlPa(DA_mm, Y_pct, pB_Al_tol_bar, pB_Poly_tol_bar, ...
         burstTol_mm, pGridLogLimits, params);
-    exportGeneratedFigures(params);
 end
 
 % 03a  Tube-side Reynolds number — diagnostic design-space map.
@@ -883,7 +819,6 @@ end
 plotSingleLogMap(DA_mm, Y_pct, Re_i_plot, Re_i_plot, ...
     'tube side reynolds', [log10(10) log10(5000)], params.re_i_contour_levels, "both", ...
     '{\rm{Re}}_{\rm{i}} [-]', params, "reynolds");
-exportGeneratedFigures(params);
 
 % 03b  Tube-side friction pressure drop — diagnostic map.
 %      This is a straight-tube friction screen at fixed tube-side velocity.
@@ -892,8 +827,7 @@ exportGeneratedFigures(params);
 plotSingleLogMap(DA_mm, Y_pct, dp_i_fric_bar_plot, dp_i_fric_bar_plot, ...
     'tube side friction pressure drop', log10(params.dp_i_log_caxis_bar), ...
     params.dp_i_contour_levels_bar, "both", ...
-    'Friction pressure drop, Δ{\it p}_{\rm{i}} [bar]', params, "pressureDrop");
-exportGeneratedFigures(params);
+    'Friction pressure drop, \Delta {\it p}_{\rm{i}} [bar]', params, "pressureDrop");
 
 % 03c  Coolant throughput — fixed tube-side velocity and benchmark-scaled tube count.
 %      Reports the model-implied total bundle coolant volume flow in L/min.
@@ -905,47 +839,40 @@ plotMapLinearIso(DA_mm, Y_pct, coolant_Vdot_Lmin_plot, ...
     params.coolant_flow_Lmin_caxis, ...
     params.coolant_flow_Lmin_contour_levels, ...
     params, "both");
-exportGeneratedFigures(params);
 
 % 03d  Air-side Reynolds number, simple inlet/d_o convention.
 %      This is the convention closest to the MA-style inlet Reynolds maps.
 plotSingleLogMap(DA_mm, Y_pct, Re_o_simple_plot, Re_o_simple_plot, ...
     'air reynolds simple', [log10(10) log10(5000)], params.re_o_contour_levels, "both", ...
     '{\rm{Re}}_{\rm{a,d}} [-]', params, "reynolds");
-exportGeneratedFigures(params);
 
 % 03e  Air-side Reynolds number, VDI G7 tube-bank convention.
 %      VDI G7 uses the reference length l=pi*d_o/2 and the void factor c.
 plotSingleLogMap(DA_mm, Y_pct, Re_o_vdi_plot, Re_o_vdi_plot, ...
     'air reynolds vdi g7', [log10(20) log10(10000)], params.re_o_contour_levels, "both", ...
     '{\rm{Re}}_{\rm{c,l}} [-]', params, "reynolds");
-exportGeneratedFigures(params);
 
 % 03f  Tube-to-tube clear spacing for constant longitudinal pitch ratio.
 %      With b=S_L/d_o=2.00, the longitudinal clear spacing is s_L=(b-1)d_o.
 plotSingleLogMap(DA_mm, Y_pct, clearSpacingLong_mm, clearSpacingLong_mm, ...
     'tube spacing longitudinal', [log10(0.1) log10(10)], params.spacing_contour_levels_mm, "both", ...
     '{\it s}_{\rm{L}} [mm]', params, "mm");
-exportGeneratedFigures(params);
 
 % 03g  Tube-to-tube clear spacing for constant transverse pitch ratio.
 %      With a=S_T/d_o=3.28, the transverse clear spacing is s_T=(a-1)d_o.
 plotSingleLogMap(DA_mm, Y_pct, clearSpacingTrans_mm, clearSpacingTrans_mm, ...
     'tube spacing transverse', [log10(0.1) log10(30)], [0.2 0.5 1 2 5 10 20], "both", ...
     '{\it s}_{\rm{T}} [mm]', params, "mm");
-exportGeneratedFigures(params);
 
 % 03h  Geometrically closest clear spacing for an inline tube bank.
 plotSingleLogMap(DA_mm, Y_pct, clearSpacingClosestInline_mm, clearSpacingClosestInline_mm, ...
     'tube spacing closest inline', [log10(0.1) log10(10)], params.spacing_contour_levels_mm, "both", ...
     '{\it s}_{\rm{min,inline}} [mm]', params, "mm");
-exportGeneratedFigures(params);
 
 % 03i  Geometrically closest clear spacing for a staggered tube bank.
 plotSingleLogMap(DA_mm, Y_pct, clearSpacingClosestStaggered_mm, clearSpacingClosestStaggered_mm, ...
     'tube spacing closest staggered', [log10(0.1) log10(20)], [0.2 0.5 1 2 5 10 20], "both", ...
     '{\it s}_{\rm{min,stag}} [mm]', params, "mm");
-exportGeneratedFigures(params);
 
 % 03a-c single resistance-share maps are not used by the current LaTeX paper.
 % The paper uses the combined landscape figure generated below instead.
@@ -953,69 +880,6 @@ RtotAl = Ri_Al_plot + Rw_Al_plot + Ro_Al_plot;
 RtotAl(RtotAl <= 0) = NaN;
 RtotPoly = Ri_Poly_plot + Rw_Poly_plot + Ro_Poly_plot;
 RtotPoly(RtotPoly <= 0) = NaN;
-
-% 23  Graetz-number map. The highlighted constant-d_i contours identify the
-%     entrance-region crossover, the resistance-share ridge, and the start of
-%     transition blending in the internal-flow model.
-axDiag = plotSingleLogMap(DA_mm, Y_pct, Gz_plot, Gz_plot, ...
-    'graetz number', [log10(0.1) log10(5000)], ...
-    [0.1 0.2 0.5 1 2 5 10 20 50 100 200 500 1000 2000 5000], "both", ...
-    '{\rm{Gz}} = {\rm{Re}}_{\rm{i}} {\rm{Pr}}_{\rm{i}} {\it d}_{\rm{i}}/{\it l} [-]', ...
-    params, "diagnostic");
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, Gz_raw, 11.7, ...
-    [0.72 0.08 0.12], '--', 2.0, '{\rm{Nu}}_2 = {\rm{Nu}}_1', 1.0, params);
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, Gz_raw, 33, ...
-    [0.72 0.08 0.12], '--', 2.0, 'ridge: sensitivity balance', 2.3, params);
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, Gz_raw, 877, ...
-    [0.72 0.08 0.12], '--', 2.0, '{\rm{Re}}_{\rm{i}} = 2300', 8.0, params);
-exportGeneratedFigures(params);
-
-% 24  VDI-G1 diameter sensitivity / Leveque-regime indicator. The aluminum
-%     ridge lies in the band where the G1 sensitivity approaches the G7
-%     Reynolds-number sensitivity n_o = 0.51-0.60.
-axDiag = plotMapLinearIso(DA_mm, Y_pct, s_plot, ...
-    'g1 diameter sensitivity', ...
-    '{\rm{d}} ln {\rm{Nu}}_{\rm{i}} / {\rm{d}} ln {\it d}_{\rm{i}} [-]', ...
-    [0 0.9], 0.1:0.1:0.8, params, "both");
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, F_Al, 0, ...
-    [0.85 0.11 0.25], '-', 2.0, 'Al ridge: {\it F}_{\rm{Al}} = 0', 2.5, params);
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, s_field, 2/3, ...
-    [0.12 0.12 0.12], '--', 1.8, 'Leveque asymptote: 2/3', 3.5, params);
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, Re_i_raw, ...
-    params.re_transition_level, [0 0 0], ':', 1.6, ...
-    '{\rm{Re}}_{\rm{i}} = 2300', 8.0, params);
-exportGeneratedFigures(params);
-
-% 25/26  Wall-Biot maps use a shared log scale. For a thin wall,
-%         phi_w approximately equals Bi*tau. Along the PA minimum-wall line
-%         this gives phi_w around 2-5 %, consistent with the paper discussion.
-biLogLimits = [log10(1e-4) log10(3)];
-plotSingleLogMap(DA_mm, Y_pct, Bi_Al_plot, Bi_Al_plot, ...
-    'wall biot aluminum', biLogLimits, ...
-    [1e-4 2e-4 5e-4 1e-3 2e-3 5e-3 1e-2 0.1 0.3 1 3], "Al", ...
-    '{\rm{Bi}} = {\it k}_{\rm{o}}{\it d}_{\rm{o}}/\lambda_{\rm{w}} [-]', ...
-    params, "diagnostic");
-exportGeneratedFigures(params);
-axDiag = plotSingleLogMap(DA_mm, Y_pct, Bi_PA_plot, Bi_PA_plot, ...
-    'wall biot polymer', biLogLimits, ...
-    [1e-4 1e-3 1e-2 0.05 0.1 0.2 0.5 1 2], "Poly", ...
-    '{\rm{Bi}} = {\it k}_{\rm{o}}{\it d}_{\rm{o}}/\lambda_{\rm{w}} [-]', ...
-    params, "diagnostic");
-plotDiagnosticContourWithLabel(axDiag, DA_mm, Y_pct, Bi_PA_plot, 1, ...
-    [0.08 0.08 0.08], '--', 2.2, '{\rm{Bi}} = 1', 1.5, params);
-exportGeneratedFigures(params);
-
-% 27/28  Morphology proof maps. The red raw-field zero contour passes through
-%         the vertices of the phi_i contours. The blue raw-field zero contour
-%         marks the sign reversal of the wall-ratio dependence. Aluminum has
-%         no D=0 line in the visible design window because Bi is much less than 1.
-plotShareMorphologyMap(DA_mm, Y_pct, 100.*Ri_Al_plot./RtotAl, ...
-    'share morphology aluminum', '\phi_{\rm{i,Al}} [%]', params, F_Al, D_Al);
-exportGeneratedFigures(params);
-plotShareMorphologyMap(DA_mm, Y_pct, 100.*Ri_Poly_plot./RtotPoly, ...
-    'share morphology polymer', '\phi_{\rm{i,PA}} [%]', params, F_PA, D_PA);
-exportGeneratedFigures(params);
-
 % plotSingleShareMap(DA_mm, Y_pct, 100.*Ri_Poly_plot./Rtot, ...
 %     'share Ri', '\phi_{\rm{i}} = {\it R}_{\rm{i}}/{\it R}_{\rm{tot}} [%]', params);
 % plotSingleShareMap(DA_mm, Y_pct, 100.*Rw_Poly_plot./Rtot, ...
@@ -1037,8 +901,7 @@ params_feasible_delta.composite_boundary = struct( ...
     'x_pa_mm', boundaryPAXmm);
 plotMapPercentIso(DA_mm, Y_pct, 100.*(ratio_tech_adjusted - 1), ...
     'tech adjusted change', ...
-    'Feasible coefficient difference, Δ{\it k}_{\rm{o}} [%]', params_feasible_delta);
-exportGeneratedFigures(params);
+    'Feasible coefficient difference, \Delta{\it k}_{\rm{o}} [%]', params_feasible_delta);
 
 % 05b  All-screen-adjusted bundle-scale conductance change.
 %      Each feasible PA point is compared at the same wall-thickness ratio
@@ -1078,8 +941,7 @@ params_kA_delta.cross_section_reference_axes_cm = ...
 params_kA_delta.show_validated_ref_in_percent_map = true;
 plotMapPercentIso(DA_mm, Y_pct, kA_delta_pct, ...
     'tech adjusted kA change', ...
-    'Δ({\it k}_{\rm{o}}{\it A}_{\rm{o}})_{\rm{feas}}', params_kA_delta);
-exportGeneratedFigures(params);
+    '\Delta({\it k}_{\rm{o}}{\it A}_{\rm{o}})_{\rm{feas}}', params_kA_delta);
 
 % 06a-b  Tube-supply cost orientation over the same 2D design space.
 %        The maps use the paper benchmark footprint and fixed relative
@@ -1088,12 +950,10 @@ exportGeneratedFigures(params);
 plotSingleLogMap(DA_mm, Y_pct, cost_Al_index, cost_Al_index, ...
     'tube supply cost aluminum', log10(params.cost_log_caxis), params.cost_contour_levels, "Al", ...
     '{\it C}_{\rm{tube}}/{\it C}_{\rm{fin}} [-]', params, "cost");
-exportGeneratedFigures(params);
 
 plotSingleLogMap(DA_mm, Y_pct, cost_Poly_index, cost_Poly_index, ...
     'tube supply cost polymer', log10(params.cost_log_caxis), params.cost_contour_levels, "Poly", ...
     '{\it C}_{\rm{tube}}/{\it C}_{\rm{fin}} [-]', params, "cost");
-exportGeneratedFigures(params);
 
 % 06  k_o slices — not used by the current LaTeX paper
 k_Al_3d   = k_Al_raw;    k_Al_3d(techMaskAl)     = NaN;
@@ -1116,7 +976,6 @@ if ~strcmpi(getenv('WAERME_SKIP_SHARE_GRID'), '1')
         100.*Ri_Poly_plot./RtotPoly, ...
         100.*Rw_Poly_plot./RtotPoly, ...
         100.*Ro_Poly_plot./RtotPoly, params);
-    exportGeneratedFigures(params);
 end
 
 % 09  Capillary-rise process map.
@@ -1125,7 +984,6 @@ end
 %     PA wetting transfer from the Plexiglas wedge scan.
 if ~strcmpi(getenv('WAERME_SKIP_CAPILLARY_GRID'), '1')
     plotCapillaryRiseGridAlPa(DA_mm, Y_pct, capillaryRiseAl_mm, capillaryRisePA_mm, params);
-    exportGeneratedFigures(params);
 end
 
 % 10  Compact boundary summary for aluminum and PA design-space orientation.
@@ -1138,14 +996,15 @@ if ~strcmpi(getenv('WAERME_SKIP_DESIGN_BOUNDARY'), '1')
         capillaryRiseAl_raw_mm(:, :, designCapillaryAccelIdx), ...
         capillaryRisePA_raw_mm(:, :, designCapillaryAccelIdx), ...
         log10(params.design_boundary_kA_caxis_WK), params);
-    exportGeneratedFigures(params);
 end
+
+exportGeneratedFigures(params);
 
 
 %% ============================================================
 %  Helper: individual single-panel log-color map (V8 new)
 % ============================================================
-function ax = plotSingleLogMap(X_mm, Y_lin, Z, contourZ, figName, logLimits, contourLevels, techLine, cbLabel, params, labelMode)
+function plotSingleLogMap(X_mm, Y_lin, Z, contourZ, figName, logLimits, contourLevels, techLine, cbLabel, params, labelMode)
 if nargin < 11 || isempty(labelMode), labelMode = "plain"; end
 
 fig = createPptFigure(params, figName, params.single_panel_figure_size_cm);
@@ -1201,7 +1060,7 @@ if ~isempty(contourLevels)
                 labelLvl = selectSingleMapContourLabels(lvl);
             elseif labelModeLower == "cost"
                 labelLvl = selectCostContourLabels(lvl);
-            elseif any(labelModeLower == ["reynolds", "mm", "diagnostic"])
+            elseif any(labelModeLower == ["reynolds", "mm"])
                 labelLvl = unique(double(lvl(:).'));
             end
             cl = addContourLabelsAlongLines(ax, C, hc, labelLvl, ...
@@ -1413,7 +1272,7 @@ end
 end
 
 
-function ax = plotMapLinearIso(X_mm, Y_lin, Z, figName, cbLabel, caxisLimits, contourLevels, params, techLine)
+function plotMapLinearIso(X_mm, Y_lin, Z, figName, cbLabel, caxisLimits, contourLevels, params, techLine)
 if nargin < 9 || isempty(techLine)
     techLine = "both";
 end
@@ -1701,102 +1560,6 @@ cb.Label.FontName = params.font_name;
 cb.Label.FontSize = params.font_size;
 applyPresentationStyle(fig, params);
 
-end
-
-
-%% ============================================================
-%  Helper: resistance-share map with raw morphology overlays
-% ============================================================
-function plotShareMorphologyMap(X_mm, Y_lin, sharePct, figName, cbLabel, ...
-        params, ridgeF, flipD)
-
-fig = createPptFigure(params, figName, params.share_panel_figure_size_cm);
-ax = axes('Parent', fig);
-box(ax, 'on');
-hold(ax, 'on');
-
-Zc = double(sharePct);
-Zc(~builtin('isfinite', Zc)) = NaN;
-drawVectorFilledMap(ax, X_mm, Y_lin, Zc, params, ...
-    linspace(0, 100, params.vector_fill_levels));
-
-set(ax, 'XScale', 'log', 'YScale', 'linear');
-xlabel(ax, 'Outer diameter, {\it d}_{\rm{o}} [mm]', 'Interpreter', 'tex');
-ylabel(ax, 'Wall-thickness ratio, \tau = {\it t}/{\it d}_{\rm{o}} [%]', ...
-    'Interpreter', 'tex');
-caxis(ax, [0 100]);
-applyProjectColormap(fig, params);
-xlim(ax, params.x_mm_lim);
-ylim(ax, params.y_pct_lim);
-
-if contains(lower(string(figName)), "aluminum")
-    techLine = "Al";
-else
-    techLine = "Poly";
-end
-plotTechLimitLines(params, techLine, false, ax);
-if techLine == "Al"
-    plotValidatedCoolerReferencePoint(ax, params);
-end
-
-paramsSketch = params;
-paramsSketch.cross_section_reference_axes_cm = params.share_panel_axes_cm(3:4);
-plotCrossSectionSketches(ax, paramsSketch);
-
-lvl = trimContourLevels(params.share_contour_levels, Zc);
-if ~isempty(lvl)
-    if isscalar(lvl), lvl = [lvl lvl]; end
-    [C, hc] = contour(ax, X_mm, Y_lin, Zc, lvl, ...
-        'Color', [0.12 0.12 0.12], 'LineWidth', 0.8);
-    lblLvl = lvl(mod(lvl, 5) == 0);
-    if isempty(lblLvl), lblLvl = lvl(1:max(1, round(end/4)):end); end
-    if isscalar(lblLvl), lblLvl = [lblLvl lblLvl]; end
-    addContourLabelsAlongLines(ax, C, hc, lblLvl, ...
-        params, params.font_size - 2, params.contour_label_spacing, "plain");
-end
-
-legendHandles = gobjects(0);
-legendLabels = {};
-[~, hRidge] = plotDiagnosticContour(ax, X_mm, Y_lin, ridgeF, 0, ...
-    [0.85 0.11 0.25], '-', 2.0, 'MorphologyRidge');
-if ~isempty(hRidge) && isgraphics(hRidge)
-    legendHandles(end+1, 1) = hRidge; %#ok<AGROW>
-    legendLabels{end+1} = 'Ridge, {\it F} = 0'; %#ok<AGROW>
-end
-[~, hFlip] = plotDiagnosticContour(ax, X_mm, Y_lin, flipD, 0, ...
-    [0.26 0.41 0.88], '-', 2.0, 'MorphologyFlip');
-if ~isempty(hFlip) && isgraphics(hFlip)
-    legendHandles(end+1, 1) = hFlip; %#ok<AGROW>
-    legendLabels{end+1} = 'Flip, {\it D} = 0'; %#ok<AGROW>
-end
-if ~isempty(legendHandles)
-    lgd = legend(ax, legendHandles, legendLabels, ...
-        'Location', 'southwest', 'AutoUpdate', 'off');
-    set(lgd, 'FontName', params.font_name, ...
-        'FontSize', params.font_size - 3, 'Interpreter', 'tex');
-end
-
-grid(ax, 'on');
-styleAxes(ax, params);
-xlim(ax, params.x_mm_lim);
-ylim(ax, params.y_pct_lim);
-finishMapLayering(ax);
-
-drawnow;
-set(ax, 'Units', 'centimeters', 'Position', params.share_panel_axes_cm);
-cb = colorbar(ax);
-drawnow;
-set(ax, 'Units', 'centimeters', 'Position', params.share_panel_axes_cm);
-set(cb, 'Units', 'centimeters', 'Position', params.share_panel_colorbar_cm);
-cb.Label.Interpreter = 'tex';
-cb.Label.String = cbLabel;
-cb.Ticks = [0 10 25 50 75 90 100];
-cb.TickLabels = {'0 %', '10 %', '25 %', '50 %', '75 %', '90 %', '100 %'};
-cb.FontName = params.font_name;
-cb.FontSize = params.font_size;
-cb.Label.FontName = params.font_name;
-cb.Label.FontSize = params.font_size;
-applyPresentationStyle(fig, params);
 end
 
 
@@ -4272,113 +4035,6 @@ nTubes(bad) = NaN;
 end
 
 
-function validateDiagnosticMapReferenceValues(da_mm, t_mm, di_1d_mm, s_1d, ...
-        do_1d_mm, n_o_1d, Gz_raw, k_Al_raw, k_PA_raw, Bi_Al_raw, Bi_PA_raw, ...
-        F_Al, F_PA, D_PA, params)
-% Independent reference values from the documented G1/G7 reimplementation.
-% The checks guard the physical interpretation of the diagnostic overlays,
-% not merely successful figure creation.
-sTargets_mm = [0.6 1.0 1.5];
-sExpected = [0.279 0.515 0.656];
-sCheck = interp1(di_1d_mm, s_1d, sTargets_mm);
-for ii = 1:numel(sExpected)
-    assertDiagnosticNear(sCheck(ii), sExpected(ii), 0.03, ...
-        sprintf('G1 sensitivity at d_i=%.3g mm', sTargets_mm(ii)));
-end
-
-nTargets_mm = [1 3 10];
-nExpected = [0.531 0.560 0.602];
-nCheck = interp1(do_1d_mm, n_o_1d, nTargets_mm);
-for ii = 1:numel(nExpected)
-    assertDiagnosticNear(nCheck(ii), nExpected(ii), 0.03, ...
-        sprintf('G7 sensitivity at d_o=%.3g mm', nTargets_mm(ii)));
-end
-
-gzCheck = [
-    interp2(da_mm, t_mm, Gz_raw, 2.0, (2.0 - 1.1) ./ 2), ...
-    interp2(da_mm, t_mm, Gz_raw, 8.0, (8.0 - 5.66) ./ 2)];
-gzExpected = [33.1 877];
-for ii = 1:numel(gzExpected)
-    assertDiagnosticNear(gzCheck(ii), gzExpected(ii), 0.05 .* gzExpected(ii), ...
-        sprintf('Graetz reference %d', ii));
-end
-
-kCheck = [
-    interp2(da_mm, t_mm, k_Al_raw, 1.0, 0.10), ...
-    interp2(da_mm, t_mm, k_PA_raw, 1.0, 0.10)];
-biCheck = [
-    interp2(da_mm, t_mm, Bi_Al_raw, 1.0, 0.10), ...
-    interp2(da_mm, t_mm, Bi_PA_raw, 1.0, 0.10)];
-assertDiagnosticNear(kCheck(1), 285, 0.05 .* 285, ...
-    'Al k_o at d_o=1 mm, tau=10 %');
-assertDiagnosticNear(kCheck(2), 252, 0.05 .* 252, ...
-    'PA k_o at d_o=1 mm, tau=10 %');
-assertDiagnosticNear(biCheck(1), 1.3e-3, 0.05 .* 1.3e-3, ...
-    'Al Bi at d_o=1 mm, tau=10 %');
-assertDiagnosticNear(biCheck(2), 1.0, 0.05, ...
-    'PA Bi at d_o=1 mm, tau=10 %');
-
-ridgeAl = [
-    zeroCrossingTauNear(da_mm, t_mm, F_Al, 2.0, 22.9, params), ...
-    zeroCrossingTauNear(da_mm, t_mm, F_Al, 3.0, 31.4, params)];
-ridgePA = [
-    zeroCrossingTauNear(da_mm, t_mm, F_PA, 1.5, 28, params), ...
-    zeroCrossingTauNear(da_mm, t_mm, F_PA, 2.0, 36, params)];
-flipPA = [
-    zeroCrossingTauNear(da_mm, t_mm, D_PA, 3.0, 33, params), ...
-    zeroCrossingTauNear(da_mm, t_mm, D_PA, 5.0, 26, params)];
-
-ridgeAlExpected = [22.9 31.4];
-ridgePAExpected = [28 36];
-flipPAExpected = [33 26];
-for ii = 1:2
-    assertDiagnosticNear(ridgeAl(ii), ridgeAlExpected(ii), ...
-        0.06 .* ridgeAlExpected(ii), sprintf('Al ridge tau reference %d', ii));
-    assertDiagnosticNear(ridgePA(ii), ridgePAExpected(ii), ...
-        2.5, sprintf('PA ridge tau reference %d', ii));
-    assertDiagnosticNear(flipPA(ii), flipPAExpected(ii), ...
-        2.5, sprintf('PA flip tau reference %d', ii));
-end
-
-fprintf(['Diagnostic-map references passed: s(1 mm)=%.3f, n_o(3 mm)=%.3f, ' ...
-    'Gz(1.1 mm)=%.1f; Al ridge %.1f/%.1f %%, PA ridge %.1f/%.1f %%, ' ...
-    'PA flip %.1f/%.1f %%.\n'], ...
-    sCheck(2), nCheck(2), gzCheck(1), ridgeAl, ridgePA, flipPA);
-end
-
-
-function tauRoot = zeroCrossingTauNear(da_mm, t_mm, Z, doTarget_mm, ...
-        expectedTau_pct, params)
-tau = linspace(max(params.y_pct_calc_lim(1), 1e-4), ...
-    params.y_pct_plot_lim(2), 4001);
-tQuery_mm = doTarget_mm .* tau ./ 100;
-z = interp2(da_mm, t_mm, double(Z), ...
-    doTarget_mm .* ones(size(tQuery_mm)), tQuery_mm, 'linear', NaN);
-
-roots = tau(abs(z) <= 1e-12 & builtin('isfinite', z));
-validPair = builtin('isfinite', z(1:end-1)) & builtin('isfinite', z(2:end));
-idx = find(validPair & z(1:end-1) .* z(2:end) < 0);
-for ii = idx
-    z0 = z(ii);
-    z1 = z(ii+1);
-    roots(end+1) = tau(ii) - z0 .* (tau(ii+1) - tau(ii)) ./ (z1 - z0); %#ok<AGROW>
-end
-roots = unique(roots(builtin('isfinite', roots)));
-assert(~isempty(roots), ...
-    'No diagnostic zero crossing at d_o=%.3g mm near tau=%.3g %%.', ...
-    doTarget_mm, expectedTau_pct);
-[~, idxNear] = min(abs(roots - expectedTau_pct));
-tauRoot = roots(idxNear);
-end
-
-
-function assertDiagnosticNear(actual, expected, tolerance, label)
-assert(builtin('isfinite', actual) && abs(actual - expected) <= tolerance, ...
-    '%s off: expected %.5g +/- %.3g, obtained %.5g.', ...
-    char(label), expected, tolerance, actual);
-end
-
-
 function Z = applyMask2D(Z, mask)
 Z(mask) = NaN;
 end
@@ -4755,86 +4411,6 @@ contour(ax, X_mm, Y_lin, Z, [lvl lvl], ...
     'LineWidth', 1.35, ...
     'HandleVisibility', 'off', ...
     'Tag', 'ReTransitionLine');
-end
-
-
-function hText = plotDiagnosticContourWithLabel(ax, X_mm, Y_lin, Z, level, ...
-        color, lineStyle, lineWidth, labelText, targetX_mm, params)
-[C, ~] = plotDiagnosticContour(ax, X_mm, Y_lin, Z, level, color, ...
-    lineStyle, lineWidth, 'DiagnosticContour');
-hText = gobjects(0);
-if isempty(C)
-    return;
-end
-
-segments = parseContourMatrix(C);
-if isempty(segments)
-    return;
-end
-
-best = struct('score', inf, 'xn', NaN, 'yn', NaN, 'angle', 0);
-for ii = 1:numel(segments)
-    [xn, yn] = normalizeAxesCoordinates(ax, segments(ii).x, segments(ii).y);
-    valid = builtin('isfinite', xn) & builtin('isfinite', yn) & ...
-        xn >= 0.06 & xn <= 0.94 & yn >= 0.06 & yn <= 0.94;
-    candidates = find(valid);
-    if isempty(candidates)
-        continue;
-    end
-    xTargetNorm = normalizeAxesCoordinates(ax, targetX_mm, mean(get(ax, 'YLim')));
-    score = abs(xn(candidates) - xTargetNorm) + 0.04 .* abs(yn(candidates) - 0.5);
-    [scoreMin, localIdx] = min(score);
-    if scoreMin >= best.score
-        continue;
-    end
-    idx = candidates(localIdx);
-    idxLo = max(1, idx - 2);
-    idxHi = min(numel(xn), idx + 2);
-    angleDeg = atan2d(yn(idxHi) - yn(idxLo), xn(idxHi) - xn(idxLo));
-    best = struct('score', scoreMin, 'xn', xn(idx), 'yn', yn(idx), ...
-        'angle', normalizeReadableAngle(angleDeg));
-end
-
-if ~builtin('isfinite', best.score)
-    return;
-end
-hText = text(ax, best.xn, best.yn, labelText, ...
-    'Units', 'normalized', ...
-    'Interpreter', 'tex', ...
-    'FontName', params.font_name, ...
-    'FontSize', params.font_size - 3, ...
-    'FontWeight', 'bold', ...
-    'Color', color, ...
-    'HorizontalAlignment', 'center', ...
-    'VerticalAlignment', 'middle', ...
-    'Rotation', best.angle, ...
-    'BackgroundColor', 'w', ...
-    'Margin', 0.2, ...
-    'EdgeColor', 'none', ...
-    'Clipping', 'on', ...
-    'HandleVisibility', 'off', ...
-    'Tag', 'DiagnosticContourLabel');
-end
-
-
-function [C, hContour] = plotDiagnosticContour(ax, X_mm, Y_lin, Z, level, ...
-        color, lineStyle, lineWidth, tag)
-C = [];
-hContour = gobjects(0);
-Z = double(Z);
-zv = Z(builtin('isfinite', Z));
-if isempty(zv) || level < min(zv) || level > max(zv)
-    return;
-end
-[C, hContour] = contour(ax, X_mm, Y_lin, Z, [level level], ...
-    'LineColor', color, ...
-    'LineStyle', lineStyle, ...
-    'LineWidth', lineWidth, ...
-    'Tag', tag);
-if isempty(C)
-    if isgraphics(hContour), delete(hContour); end
-    hContour = gobjects(0);
-end
 end
 
 
@@ -5778,44 +5354,21 @@ end
 
 
 %% ============================================================
-%  Helpers: streaming figure export
+%  Helper: export all open figures as SVG
 % ============================================================
-function prepareGeneratedFigureExport(params)
-if ~isfield(params, 'export_figures') || ~params.export_figures
-    return;
-end
+function exportGeneratedFigures(params)
+if ~isfield(params,'export_figures') || ~params.export_figures, return; end
 exportDir = params.export_dir;
-if ~exist(exportDir, 'dir'), mkdir(exportDir); end
-if isfield(params, 'clean_export_dir') && params.clean_export_dir
+if ~exist(exportDir,'dir'), mkdir(exportDir); end
+if isfield(params,'clean_export_dir') && params.clean_export_dir
     deleteIfPresent(fullfile(exportDir, '*.svg'));
     deleteIfPresent(fullfile(exportDir, '*.pdf'));
     deleteIfPresent(fullfile(exportDir, '*.png'));
 end
-end
-
-
-function exportGeneratedFigures(params)
-shouldExport = isfield(params, 'export_figures') && params.export_figures;
-shouldCloseOnly = isfield(params, 'close_figures_without_export') && ...
-    params.close_figures_without_export;
-if ~shouldExport && ~shouldCloseOnly
-    return;
-end
-figs = findall(0, 'Type', 'figure');
-if isempty(figs)
-    return;
-end
+figs = findall(0,'Type','figure');
+if isempty(figs), warning('No figures to export.'); return; end
 [~, idx] = sort([figs.Number]);
 figs = figs(idx);
-
-if ~shouldExport
-    close(figs);
-    drawnow;
-    return;
-end
-
-exportDir = params.export_dir;
-if ~exist(exportDir,'dir'), mkdir(exportDir); end
 nameMap = containers.Map( ...
     {'ko aluminum', 'ko polymer', ...
      'bundle kA aluminum', 'bundle kA polymer', 'bundle kA alu pa portrait', ...
@@ -5827,9 +5380,6 @@ nameMap = containers.Map( ...
      'air reynolds simple', 'air reynolds vdi g7', ...
      'tube spacing transverse', 'tube spacing closest inline', ...
      'tube spacing closest staggered', ...
-     'graetz number', 'g1 diameter sensitivity', ...
-     'wall biot aluminum', 'wall biot polymer', ...
-     'share morphology aluminum', 'share morphology polymer', ...
      'tech adjusted change', 'tech adjusted kA change', ...
      'shares alu pa portrait', ...
      'capillary rise alu pa portrait', ...
@@ -5845,9 +5395,6 @@ nameMap = containers.Map( ...
      '07_re_air_simple', '08_re_air_vdi_g7', ...
      '10_tube_spacing_transverse', '11_tube_spacing_closest_inline', ...
      '13_tube_spacing_closest_staggered', ...
-     '23_graetz_number', '24_g1_diameter_sensitivity', ...
-     '25_wall_biot_aluminum', '26_wall_biot_polymer', ...
-     '27_share_morphology_aluminum', '28_share_morphology_polymer', ...
      '09_tech_adjusted_change', '22_tech_adjusted_kA_change', ...
      '12_shares_alu_pa_portrait', ...
      '14_capillary_rise_alu_pa_portrait', ...

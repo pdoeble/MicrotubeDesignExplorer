@@ -1,0 +1,80 @@
+# Adaptive dimensionless diagnostic plots — living plan
+
+> **Path:** `/plans/260716-dimensionless-diagnostic-plots.md`
+> **Master plan:** `/plans/260710-master-roadmap.md`
+> **Milestone:** M6/M8 scientific plot extension
+> **Workstream:** W3/W6/W8
+> **Status:** in-progress
+> **Created:** 2026-07-16
+> **Last updated:** 2026-07-16
+
+## Scope
+
+Archive the previous MATLAB master, accept the supplied diagnostic source
+material, and add adaptive Graetz-number, wall-Biot-number, and local VDI-G1
+diameter-sensitivity maps to the static application. Make all result-map axes
+follow non-default sweep domains while preserving the established paper view
+for the committed defaults.
+
+Ridge/flip overlays, fixed default-case diagnostic annotations, updates to the
+paper PDF/TeX, and expansion of the default report-figure selection are out of
+scope. The existing resistance-share grid remains the public morphology view.
+
+## Interfaces
+
+- Additive `SimulationResult` fields per cooler: `graetz_inner`, `wall_biot`,
+  and `g1_diameter_sensitivity`, all dimensionless.
+- No `SimulationRequest`, schema-shape, URL-state, worker-envelope, or contract
+  version change; contract 1.0.0 permits additive named result fields.
+- New stable plot IDs: `graetz-tube-side-map`, `wall-biot-map`, and
+  `g1-diameter-sensitivity-map`.
+- The active plot domain derives from the request sweep. The unchanged
+  calculation window 0–45 % retains the approved 0–40 % paper view.
+
+## Tasks
+
+- [ ] Commit the supplied source-material archive and diagnostic references
+  without editing them.
+- [ ] Thread adaptive diameter/τ domains through single and composite plot
+  preparation, axes, overlays, comparison clipping, labels, and hatching.
+- [ ] Implement the three pure float64 diagnostic quantities and expose them
+  through `SimulationResult`.
+- [ ] Extend MATLAB golden harvesting, regenerate provenance/manifest, and
+  verify all pre-existing numerical arrays remain unchanged.
+- [ ] Register and render the three plots with dynamic `Re_i = 2300`, `Bi = 1`,
+  and `S_i = 2/3` reference contours.
+- [ ] Update model, interface, UI, plot-catalog, decision, and roadmap docs.
+- [ ] Complete scientific, frontend, build, browser, visual, and release gates.
+- [ ] Commit coherent slices and fast-forward push `main` to GitHub and GitLab.
+
+## Risks
+
+| Risk | Mitigation |
+|---|---|
+| A numerical derivative silently depends on sweep resolution | Evaluate a pointwise central logarithmic stencil with documented `h = 1e-5` while holding local velocity and all other correlation inputs fixed |
+| Default paper figures regress while domains become adaptive | Preserve the default x-domain and the special 0–40 % display window; run the exhaustive default visual audit |
+| Non-default overlays retain hidden 0.1–10 mm assumptions | Pass one explicit domain through resampling, axes, labels, screen contours, hatches, markers, and composite panels |
+| MATLAB diagnostic gradients disagree at correlation branch joins | Use strict laminar checks, documented transition tolerance away from the anchors, and separate branch/stencil tests at the joins |
+| Golden regeneration changes existing physics | Compare every pre-existing binary hash and stop if any established numerical array changes |
+| Remote histories diverge during implementation | Fetch both remotes before push, require both tips to be ancestors, and never force-push |
+
+## Tests / evidence
+
+- MATLAB R2024b master execution and golden-reference regeneration.
+- Python golden, API, operating-mode, boundary-condition, convergence, pytest,
+  ruff, mypy, and contract-drift checks.
+- Frontend registry/spec/report tests, typecheck, lint, format check, production
+  Pages build, Chromium app/worker/export checks, and nested-path smoke.
+- Opt-in 40-ID visual audit plus manual contact-sheet inspection.
+- Prohibited-file check, `git diff --check`, commit file-list review, and remote
+  commit verification.
+
+## Status log
+
+| Date | Change |
+|---|---|
+| 2026-07-16 | Plan accepted; both remote `main` tips verified at `5d6b3ee`; historical MATLAB blob verified identical to the prior master. |
+
+## Final commits
+
+Pending completion.
