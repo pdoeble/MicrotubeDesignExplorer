@@ -1,0 +1,38 @@
+project_id = "microtubedesignexplorer"
+display_name = "MicrotubeDesignExplorer"
+schema_version = 1
+
+[backend]
+type = "central_project"
+
+[indexing]
+include = ["**/*.md"]
+exclude = [
+  ".git/**",
+  ".venv/**",
+  "venv/**",
+  "node_modules/**",
+  "build/**",
+  "dist/**",
+  "output/**",
+  "outputs/**",
+  "results/**",
+  "cache/**",
+  "logs/**",
+  ".rag/**",
+  "rag/**",
+  ".codex/**",
+  "**/*.md.obsidian-disabled",
+  "**/*_all.md",
+  "**/merged_wiki.md",
+  "**/clean_all.md",
+  "**/clean__*.md",
+]
+
+[content]
+classification = "PROJECT"
+require_clean_git = true
+
+[permissions]
+generic_search = true
+literature_search = true
