@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: plan
+derivation: direct_authoring
+---
 # Model setup category tabs — living plan
 
 > **Path:** `/plans/260713-model-setup-category-tabs.md`

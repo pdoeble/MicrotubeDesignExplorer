@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: active
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: decision_record
+derivation: direct_authoring
+---
 # Implementierungsanleitung für die interaktive GitHub-Pages-Begleitseite
 
 Damit sind die Grundanforderungen weitgehend geklärt. Der verbindliche fachliche Stand ist das MATLAB-Skript einschließlich seiner Berechnungswege, Randbedingungen, Machbarkeitsgrenzen und sinnvoll nutzbaren Plots. 

@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: superseded
+currency_assessment: not_assessed
+audit_role: supporting_context
+scope: unknown
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # ADR-NNNN — Title
 
 - **Status:** proposed | accepted | superseded by ADR-XXXX

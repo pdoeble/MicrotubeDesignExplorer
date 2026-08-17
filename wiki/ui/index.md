@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: superseded
+currency_assessment: possibly_outdated
+audit_role: supporting_context
+scope: shared
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # UI conventions
 
 Visual and accessibility conventions (AGENTS §8, §12). Target: WCAG 2.2 AA,

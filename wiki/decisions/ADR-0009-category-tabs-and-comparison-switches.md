@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: decision_record
+derivation: direct_authoring
+---
 # ADR-0009: Model-setup category tabs and comparison switches
 
 - Status: accepted

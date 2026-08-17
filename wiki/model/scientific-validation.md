@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: unknown
+currency_assessment: possibly_outdated
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: report
+derivation: direct_authoring
+---
 # Scientific validation evidence
 
 This page summarizes the validation evidence for the Python scientific core and

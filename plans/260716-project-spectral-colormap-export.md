@@ -1,3 +1,15 @@
+---
+canonical_status: reference_copy
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: external_reference
+scope: shared
+review_disposition: review
+provenance_origin: vendored_third_party
+document_kind: api_documentation
+derivation: copy_or_mirror
+---
 # Project spectral colormap export — living plan
 
 > **Path:** `/plans/260716-project-spectral-colormap-export.md`

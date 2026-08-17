@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: core
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # Contracts, units, and validity — living plan
 
 > **Path:** `/plans/260710-contracts-units-and-validity.md`

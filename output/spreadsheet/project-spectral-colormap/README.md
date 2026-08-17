@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: recommended
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: unknown
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # Project Spectral Colormap – Python-Export
 
 Dieses Paket enthält exakt die 256 RGB-Stützstellen, die der Microtube Design

@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: supporting_context
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: report
+derivation: direct_authoring
+---
 # Release-candidate review package
 
 This package defines the independent review evidence required before M8, M9,

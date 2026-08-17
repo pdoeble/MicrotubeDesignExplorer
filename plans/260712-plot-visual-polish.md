@@ -1,3 +1,15 @@
+---
+canonical_status: reference_copy
+normative_status: informative
+lifecycle_state: retired
+currency_assessment: not_assessed
+audit_role: supporting_context
+scope: unknown
+review_disposition: review
+provenance_origin: vendored_third_party
+document_kind: report
+derivation: copy_or_mirror
+---
 # Plot visual polish — per-plot living checklist
 
 > **Path:** `/plans/260712-plot-visual-polish.md`

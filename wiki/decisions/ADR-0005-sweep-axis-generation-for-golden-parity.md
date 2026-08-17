@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: active
+currency_assessment: not_assessed
+audit_role: core
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: decision_record
+derivation: direct_authoring
+---
 # ADR-0005 — Sweep axis generation for golden parity
 
 - **Status:** accepted

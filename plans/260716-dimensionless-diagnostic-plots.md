@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: unknown
+currency_assessment: current
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: plan
+derivation: direct_authoring
+---
 # Adaptive dimensionless diagnostic plots — living plan
 
 > **Path:** `/plans/260716-dimensionless-diagnostic-plots.md`

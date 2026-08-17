@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: superseded
+currency_assessment: not_assessed
+audit_role: core
+scope: local
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # Handover — M3 Python core port
 
 > **Path:** `/plans/260710-handover-m3-core-port.md`

@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: retired
+currency_assessment: outdated
+audit_role: unknown
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # ADR-0010: GitHub canonical repository with internal GitLab mirror
 
 - Status: accepted with external limitation; amended by ADR-0012

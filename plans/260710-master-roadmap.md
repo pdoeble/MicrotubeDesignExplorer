@@ -1,3 +1,15 @@
+---
+canonical_status: derived_copy
+normative_status: informative
+lifecycle_state: superseded
+currency_assessment: outdated
+audit_role: external_reference
+scope: shared
+review_disposition: keep
+provenance_origin: generated_report
+document_kind: report
+derivation: generated_from_run
+---
 # Master Roadmap — Interactive Microtube Paper Companion
 
 > **Path:** `/plans/260710-master-roadmap.md`  

@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: core
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # Paper-repository application wiki page
 
 > **Path:** `/plans/260713-paper-repository-app-wiki.md`

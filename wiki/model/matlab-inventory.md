@@ -1,3 +1,15 @@
+---
+canonical_status: derived_copy
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: core
+scope: unknown
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: technical_or_research_note
+derivation: direct_authoring
+---
 # MATLAB inventory — `Waermedurchgang_V10_physical.m`
 
 Complete inventory of the authoritative executable reference (M1).

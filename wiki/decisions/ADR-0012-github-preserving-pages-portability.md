@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: superseded
+currency_assessment: not_assessed
+audit_role: operational
+scope: local
+review_disposition: keep
+provenance_origin: local_project_authoring
+document_kind: unknown
+derivation: direct_authoring
+---
 # ADR-0012: GitHub-preserving static Pages portability
 
 - Status: accepted

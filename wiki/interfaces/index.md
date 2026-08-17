@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: technical_or_research_note
+derivation: direct_authoring
+---
 # Interfaces
 
 Shared contracts between the Python core, the Pyodide worker, and the

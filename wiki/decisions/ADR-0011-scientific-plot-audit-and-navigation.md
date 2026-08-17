@@ -1,3 +1,15 @@
+---
+canonical_status: reference_copy
+normative_status: informative
+lifecycle_state: active
+currency_assessment: possibly_outdated
+audit_role: external_reference
+scope: local
+review_disposition: keep
+provenance_origin: vendored_third_party
+document_kind: api_documentation
+derivation: copy_or_mirror
+---
 # ADR-0011: Scientific plot audit, boundary rendering, and navigation
 
 - Status: accepted

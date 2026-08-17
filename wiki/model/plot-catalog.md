@@ -1,3 +1,15 @@
+---
+canonical_status: reference_copy
+normative_status: informative
+lifecycle_state: superseded
+currency_assessment: not_assessed
+audit_role: external_reference
+scope: shared
+review_disposition: keep
+provenance_origin: vendored_third_party
+document_kind: api_documentation
+derivation: copy_or_mirror
+---
 # Plot catalog — approved plot families and stable IDs
 
 Binding registry of every paper-approved plot and its approved web companion

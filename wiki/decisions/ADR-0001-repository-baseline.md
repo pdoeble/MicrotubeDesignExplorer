@@ -1,3 +1,15 @@
+---
+canonical_status: derived_copy
+normative_status: informative
+lifecycle_state: active
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: decision_record
+derivation: direct_authoring
+---
 # ADR-0001 — Repository baseline, toolchain, and provisional license
 
 - **Status:** accepted

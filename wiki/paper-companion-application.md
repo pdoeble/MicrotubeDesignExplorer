@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: active
+currency_assessment: possibly_outdated
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: plan
+derivation: direct_authoring
+---
 # Microtube Design Explorer — Begleitanwendung zum Paper
 
 > **Zweck dieser Seite:** Selbstständige technische und wissenschaftliche

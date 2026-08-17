@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: report
+derivation: direct_authoring
+---
 # Accessibility evidence
 
 Target: WCAG 2.2 AA for the static scientific application.

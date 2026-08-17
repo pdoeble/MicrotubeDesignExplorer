@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: informative
+lifecycle_state: active
+currency_assessment: possibly_outdated
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: decision_record
+derivation: direct_authoring
+---
 # ADR-0014: VDI-Wärmeatlas edition citation follows the paper
 
 - Status: accepted

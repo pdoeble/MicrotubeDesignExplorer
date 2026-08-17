@@ -1,3 +1,15 @@
+---
+canonical_status: derived_copy
+normative_status: informative
+lifecycle_state: unknown
+currency_assessment: outdated
+audit_role: core
+scope: unknown
+review_disposition: review
+provenance_origin: generated_report
+document_kind: report
+derivation: generated_from_run
+---
 # MATLAB inventory and golden data — living plan
 
 > **Path:** `/plans/260710-matlab-inventory-and-golden-data.md`

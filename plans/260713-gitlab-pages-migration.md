@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: active
+currency_assessment: not_assessed
+audit_role: operational
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: plan
+derivation: direct_authoring
+---
 # GitLab-Pages-Migration (Self-Managed) — Living Plan
 
 > **Path:** `/plans/260713-gitlab-pages-migration.md`

@@ -1,3 +1,15 @@
+---
+canonical_status: unknown
+normative_status: binding
+lifecycle_state: retired
+currency_assessment: outdated
+audit_role: supporting_context
+scope: project
+review_disposition: review
+provenance_origin: local_project_authoring
+document_kind: report
+derivation: direct_authoring
+---
 # GitHub-to-GitLab mirroring — living plan
 
 > **Path:** `/plans/260713-github-gitlab-mirroring.md`
