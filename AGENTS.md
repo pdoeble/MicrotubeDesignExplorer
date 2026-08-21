@@ -1,4 +1,23 @@
 # AGENTS.md
+## Obsidian-compatible links (mandatory)
+
+For every Markdown file created or edited from now on:
+
+- Link notes in the same Obsidian vault as `[[path/to/Note|Label]]`, using a
+  vault-relative `/` path, no `.md`, and enough path segments to be unique.
+- Link note headings as `[[path/to/Note#Heading|Label]]` or `[[#Heading]]` in
+  the current note.
+- Link other local files with relative CommonMark links such as
+  `[Label](../path/file.ext)`; use `/` and wrap destinations containing spaces
+  in angle brackets.
+- Use `[Label](https://example.com)` for web links and `![[path/image.png]]` for
+  Obsidian-native embeds.
+- Never use absolute local paths, `file://`, editor schemes, backslash targets,
+  or `:line` suffixes as Markdown link destinations. Verify new local targets.
+- Continuous improvement: whenever current work encounters an outdated, broken,
+  ambiguous, or non-compliant link, correct it in the same change and verify
+  the target. Do not bulk-migrate unvisited documents.
+
 ## 1. Mission
 - Build a static scientific web application for microtube heat-exchanger design-space analysis as a companion to the paper.
 - The complete physics of `Waermedurchgang_V10_physical.m` must be ported to Python.
