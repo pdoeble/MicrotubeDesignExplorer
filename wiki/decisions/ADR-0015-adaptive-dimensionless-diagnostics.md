@@ -76,3 +76,13 @@ fields, so copying that presentation would not satisfy the interactive model.
 - The public registry grows from 37 to 40 stable plot IDs; the compact default
   report-figure selection remains unchanged.
 
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/equations|Dimensionless diagnostics]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/result-plots|Figure semantics]] (microtubedesignexplorer)

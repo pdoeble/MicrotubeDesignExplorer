@@ -42,3 +42,14 @@ Binding for all contributors and agents (complements AGENTS.md §14–§16).
 
 Workstream ownership boundaries are defined in the master roadmap §6.
 Cross-boundary changes require coordination through a shared-interface ADR.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[ThermoExpress/wiki/30_Develop_Setup|30.1.1a Branch and worktree model]] (thermoexpress)
+- [[MicrotubeDesignExplorer/wiki/model/golden-data|Function-level coverage (why these cases exist)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/matlab-inventory|4. Equation branches (scientific core)]] (microtubedesignexplorer)

@@ -57,3 +57,14 @@ Git and are reproduced from committed lockfiles and source.
   present in the local `node_modules/.cache/microtubes-pyodide/` cache.
 - Any Pyodide version change must update the lockfile and rerun the M4/M8
   browser parity checks.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/interfaces/worker-protocol|Asset loading]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.4 Browserlaufzeit und statische Assets]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/README|Python core (run inside python/)]] (microtubedesignexplorer)

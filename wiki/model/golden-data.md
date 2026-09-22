@@ -101,3 +101,14 @@ that contains only golden changes.
 |---|---|---|---|
 | 2026-07-10 | R2024b Update 1 | `e521b0b7…7527fc` | Initial generation (M1) |
 | 2026-07-16 | R2024b Update 1 | `3418d69b…541e` | Current MATLAB diagnostics harvested; all 276 pre-existing artifact hashes verified unchanged |
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/matlab-inventory|5. Masks and validity (order of application)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/scientific-validation|Golden parity coverage]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0002-golden-reference-generation|Decision]] (microtubedesignexplorer)

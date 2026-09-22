@@ -108,3 +108,14 @@ Active review records:
 - Scientific review: <https://github.com/pdoeble/MicrotubeDesignExplorer/issues/1>
 - Accessibility review:
   <https://github.com/pdoeble/MicrotubeDesignExplorer/issues/2>
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/matlab-inventory|MATLAB inventory — `Waermedurchgang_V10_physical.m`]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/index|Model documentation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/release-and-maintenance|Release candidate checklist]] (microtubedesignexplorer)

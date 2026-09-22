@@ -130,3 +130,14 @@ stacks.
 - TypeScript: `tests/frontend/contracts.test.ts` (Ajv 2020-12 validation of
   defaults, rejection of unknown fields/non-positive properties, manifest
   consistency).
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/equations|Operating modes]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0003-operating-mode-scope|Decision]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.3 Scientific Core]] (microtubedesignexplorer)

@@ -59,3 +59,14 @@ scientific grouping, URL state, or link snapshot behavior.
 - Nested tabs and switches require role-, keyboard-, zoom-, and mobile-overflow
   coverage in frontend and E2E tests.
 - No schema, physics, default, worker, or numerical behavior changes.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0008-consolidated-model-setup-navigation|ADR-0008: Consolidated model-setup navigation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/index|Current application navigation]] (microtubedesignexplorer)

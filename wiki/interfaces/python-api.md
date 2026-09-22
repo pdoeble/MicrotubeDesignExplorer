@@ -90,3 +90,14 @@ remain unchanged because named result fields are an additive registry.
 Comparison exports same-geometry ratio and percent delta, nearest
 left-reference diameter, tech-adjusted ratios and percent deltas, and
 composite feasible boundary vectors.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/interfaces/contracts|Result payload]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.2 Datenfluss]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/report-payload|Payload contents]] (microtubedesignexplorer)

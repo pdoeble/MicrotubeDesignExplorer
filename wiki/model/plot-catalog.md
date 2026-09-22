@@ -123,3 +123,14 @@ only; they do not alter, smooth or fit the scientific field.
 - Horizontal shared colorbars use an invisible carrier trace to reproduce
   MATLAB's reversed top-bar direction. Their titles and tick labels are
   positioned as figure annotations with collision-tested physical spacing.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/ui/result-plots|Figure semantics]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0011-scientific-plot-audit-and-navigation|Decision]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0015-adaptive-dimensionless-diagnostics|Decision]] (microtubedesignexplorer)

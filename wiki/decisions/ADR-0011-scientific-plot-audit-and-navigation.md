@@ -124,3 +124,14 @@ express the scientific question answered by a plot.
 - Manual review: four contact sheets assembled from those 66 screenshots and
   inspected for axes, color scales, fills, isolines, labels, overlays,
   hatching, and clipping.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/ui/result-plots|Figure semantics]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/plot-catalog|Excluded MATLAB figures (documented exclusions, M6 exit gate)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|3. Quellenhierarchie und wissenschaftliche Governance]] (microtubedesignexplorer)

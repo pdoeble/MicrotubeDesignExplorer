@@ -160,3 +160,12 @@ definiert, aber noch nicht gerechnet.
    gewichtet nur um") — bisher nicht eingebaut.
 4. Optional: 27/28 als Appendix-Figur (dann Kosmetik aus §6 umsetzen).
 5. Änderungen committen (tex, bib, PDF, Spec, dieses Wiki).
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/source_materials/260716-Chatbericht|Nicht belastbar beziehungsweise zu stark formuliert]] (microtubedesignexplorer)

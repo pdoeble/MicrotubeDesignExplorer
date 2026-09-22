@@ -65,3 +65,14 @@ When a new compute request starts, the client sends a cancellation message for
 the previous active request and rejects stale cancelled requests. Pyodide
 execution is single-threaded inside the worker, so cancellation is deterministic
 at delivery boundaries rather than an interrupt of already-running Python code.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.2 Datenfluss]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/index|Interfaces]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/python-api|Python core API]] (microtubedesignexplorer)

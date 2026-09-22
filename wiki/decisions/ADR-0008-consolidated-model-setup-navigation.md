@@ -57,3 +57,14 @@ to remove this duplication and provide a continuous user experience.
 - UI and E2E tests must assert one linking control per group, legacy-route
   normalization, hidden linked duplicates, restored independent editors and a
   forward path from setup to results.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0009-category-tabs-and-comparison-switches|ADR-0009: Model-setup category tabs and comparison switches]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/index|Current application navigation]] (microtubedesignexplorer)

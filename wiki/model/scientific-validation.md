@@ -66,3 +66,14 @@ As of 2026-07-11, automated scientific validation is implemented and locally
 executable. The M8 exit gate still requires an independent scientific reviewer
 to approve the validation report or record accepted findings in a decision
 record before M9/M10 can be marked complete.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/index|Model documentation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/review/index|Scientific review checklist]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0003-operating-mode-scope|Context]] (microtubedesignexplorer)

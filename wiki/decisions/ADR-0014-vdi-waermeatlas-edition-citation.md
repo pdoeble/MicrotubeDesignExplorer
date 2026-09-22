@@ -49,3 +49,14 @@ implemented equations or branch logic.
 - The difference from the legacy MATLAB comment remains explicit and
   traceable instead of being silently resolved.
 - Numerical results and MATLAB parity are unchanged.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/equations|VDI G1 internal tube flow]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/python/README|microtubes-core]] (microtubedesignexplorer)

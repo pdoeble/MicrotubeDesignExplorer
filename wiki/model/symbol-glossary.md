@@ -77,3 +77,14 @@ at the golden-comparison boundary and in display conversions.
   material-agnostic code path evaluated per cooler configuration.
 - MATLAB `params.*` display settings map to the frontend plot catalog, not to
   the Python core.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/equations|Sweep grid and masks]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.3 Scientific Core]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/python-api|Current field groups]] (microtubedesignexplorer)

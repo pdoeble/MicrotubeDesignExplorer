@@ -278,3 +278,14 @@ Vor Beginn der Implementierung müssen außerdem noch folgende Artefakte **einma
 - sowie die endgültige **CITATION.cff** und Lizenzentscheidung. citeturn17view1turn9search0turn9search1turn9search2
 
 Die kurze Endfassung der Empfehlung lautet deshalb: **Baut die Anwendung als statische React/TypeScript-App mit Python-Kern in Pyodide-Web-Worker, nutzt JSON-Schema/Pydantic als harte Vertragsgrenze, rendert in Plotly, testet mit pytest/Vitest/Playwright, veröffentlicht über GitHub Actions auf GitHub Pages, und friert vor jeder Parallelentwicklung zuerst Parameter-, Plot-, Fehler- und Baseline-Artefakte ein.** Das ist für euren Anwendungsfall die robusteste, reproduzierbarste und am wenigsten missverständliche Lösung. citeturn12view0turn12view1turn17view0turn19view9turn19view2turn19view3
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|16. Repositorystruktur]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/accessibility|Open review gates]] (microtubedesignexplorer)
+- [[PV_Biz/IMPLEMENTIERUNGSPLAN_PV_MIETERSTROM|Milestone 0 – Repository und Architektur]] (pv_biz)

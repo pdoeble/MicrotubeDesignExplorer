@@ -162,3 +162,14 @@ review of the MATLAB reference script hash.
 - GitLab Pages is not yet enabled on the Hochschule Self-Managed instance. No
   `.gitlab-ci.yml` or GitLab deployment is active; GitHub Pages remains the
   production site.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0012-github-preserving-pages-portability|Decision]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/golden-data|Golden data — provenance and regeneration]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0010-github-canonical-gitlab-internal-mirror|ADR-0010: GitHub canonical repository with internal GitLab mirror]] (microtubedesignexplorer)

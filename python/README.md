@@ -24,3 +24,14 @@ in the docstrings and in `wiki/model/`.
 
 Golden parity against MATLAB-derived references in `/reference` is enforced
 by `tests/python/` at `rtol=1e-8`, `atol=1e-10`.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/interfaces/contracts|Contracts — SimulationRequest / SimulationResult (frozen M2)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.3 Scientific Core]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/report-payload|Report payload]] (microtubedesignexplorer)

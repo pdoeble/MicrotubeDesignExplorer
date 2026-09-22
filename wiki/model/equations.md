@@ -250,3 +250,14 @@ Implemented in `models.resistances`, ported from MATLAB lines 506-509 and
 - outer resistance: `R_o = 1 / alpha_o`
 - overall coefficient: `k = 1 / (R_i + R_w + R_o)`
 - resistance shares: `R_part / (R_i + R_w + R_o)`
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/symbol-glossary|Correlations and results]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/golden-data|Function-level coverage (why these cases exist)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/python-api|Current field groups]] (microtubedesignexplorer)

@@ -57,3 +57,14 @@ controls. Report figures are captured as SVG from the same registered Plotly
 specs, using a fixed default selection rather than the complete plot registry
 to keep reports printable and deterministic. The JSON sidecar intentionally
 does not embed figure image data.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/interfaces/contracts|Contracts — SimulationRequest / SimulationResult (frozen M2)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/python-api|Python core API]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/url-state|URL state]] (microtubedesignexplorer)

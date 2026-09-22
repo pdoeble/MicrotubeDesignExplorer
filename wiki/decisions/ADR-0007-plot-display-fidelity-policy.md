@@ -60,3 +60,14 @@ native wall-thickness axis and therefore matched numerically but not visually.
   handling, fixed domains and τ-axis limits.
 - Adding or changing a display interpolation policy requires a new ADR; it may
   not be hidden inside a Plotly adapter.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/ui/result-plots|Rendering pipeline]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|3. Quellenhierarchie und wissenschaftliche Governance]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/golden-data|What the default case captures]] (microtubedesignexplorer)

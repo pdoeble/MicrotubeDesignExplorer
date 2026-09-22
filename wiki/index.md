@@ -56,3 +56,14 @@ Durable project knowledge. `AGENTS.md` is binding; the master living plan is
   roadmap §13.
 - New decisions go to `decisions/` using `_adr-template.md`; never silently
   resolve a source conflict.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|21. Weiterführende bindende Dokumentation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/index|Model documentation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/release-and-maintenance|Release and maintenance handover]] (microtubedesignexplorer)

@@ -519,3 +519,13 @@ bezeichnet werden. Die physikalisch entscheidende Größe ist letztlich
 ]
 
 Diese Relation sollte direkt im Text zur PA-Morphologie stehen.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/source_materials/260716_Isolinien-Morphologie-Wiki|5. Tragweite und Caveats]] (microtubedesignexplorer)
+- [[ThermoExpress/wiki/References/260407_Pro-Bericht|2.2 Algebraisierung der Lasten statt modellierter Waermeuebertragung]] (thermoexpress)

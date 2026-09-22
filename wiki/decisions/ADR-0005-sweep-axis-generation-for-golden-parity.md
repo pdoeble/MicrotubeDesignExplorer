@@ -53,3 +53,14 @@ ADR and separate regression coverage.
 - `uv run pytest` passes 45 tests including default sweep mask parity.
 - `uv run mypy .` passes.
 - `uv run ruff check ..` passes.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/matlab-inventory|1. Fixed operating point and sweep definition]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/equations|Sweep grid and masks]] (microtubedesignexplorer)

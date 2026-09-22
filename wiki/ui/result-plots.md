@@ -130,3 +130,14 @@ sweep, captures every registered plot/material/layout variant, and rejects
 text collisions, colorbar intersections, and clipped SVG text. Completion of
 visual plot work additionally requires manual review of the resulting contact
 sheets rather than relying on spot checks.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/plot-catalog|Non-negotiable rendering rules (from AGENTS §8)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0011-scientific-plot-audit-and-navigation|Decision]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/matlab-inventory|7. Scientific vs. presentation-only code]] (microtubedesignexplorer)

@@ -53,3 +53,14 @@ Target: WCAG 2.2 AA for the static scientific application.
 - Screen-reader traversal has not yet been reviewed by an independent user.
 - Scientific and accessibility approval by an independent reviewer remains an
   M8 exit dependency before M9 can be treated as a release candidate gate.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|13. Barrierefreiheit und Scientific UX]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/index|Current application navigation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/review/index|Accessibility review checklist]] (microtubedesignexplorer)

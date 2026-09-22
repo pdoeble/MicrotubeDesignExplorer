@@ -48,3 +48,14 @@ restrained Springer-like scientific visual language.
   instantaneous.
 - Focus indicators use a 3px high-contrast outline (`--color-focus`).
 - Color is never the only carrier of feasibility/threshold meaning.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0009-category-tabs-and-comparison-switches|Context]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|8.2 Model Setup]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/ui/accessibility|M8 automated checks]] (microtubedesignexplorer)

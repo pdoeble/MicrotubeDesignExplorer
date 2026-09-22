@@ -72,3 +72,14 @@ but not an active GitLab pipeline or a GitHub cutover.
   replaced by this narrower staged policy.
 - An active GitLab Pages deployment still requires completion of the external
   enablement milestone and a further plan/ADR status update.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0010-github-canonical-gitlab-internal-mirror|ADR-0010: GitHub canonical repository with internal GitLab mirror]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|15. Statische Bereitstellung]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)

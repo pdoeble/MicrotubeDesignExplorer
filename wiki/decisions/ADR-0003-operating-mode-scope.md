@@ -53,3 +53,14 @@ introducing undocumented empirical models.
   drop: the only pressure-drop function is
   `calcTubeFrictionPressureDropBar` (currently line 4135), documented as
   "coolant-side … straight-tube friction".
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/model/equations|Operating modes]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/interfaces/contracts|Request structure]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/symbol-glossary|Correlations and results]] (microtubedesignexplorer)

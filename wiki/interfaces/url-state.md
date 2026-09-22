@@ -81,3 +81,14 @@ papers, reviews, reports, or messages.
 - Browser URL roundtrip: `tests/e2e/app-acceptance.spec.ts`.
 - Decision and dependency rationale:
   `wiki/decisions/ADR-0013-compressed-url-state-v2.md`.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0013-compressed-url-state-v2|Decision]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|8.3 URL-State]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/release-and-maintenance|Adding operating modes or contract versions]] (microtubedesignexplorer)

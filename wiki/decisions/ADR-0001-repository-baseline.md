@@ -62,3 +62,14 @@ were still open.
   (Node v22.15.0, pnpm 11.11.0, Python 3.12.3, uv 0.11.28).
 - Baseline CI (`.github/workflows/ci.yml`) runs lint, type checks, and tests
   for both stacks.
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|6.1 Feste Architekturentscheidung]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/index|Decisions (ADRs)]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/README|Toolchain]] (microtubedesignexplorer)

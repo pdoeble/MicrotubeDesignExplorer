@@ -24,3 +24,14 @@ core. The authoritative executable reference is
 | [equations.md](equations.md) | Ported equations with sources (VDI G1/G7, Lamé, Darcy) and validity | M3 |
 | [golden-data.md](golden-data.md) | Golden dataset provenance and regeneration procedure | M1 |
 | [scientific-validation.md](scientific-validation.md) | Automated validation evidence and independent approval state | M8 |
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/paper-companion-application|21. Weiterführende bindende Dokumentation]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/index|Key documents]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/model/scientific-validation|Golden parity coverage]] (microtubedesignexplorer)

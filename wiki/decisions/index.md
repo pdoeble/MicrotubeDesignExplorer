@@ -32,3 +32,14 @@ Numbering is sequential and never reused.
 | [ADR-0013](ADR-0013-compressed-url-state-v2.md) | Lossless compressed URL state v2 | accepted |
 | [ADR-0014](ADR-0014-vdi-waermeatlas-edition-citation.md) | VDI-Wärmeatlas edition citation follows the paper | accepted |
 | [ADR-0015](ADR-0015-adaptive-dimensionless-diagnostics.md) | Adaptive dimensionless diagnostic maps | accepted |
+
+<!-- related-links-generated: fts5-lexical -->
+## Related (automatisch, lexikalisch via FTS5/BM25)
+
+Diese Links beruhen auf Wortueberlappung mit dem Projekt-Suchindex, nicht
+auf inhaltlichem Verstehen. Sie sind Kandidaten, keine geprueften
+fachlichen Relationen; falsch positive Treffer sind moeglich.
+
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0001-repository-baseline|ADR-0001 — Repository baseline, toolchain, and provisional license]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0009-category-tabs-and-comparison-switches|ADR-0009: Model-setup category tabs and comparison switches]] (microtubedesignexplorer)
+- [[MicrotubeDesignExplorer/wiki/decisions/ADR-0008-consolidated-model-setup-navigation|ADR-0008: Consolidated model-setup navigation]] (microtubedesignexplorer)
